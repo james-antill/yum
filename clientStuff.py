@@ -14,8 +14,6 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 # Copyright 2002 Duke University 
 
-import urllib2
-import urlparse
 import string
 import rpm
 import os
@@ -27,17 +25,7 @@ import fnmatch
 import pkgaction
 import callback
 import rpmUtils
-
-
-try:
-    # This is a convenient way to make keepalive optional.
-    # Just rename the module so it can't be imported.
-    from keepalive import HTTPHandler
-    keepalive_handler = HTTPHandler()
-    opener = urllib2.build_opener(keepalive_handler)
-    urllib2.install_opener(opener)
-except ImportError, msg:
-    keepalive_handler = None
+from urlgrabber import close_all, urlgrab, URLGrabError
 
 from i18n import _
 
@@ -281,85 +269,6 @@ def returnObsoletes(headerNevral, rpmNevral, uninstNAlist):
                                     obsoleted[obspkg] = []
                                 obsoleted[obspkg].append((name, arch))
     return obsoleting, obsoleted
-
-def progresshook(blocks, blocksize, total):
-    totalblocks = total/blocksize
-    curbytes = blocks*blocksize
-    sys.stdout.write('\r' + ' ' * 80)
-    sys.stdout.write('\rblock: %d/%d' % (blocks, totalblocks))
-    sys.stdout.flush()
-    if curbytes == total:
-        print ' '
-        
-
-def urlgrab(url, filename=None, copy_local=0, close_connection=0):
-    """grab the file at <url> and make a local copy at <filename>
-
-    If filename is none, the basename of the url is used.
-
-    copy_local is ignored except for file:// urls, in which case it
-    specifies whether urlgrab should still make a copy of the file, or
-    simply point to the existing copy.
-
-    close_connection tells urlgrab to close the connection after
-    completion.  This is ignored unless the download happends with the
-    http keepalive handler.  Otherwise, the connection is left open
-    for further use.
-
-    urlgrab returns the filename of the local file.
-    """
-
-    (scheme,host, path, parm, query, frag) = urlparse.urlparse(url)
-    path = os.path.normpath(path)
-    url = urlparse.urlunparse((scheme, host, path, parm, query, frag))
-
-    if filename == None:
-        filename = os.path.basename(path)
-    if scheme == 'file' and not copy_local:
-        # just return the name of the local file - don't make a copy
-        if os.path.isfile(path):
-            return path
-        else:
-            errorlog(0, 'Not a normal file: %s' % path)
-            errorlog(0, 'URL: %s' % url)
-            sys.exit(1)
-
-    # now fetch the file
-    try:
-        fo = urllib2.urlopen(url)
-        _do_grab(filename, fo)
-        hdr = fo.info()
-        fo.close()
-        if close_connection:
-            # try and close connection
-            try: fo.close_connection()
-            except AttributeError: pass
-    except IOError, e:
-        errorlog(0, _('IOError: %s')  % (e))
-        errorlog(0, _('URL: %s') % (url))
-        sys.exit(1)
-    except OSError, e:
-        errorlog(0, _('OSError: %s') % (e))
-        errorlog(0, _('URL: %s') % (url))
-        sys.exit(1)
-    # this is a cute little hack - if there isn't a "Content-Length"
-    # header then its probably something generated dynamically, such
-    # as php, cgi, a directory listing, or an error message.  It is
-    # probably not what we want.
-    if not hdr is None and not hdr.has_key('Content-Length'):
-        errorlog(0, _('ERROR: Url Return no Content-Length  - something is wrong'))
-        errorlog(0, _('URL: %s') % (url))
-        sys.exit(1)
-    return filename
-
-def _do_grab(filename, fo):
-    new_fo = open(filename, 'wb')
-    bs = 1024*8
-    block = fo.read(bs)
-    while block:
-        new_fo.write(block)
-        block = fo.read(bs)
-    new_fo.close()
 
 def getupdatedhdrlist(headernevral, rpmnevral):
     "returns (name, arch) tuples of updated and uninstalled pkgs"
@@ -688,7 +597,10 @@ def get_groups_from_servers(serveridlist):
         localgroupfile = conf.localGroups(serverid)
         if not conf.cache:
             log(3, 'getting groups from server: %s' % serverid)
-            localgroupfile = urlgrab(remotegroupfile, localgroupfile, copy_local=1)
+            try:
+                localgroupfile = urlgrab(remotegroupfile, localgroupfile, copy_local=1)
+            except URLGrabError, e:
+                log(3, 'Error getting file %s' remotegroupfile)
         else:
             if os.path.exists(localgroupfile):
                 log(3, 'using cached groups from server: %s' % serverid)
@@ -761,7 +673,7 @@ def download_headers(HeaderInfo, nulist):
                 checkpass = checkpass + 1
                 os.unlink(LocalHeaderFile)
                 good = 0
-    if keepalive_handler: keepalive_handler.close_all()
+    close_all()
                 
 def take_action(cmds, nulist, uplist, newlist, obsoleting, tsInfo, HeaderInfo, rpmDBInfo, obsoleted):
     from yummain import usage
@@ -937,7 +849,7 @@ def create_final_ts(tsInfo):
             pass
         elif state == 'e' or state == 'ed':
             tsfin.addErase(name)
-    if keepalive_handler: keepalive_handler.close_all()
+    close_all()
     return tsfin
 
 

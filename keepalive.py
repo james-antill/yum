@@ -115,12 +115,20 @@ class HTTPHandler(urllib2.HTTPHandler):
 
         try:
             need_new_connection = 1
-            if self._connections.has_key(host):
-                h = self._connections[host]
-                self._start_connection(h, req)
+            h = self._connections.get(host)
+            if not h is None:
                 try:
+                    self._start_connection(h, req)
+                except socket.error, e:
+                    r = None
+                else:
                     r = h.getresponse()
-                except httplib.BadStatusLine:
+
+                if r is None or r.version == 9:
+                    # httplib falls back to assuming HTTP 0.9 if it gets a
+                    # bad header back.  This is most likely to happen if
+                    # the socket has been closed by the server since we
+                    # last used the connection.
                     if DEBUG: print "failed to re-use connection to %s" % host
                     h.close()
                 else:
@@ -174,7 +182,7 @@ class HTTPResponse(httplib.HTTPResponse):
     
 
     def __init__(self, sock, debuglevel=0, strict=0):
-        httplib.HTTPResponse.__init__(self, sock, debuglevel, strict)
+        httplib.HTTPResponse.__init__(self, sock, debuglevel)
         self.fileno = sock.fileno
         self._rbuf = ''
         self._rbufsize = 8096
@@ -241,17 +249,6 @@ class HTTPResponse(httplib.HTTPResponse):
 class HTTPConnection(httplib.HTTPConnection):
     # use the modified response class
     response_class = HTTPResponse
-    # if we don't use strict, and a socket gets closed, then the
-    # response object:
-    #   1) tries to read from the socket
-    #   2) gets nothing back (because it's closed)
-    #   3) can't recognize the HTTP version (because there isn't one)
-    #   4) assumes we're using HTTP 0.9, it's fallback
-    #   5) throws some weird-assed exception buried in the 0.9 compatability
-    #      class
-    # this way, it sees the empty header and throws a BadStatusLine, which
-    # tells us the connection is down
-    strict = 1
     
 #########################################################################
 #####   TEST FUNCTIONS
