@@ -320,8 +320,8 @@ class nevral:
                             if whatprovides and whatprovides.count() != 0:
                                 for provhdr in whatprovides:
                                     if self.state(provhdr[rpm.RPMTAG_NAME],provhdr[rpm.RPMTAG_ARCH]) in ('e','ed'):
-                                        ((e,v,r,a,l,i),s)=rpmDBInfo._get_data(name)
-                                        self.add((name,e,v,r,a,l,i),'ed')
+                                        ((e,v,r,arch,l,i),s)=rpmDBInfo._get_data(name)
+                                        self.add((name,e,v,r,arch,l,i),'ed')
                                         log(4, 'Got Erase Dep: %s, %s' %(name,arch))
                                         CheckDeps=1
                                     else:
