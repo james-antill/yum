@@ -791,6 +791,8 @@ def get_groups_from_servers(serveridlist):
     log(2, 'Getting groups from servers')
     validservers = []
     for serverid in serveridlist:
+        if not conf.groupsenable[serverid]:
+            continue
         remotegroupfile = conf.remoteGroups(serverid)
         localgroupfile = conf.localGroups(serverid)
         if not conf.cache:
@@ -879,7 +881,7 @@ def returnCompsHeaders():
         del fd2
         
         for hdr in hdrlist:
-            hdr.fullFileList()
+            hdr.fullFilelist()
             hdrobj = rpmUtils.Header_Work(hdr)
             (n,e,v,r,a) = hdrobj.nevra()
             e = hdrobj.fixedEpoch()

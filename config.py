@@ -58,6 +58,7 @@ class yumconf:
         self.servergpgcheck={}
         self.serverexclude={}
         self.failoverclass = {}
+        self.groupsenable = {}
         self.excludes=[]
         
         #defaults
@@ -214,7 +215,12 @@ class yumconf:
                             if s not in ['http', 'ftp', 'file', 'https']:
                                 print _('using ftp, http[s], or file for servers, Aborting - %s') % (url)
                                 sys.exit(1)
-
+                        
+                        enablegroups=1
+                        if self._getoption(section, 'enablegroups') != None:
+                            enablegroups=self.cfg.getboolean(section, 'enablegroups')
+                        self.groupsenable[section] = enablegroups
+                        
                         cache = os.path.join(self.cachedir,section)
                         pkgdir = os.path.join(cache, 'packages')
                         hdrdir = os.path.join(cache, 'headers')
