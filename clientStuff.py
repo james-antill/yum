@@ -838,17 +838,33 @@ def create_final_ts(tsInfo):
         serverid = tsInfo.serverid(name, arch)
         state = tsInfo.state(name, arch)
         if state in ('u', 'ud', 'iu', 'i'): # inst/update
+            # this should be just like the hdr getting
+            # check it out- if it is good, move along
+            # otherwise, download, check, wash, rinse, repeat
+            # just md5/open check - we'll mess with gpg checking after we know
+            # that the pkg is valid
             if os.path.exists(rpmloc):
-                log(4, 'Using cached %s' % (os.path.basename(rpmloc)))
+                log(4, 'Checking cached RPM %s' % (os.path.basename(rpmloc)))
+                if not rpmUtils.checkRpmMD5(rpmloc):
+                    errorlog(0, 'Damaged RPM %s, removing.' % (rpmloc))
+                    os.unlink(rpmloc)
+
+            # gotten rid of the bad ones
+            # now lets download things
+            if os.path.exists(rpmloc):
+                pass
             else:
                 log(2, 'Getting %s' % (os.path.basename(rpmloc)))
                 try:
-                    localrpmpath = retrygrab(tsInfo.remoteRpmUrl(name, arch), rpmloc, copy_local=0) 
+                    localrpmpath = retrygrab(tsInfo.remoteRpmUrl(name, arch), rpmloc, copy_local=0,
+                                             checkfunc=(rpmUtils.checkRpmMD5, (), {'urlgraberror':1})) 
                 except URLGrabError, e:
                     errorlog(0, 'Error getting file %s' % tsInfo.remoteRpmUrl(name, arch))
                     errorlog(0, '%s' % e)
                     sys.exit(1)
-                tsInfo.setlocalrpmpath(name, arch, localrpmpath)
+                else:
+                    tsInfo.setlocalrpmpath(name, arch, localrpmpath)
+                    
             # we now actually have the rpm and we know where it is - so use it
             rpmloc = tsInfo.localRpmPath(name, arch)
             if conf.servergpgcheck[serverid]:
@@ -866,11 +882,6 @@ def create_final_ts(tsInfo):
                     errorlog(0, _('Error: Untrusted GPG key on %s') % rpmloc)
                     errorlog(0, _('Error: You may want to run yum clean or remove the file: \n %s') % rpmloc)
                     errorlog(0, _('Error: You may also check that you have the correct GPG keys installed'))
-                    sys.exit(1)
-            else:
-                if not rpmUtils.checkRpmMD5(rpmloc):
-                    errorlog(0, _('Error: MD5 Signature check failed for %s') % rpmloc)
-                    errorlog(0, _('Error: You may want to run yum clean or remove the file: \n %s') % rpmloc)
                     sys.exit(1)
             if state == 'i':
                 tsfin.addInstall(pkghdr, (pkghdr, rpmloc), 'i')

@@ -25,7 +25,7 @@ def checkheader(headerfile, name, arch):
     return
     
 
-def checkRpmMD5(package):
+def checkRpmMD5(package, urlgraberror=0):
     """take a package, check it out by trying to open it, return 1 if its good
        return 0 if it's not"""
     ts.sigChecking('md5')
@@ -33,12 +33,19 @@ def checkRpmMD5(package):
     try:
         ts.hdrFromFdno(fdno)
     except rpm.error, e:
-        os.close(fdno)
-        ts.sigChecking('default')
-        return 0
+        good = 0
+    else:
+        good = 1
     os.close(fdno)
     ts.sigChecking('default')
-    return 1
+
+    if urlgraberror:
+        if not good:
+            raise URLGrabError(-1, _('RPM %s fails md5 check') % (package)) 
+        else:
+            return
+    else:
+        return good
 
 def checkSig(package, serverid=None):
     """ take a package, check it's sigs, return 0 if they are all fine, return 
