@@ -647,46 +647,32 @@ def get_package_info_from_servers(serveridlist, HeaderInfo):
         log(4,'headerinfofn: ' + headerinfofn)
         HeaderInfoNevralLoad(headerinfofn, HeaderInfo, serverid)
 
-def checkheader(headerfile, name, arch):
-    #return true(1) if the header is good
-    #return  false(0) if the header is bad
-    # test is fairly rudimentary - read in header - read two portions of the header
-    h = readHeader(headerfile)
-    if h == None:
-        return 0
-    else:
-        if name != h[rpm.RPMTAG_NAME] or arch != h[rpm.RPMTAG_ARCH]:
-            return 0
-    return 1
-
 def download_headers(HeaderInfo, nulist):
     for (name, arch) in nulist:
-        # if header exists - it gets checked
-        # if header does not exist it gets downloaded then checked
-        # this should happen in a loop - up to 3 times
-        # if we can't get a good header after 3 tries we bail.
-        checkpass = 1
         LocalHeaderFile = HeaderInfo.localHdrPath(name, arch)
         RemoteHeaderFile = HeaderInfo.remoteHdrUrl(name, arch)
-        while checkpass <= 3:
-            if os.path.exists(LocalHeaderFile):
-                log(5, 'cached %s' % LocalHeaderFile)
-            else:
-                log(2, 'getting %s' % LocalHeaderFile)
-                try:
-                    hdrfn = retrygrab(RemoteHeaderFile, LocalHeaderFile, copy_local=1)
-                except URLGrabError, e:
-                    errorlog(0, 'Error getting file %s' % RemoteHeaderFile)
-                    errorlog(0, '%s' % e)
-                    sys.exit(1)
-                HeaderInfo.setlocalhdrpath(name, arch, hdrfn)
-            if checkheader(LocalHeaderFile, name, arch):
-                    break
-            else:
-                log(3, 'damaged header %s try - %d' % (LocalHeaderFile, checkpass))
-                checkpass = checkpass + 1
+
+        # if we have one cached, check it, if it fails, unlink it and continue
+        # as if it never existed
+        # else move along
+        if os.path.exists(LocalHeaderFile):
+            log(5, 'checking cached header: %s' % LocalHeaderFile)
+            try:
+                rpmUtils.checkheader(LocalHeaderFile, name, arch)
+            except URLGrabError, e:
                 os.unlink(LocalHeaderFile)
-                good = 0
+            else:
+                continue
+                
+        log(2, 'getting %s' % LocalHeaderFile)
+        try:
+            hdrfn = retrygrab(RemoteHeaderFile, LocalHeaderFile, copy_local=1,
+                              checkfunc=(rpmUtils.checkheader, (name, arch), {}))
+        except URLGrabError, e:
+            errorlog(0, 'Error getting file %s' % RemoteHeaderFile)
+            errorlog(0, '%s' % e)
+            sys.exit(1)
+        HeaderInfo.setlocalhdrpath(name, arch, hdrfn)
     close_all()
                 
 def take_action(cmds, nulist, uplist, newlist, obsoleting, tsInfo, HeaderInfo, rpmDBInfo, obsoleted):

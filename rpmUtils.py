@@ -6,19 +6,24 @@ import os
 import gzip
 import sys
 from i18n import _
+from urlgrabber import URLGrabError
+from zlib import error as zlibError
 
 
 def checkheader(headerfile, name, arch):
-    #return true(1) if the header is good
-    #return false(0) if the header is bad
-    # test is fairly rudimentary - read in header - read two portions of the header
+    """check a header by opening it and comparing the results to the name and arch
+       we believe it to be for. if it fails raise URLGrabError(-1)"""
     h = Header_Work(headerfile)
-    if h is None:
-        return 0
+    fail = 0
+    if h.hdr is None:
+        fail = 1
     else:
         if name != h.name() or arch != h.arch():
-            return 0
-    return 1
+            fail = 1
+    if fail:
+        raise URLGrabError(-1, _('Header cannot be opened or does not match %s, %s.') % (name, arch))
+    return
+    
 
 def checkRpmMD5(package):
     """take a package, check it out by trying to open it, return 1 if its good
@@ -162,7 +167,7 @@ class Header_Work(RPM_Base_Work):
        if the first arg is a string then it's a filename
        otherwise it's an rpm hdr"""
     def __init__(self, header):
-        if header is types.StringType:
+        if type(header) is types.StringType:
             try:
                 fd = gzip.open(header, 'r')
                 try: 
@@ -178,6 +183,10 @@ class Header_Work(RPM_Base_Work):
                     errorlog(0,_('Damaged Header %s') % header)
                     h = None
             except ValueError, e:
+                errorlog(0,_('Damaged Header %s') % header)
+                h = None
+            except zlibError, e:
+                errorlog(0,_('Damaged Header %s') % header)
                 h = None
             fd.close()
         else:
