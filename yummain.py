@@ -35,7 +35,7 @@ from logger import Logger
 from config import yumconf
 from i18n import _
 
-__version__='2.0.7'
+__version__='2.0.8'
 
 def parseCmdArgs(args):
    
@@ -314,12 +314,15 @@ def main(args):
                 tsInfo.add((name, e, v, r, arch, l, i), 'a')
 
     log(2, _('Resolving dependencies'))
+    #import time
+    #print time.time()
     (errorcode, msgs) = tsInfo.resolvedeps(rpmDBInfo)
     if errorcode:
         for msg in msgs:
             print msg
         sys.exit(1)
     log(2, _('Dependencies resolved'))
+    #print time.time()
     
     # prompt for use permission to do stuff in tsInfo - list all the actions 
     # (i, u, e, ed, ud,iu(installing, but marking as 'u' in the actual ts, just 

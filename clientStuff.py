@@ -559,7 +559,7 @@ def printactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
       log_level = 1
     else:
       log_level = 2
-	
+
     log(log_level, _('I will do the following:'))
     
     for pkg in i_list:

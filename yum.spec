@@ -1,6 +1,6 @@
 Summary: RPM installer/updater
 Name: yum
-Version: 2.0.7
+Version: 2.0.8
 Release: 1
 License: GPL
 Group: System Environment/Base
@@ -73,6 +73,13 @@ exit 0
 %{_mandir}/man*/*
 
 %changelog
+* Wed Sep  8 2004 Seth Vidal <skvidal@phy.duke.edu>
+- 2.0.8 
+- x86_64 archlist bug
+- spec not owning /usr/share/yum bug
+- gpg check in czech locale bug
+
+
 * Fri May  7 2004 Seth Vidal <skvidal@phy.duke.edu>
 - 2.0.7
 
