@@ -21,6 +21,10 @@ import os.path
 import urlparse
 import string
 import urllib
+import rpm
+import re
+import archwork
+import rpmUtils
 
 from i18n import _
 
@@ -64,6 +68,11 @@ class yumconf:
         self.commands = None
         self.exactarch = 0
         self.overwrite_groups = 0
+        self.yumvar = self._getEnvVar()
+        self.distroverpkg = 'redhat-release'
+        self.yumvar['basearch'] = archwork.getArch()
+        self.yumvar['arch'] = os.uname()[4]
+        releasever = None
         
         if self._getoption('main','cachedir') != None:
             self.cachedir = self._getoption('main','cachedir')
@@ -79,13 +88,20 @@ class yumconf:
             self.assumeyes = self.cfg.getboolean('main', 'assumeyes')
         if self._getoption('main','errorlevel') != None:
             self.errorlevel = self._getoption('main', 'errorlevel')
-        if self._getoption('main','commands') != None:
-            self.commands = string.split(self._getoption('main', 'commands'),' ')
         if self._getoption('main','exactarch') != None:
             self.exactarch = self.cfg.getboolean('main', 'exactarch')
         if self._getoption('main','overwrite_groups') != None:
             self.overwrite_groups = self.cfg.getboolean('main', 'overwrite_groups')
-
+        if self._getoption('main', 'distroverpkg') != None:
+            self.distroverpkg = self._getoption('main','distroverpkg')
+        
+        # figure out what the releasever really is from the distroverpkg
+        self.yumvar['releasever'] = self._getsysver(self.distroverpkg)
+        
+        if self._getoption('main','commands') != None:
+            self.commands = self._getoption('main', 'commands')
+            self.commands = self._doreplace(self.commands)
+            self.commands = string.split(self.commands,' ')
 
         if len(self.cfg.sections()) > 1:
             for section in self.cfg.sections(): # loop through the list of sections
@@ -94,6 +110,8 @@ class yumconf:
                     url = self._getoption(section,'baseurl')
                     if name != None and url != None:
                         self.servers.append(section)
+                        name = self._doreplace(name)
+                        url = self._doreplace(url)
                         self.servername[section] = name
                         self.serverurl[section] = url
                         if self._getoption(section,'gpgcheck') != None:
@@ -140,3 +158,63 @@ class yumconf:
         
     def localHeader(self, serverid):
         return os.path.join(self.servercache[serverid], 'header.info')
+
+    def _getsysver(self, verpkg):
+        ts = rpm.TransactionSet()
+        idx = ts.dbMatch('name', self.distroverpkg)
+        # we're going to take the first one - if there is more than one of these
+        # then the user needs a beating
+        if idx.count() == 0:
+            releasever = 'Null'
+        else:
+            hdr = idx.first()
+            releasever = hdr['version']
+
+        return releasever
+    
+    def _getEnvVar(self):
+        yumvar = {}
+        yumvar[0] = os.environ.get('YUM0','$YUM0')
+        yumvar[1] = os.environ.get('YUM1','$YUM1')
+        yumvar[2] = os.environ.get('YUM2','$YUM2')
+        yumvar[3] = os.environ.get('YUM3','$YUM3')
+        yumvar[4] = os.environ.get('YUM4','$YUM4')
+        yumvar[5] = os.environ.get('YUM5','$YUM5')
+        yumvar[6] = os.environ.get('YUM6','$YUM6')
+        yumvar[7] = os.environ.get('YUM7','$YUM7')
+        yumvar[8] = os.environ.get('YUM8','$YUM8')
+        yumvar[9] = os.environ.get('YUM9','$YUM9')
+        
+        return yumvar
+        
+    def _doreplace(self, string):
+        """ do the replacement of yumvar, release, arch and basearch on any string passed to it"""
+        basearch_reg = re.compile('\$basearch')
+        arch_reg = re.compile('\$arch')
+        releasever_reg = re.compile('\$releasever')
+        yum0_reg = re.compile('\$yum0')
+        yum1_reg = re.compile('\$yum1')
+        yum2_reg = re.compile('\$yum2')
+        yum3_reg = re.compile('\$yum3')
+        yum4_reg = re.compile('\$yum4')
+        yum5_reg = re.compile('\$yum5')
+        yum6_reg = re.compile('\$yum6')
+        yum7_reg = re.compile('\$yum7')
+        yum8_reg = re.compile('\$yum8')
+        yum9_reg = re.compile('\$yum9')
+        
+        (string, count) = basearch_reg.subn(self.yumvar['basearch'], string)
+        (string, count) = arch_reg.subn(self.yumvar['arch'], string)
+        (string, count) = releasever_reg.subn(self.yumvar['releasever'], string)
+        (string, count) = yum0_reg.subn(self.yumvar[0], string)
+        (string, count) = yum1_reg.subn(self.yumvar[1], string)
+        (string, count) = yum2_reg.subn(self.yumvar[2], string)
+        (string, count) = yum3_reg.subn(self.yumvar[3], string)
+        (string, count) = yum4_reg.subn(self.yumvar[4], string)
+        (string, count) = yum5_reg.subn(self.yumvar[5], string)
+        (string, count) = yum6_reg.subn(self.yumvar[6], string)
+        (string, count) = yum7_reg.subn(self.yumvar[7], string)
+        (string, count) = yum8_reg.subn(self.yumvar[8], string)
+        (string, count) = yum9_reg.subn(self.yumvar[9], string)
+        
+        return string

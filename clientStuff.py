@@ -310,7 +310,10 @@ def urlgrab(url, filename=None, copy_local=0, close_connection=0):
         errorlog(0, _('IOError: %s')  % (e))
         errorlog(0, _('URL: %s') % (url))
         sys.exit(1)
-
+    except OSError, e:
+        errorlog(0, _('OSError: %s') % (e))
+        errorlog(0, _('URL: %s') % (url))
+        sys.exit(1)
     # this is a cute little hack - if there isn't a "Content-Length"
     # header then its probably something generated dynamically, such
     # as php, cgi, a directory listing, or an error message.  It is
