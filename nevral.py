@@ -327,9 +327,9 @@ class nevral:
                 unresolveableloop = unresolveableloop + 1
                 log(5, 'looping count = %d' % unresolveableloop)
                 if unresolveableloop >= 3:
-                    errors.append('identical dependency loop exceeded')
+                    errors.append('Unable to satisfy dependencies')
                     for ((name, version, release), (reqname, reqversion), flags, suggest, sense) in deps:
-                        errors.append('package %s needs %s (not provided)' % (name, rpmUtils.formatRequire(reqname, reqversion, flags)))
+                        errors.append('Package %s needs %s, this is not available.' % (name, rpmUtils.formatRequire(reqname, reqversion, flags)))
             else:
                 unresolveableloop = 0
                            
@@ -382,9 +382,9 @@ class nevral:
                                     unresolvable = 1
                                     log(4, 'unresolvable - %s needs %s' % (name, rpmUtils.formatRequire(reqname, reqversion, flags)))
                                     if clientStuff.nameInExcludes(reqname):
-                                        errors.append('package %s needs %s that has been excluded' % (name, reqname))
+                                        errors.append('Package %s needs %s that has been excluded.' % (name, reqname))
                                     else:
-                                        errors.append('package %s needs %s (not provided)' % (name, rpmUtils.formatRequire(reqname, reqversion, flags)))
+                                        errors.append('Package %s needs %s, this is not available.)' % (name, rpmUtils.formatRequire(reqname, reqversion, flags)))
                             CheckDeps=1
                         else:
                             # this is horribly ugly but I have to find some way to see if what it needed is provided
@@ -415,9 +415,9 @@ class nevral:
                                         # it's as if a thousand dependencies cried out and were suddenly silenced!
                                             unresolvable = 1
                                             if clientStuff.nameInExcludes(reqname):
-                                                errors.append('package %s needs %s that has been excluded' % (name, reqname))
+                                                errors.append('Package %s needs %s that has been excluded.' % (name, reqname))
                                             else:
-                                                errors.append('package %s needs %s (not provided)' % (name, rpmUtils.formatRequire(reqname, reqversion, flags)))
+                                                errors.append('Package %s needs %s, this is not available.' % (name, rpmUtils.formatRequire(reqname, reqversion, flags)))
                             else:
                                 # help us obi-wan - you're our only hope!
                                 log(4, 'Cannot find a resolution attempting update out of loop on %s' % (name))
@@ -431,9 +431,9 @@ class nevral:
                                     # it's as if a thousand dependencies cried out and were suddenly silenced!
                                     unresolvable = 1
                                     if clientStuff.nameInExcludes(reqname):
-                                        errors.append('package %s needs %s that has been excluded' % (name, reqname))
+                                        errors.append('Package %s needs %s that has been excluded.' % (name, reqname))
                                     else:
-                                        errors.append('package %s needs %s (not provided)' % (name, rpmUtils.formatRequire(reqname, reqversion, flags)))
+                                        errors.append('Package %s needs %s, this is not available.' % (name, rpmUtils.formatRequire(reqname, reqversion, flags)))
                                         
                 elif sense == rpm.RPMDEP_SENSE_CONFLICTS:
                     # much more shit should happen here. specifically:
