@@ -213,7 +213,8 @@ class nevral:
     def setPkgState(self, name, arch, newstate):
         ((e,v,r,a,l,i),state) = self._get_data(name, arch)
         self.add((name,e,v,r,arch,l,i), newstate)
-    
+
+
     def bestArchsByVersion(self, name):
         """returns a list of archs that have the highest version for name"""
         returnarchs = []
@@ -249,14 +250,7 @@ class nevral:
                 log(4,'Updating: %s, %s' % (name, arch))
                 rpmloc = self.rpmlocation(name, arch)
                 pkghdr = self.getHeader(name, arch)
-                provnames = []
-                provides = pkghdr[rpm.RPMTAG_PROVIDENAME]
-                if provides is None:
-                    pass
-                if type(provides) is types.ListType:
-                    provnames.extend(provides)
-                else:
-                    provnames.append(provides)
+                provides = rpmUtils.getProvides(pkghdr)
                 if name in conf.installonlypkgs or 'kernel-modules' in provides:
                     bestarchlist = self.bestArchsByVersion(name)
                     bestarch = archwork.bestarch(bestarchlist)
@@ -349,7 +343,13 @@ class nevral:
                         (name, arch) = self.nafromloc(sugname)
                         archlist = self.bestArchsByVersion(name)
                         bestarch = archwork.bestarch(archlist)
-                        log(3, _('bestarch = %s for %s') % (bestarch, name))
+                        pkghdr = self.getHeader(name, bestarch)
+                        provides = rpmUtils.getProvides(pkghdr)
+                        if reqname in provides:                                                                
+                            log(3, _('bestarch = %s for %s') % (bestarch, name))
+                        else:
+                            log(3, _('bestarch %s does not provide resetting to arch %s') % (bestarch, arch))
+                            bestarch = arch
                         self.setPkgState(name, bestarch, 'ud')
                         log(4, 'Got dep: %s, %s' % (name,bestarch))
                         CheckDeps = 1

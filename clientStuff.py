@@ -374,10 +374,44 @@ def getupdatedhdrlist(headernevral, rpmnevral):
         # update identical matches so glibc.i386 can only be updated by 
         # glibc.i386 not by glibc.i686 - this is for the anal and bizare
         
+        # look at the fresh new pain - what about multilib
+        # I need to have foo.i386 and foo.x86_64 both installed and visible as
+        # available, if one isn't installed. 
+        # so a complex update really isn't the difficult part
+        # i need to mark foo.arch as newlist if it is
+        # pretty much if: it's not precisely what we have installed then it's in
+        # newlist unless it is precisely a name.arch match for update.
+        # those that aren't a name.arch match but are a name match get dealt with like
+        #  if exactarch:
+        #   newer different arch then it's available but not an update
+        #   newer same arch as installed then it's an update not available
+        #   equal and same arch as installed then ignore it
+        #   older and different arch as installed then grab it
+        #   older and same arch as installed then ignore it        
+        
+        # we should take the whole list as a 'newlist' and remove those entries
+        # which are clearly:
+        #   1. updates 
+        #   2. identical to rpmnevral
+        #   3. not in our archdict at all
+        
+    newlist.extend(headernevral.NAkeys())
+    
     for (name, arch) in headernevral.NAkeys():
-        if not rpmnevral.exists(name):
-            newlist.append((name, arch))
-        else:
+        # remove stuff not in our archdict
+        if arch not in archwork.compatArchList():
+            newlist.remove((name, arch))
+            continue
+            
+        # simple ones - look for exact matches or older stuff
+        if rpmnevral.exists(name, arch):
+            (rpm_e, rpm_v, rpm_r) = rpmnevral.evr(name, arch)
+            rc = rpmUtils.compareEVR(headernevral.evr(name, arch), (rpm_e, rpm_v, rpm_r))
+            if rc <= 0:
+                newlist.remove((name, arch))
+                continue
+
+        if rpmnevral.exists(name):
             hdrarchs = archwork.availablearchs(headernevral, name)
             rpmarchs = archwork.availablearchs(rpmnevral, name)
             if len(hdrarchs) > 1 or len(rpmarchs) > 1:
@@ -393,23 +427,20 @@ def getupdatedhdrlist(headernevral, rpmnevral):
     for (name, arch) in simpleupdate:
         # try to be as precise as possible
         if conf.exactarch:
-            # make the default case false
-            exactmatch = 0
-        else:
-            # make the default case true
-            exactmatch = 1
-        
-        if rpmnevral.exists(name, arch):
-            exactmatch = 1
-            (rpm_e, rpm_v, rpm_r) = rpmnevral.evr(name, arch)
+            if rpmnevral.exists(name, arch):
+                (rpm_e, rpm_v, rpm_r) = rpmnevral.evr(name, arch)
+                rc = rpmUtils.compareEVR(headernevral.evr(name), (rpm_e, rpm_v, rpm_r))
+                if rc > 0:
+                    uplist.append((name,arch))
+                    newlist.remove((name, arch))
+
         else:
             (rpm_e, rpm_v, rpm_r) = rpmnevral.evr(name)
-            
-        if exactmatch:
             rc = rpmUtils.compareEVR(headernevral.evr(name), (rpm_e, rpm_v, rpm_r))
             if rc > 0:
                 uplist.append((name, arch))
-        
+                newlist.remove((name, arch))
+            
     # complex cases
     for name in complexupdate:
         hdrarchs = bestversion(headernevral, name)
@@ -437,13 +468,15 @@ def getupdatedhdrlist(headernevral, rpmnevral):
                     rc = rpmUtils.compareEVR(headernevral.evr(name, arch), rpmnevral.evr(name, arch))
                     if rc > 0:
                         uplist.append((name, arch))
+                        newlist.remove((name, arch))
                 else:
                     log(5, 'Inexact match in complex for %s - %s' % (name, arch))
         else:
             rc = rpmUtils.compareEVR(headernevral.evr(name, hdr_best_arch), rpmnevral.evr(name, rpm_best_arch))
             if rc > 0:
                 uplist.append((name, hdr_best_arch))
-
+                newlist.remove((name, hdr_best_arch))
+                
     nulist=uplist+newlist
     return (uplist, newlist, nulist)
 
