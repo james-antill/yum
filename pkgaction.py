@@ -323,30 +323,18 @@ def kernelupdate(tsnevral):
             filelog(1, 'No bootloader found, Cannot configure kernel.')
 
 def checkRpmMD5(package):
-    check=rpm.CHECKSIG_MD5
-    # RPM spews to stdout/stderr.  Redirect.
-    # code for this from up2date.py
-    saveStdout = os.dup(1)
-    saveStderr = os.dup(2)
-    redirStdout = os.open("/dev/null", os.O_WRONLY | os.O_APPEND)
-    redirStderr = os.open("/dev/null", os.O_WRONLY | os.O_APPEND)
-    os.dup2(redirStdout, 1)
-    os.dup2(redirStderr, 2)
-    # now do the rpm thing
-    sigcheck = rpm.checksig(package, check)
-    # restore normal stdout and stderr
-    os.dup2(saveStdout, 1)
-    os.dup2(saveStderr, 2)
-    # close the redirect files.
-    os.close(redirStdout)
-    os.close(redirStderr)
-    os.close(saveStdout)
-    os.close(saveStderr)
-    if sigcheck:
+    ts.setVSFlags(~(rpm.RPMVSF_NOMD5|rpm.RPMVSF_NEEDPAYLOAD))
+    fdno = os.open(package, os.O_RDONLY)
+    try:
+        h = ts.hdrFromFdno(fdno)
+    except rpm.error, e:
         errorlog(0, _('Error: MD5 Signature check failed for %s') %(package))
         errorlog(0, _('You may want to run yum clean or remove the file:\n %s') % (package))
         errorlog(0, _('Exiting.'))
+        os.close(fdno)
         sys.exit(1)
+    os.close(fdno)
+    return 1
 
 
 def checkRpmSig(package, serverid):

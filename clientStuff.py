@@ -173,9 +173,12 @@ def rpmdbNevralLoad(nevral):
 def readHeader(rpmfn):
     if string.lower(rpmfn[-4:]) == '.rpm':
         fd = os.open(rpmfn, os.O_RDONLY)
-        h = rpm.headerFromPackage(fd)[0]
+        h = ts.hdrFromFdno(fd)
         os.close(fd)
-        return h
+        if h[rpm.RPMTAG_SOURCEPACKAGE]:
+            return 'source'
+        else:
+            return h
     else:
         try:
             fd = gzip.open(rpmfn, 'r')
@@ -770,6 +773,7 @@ def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmD
 def create_final_ts(tsInfo):
     # download the pkgs to the local paths and add them to final transaction set
     # FIXME plug sigchecking back in here both md5 and gpg
+    # make this work so we don't end up sigchecking twice
     tsfin = rpm.TransactionSet('/')
     for (name, arch) in tsInfo.NAkeys():
         pkghdr = tsInfo.getHeader(name, arch)
@@ -785,6 +789,7 @@ def create_final_ts(tsInfo):
                 tsInfo.setlocalrpmpath(name, arch, localrpmpath)
             # we now actually have the rpm and we know where it is - so use it
             rpmloc = tsInfo.localRpmPath(name, arch)
+            pkgaction.checkRpmMD5(rpmloc)
             if conf.servergpgcheck[serverid]:
                 pkgaction.checkRpmSig(rpmloc, serverid)
             if state == 'i':
