@@ -311,9 +311,9 @@ class nevral:
                             # this is horribly ugly but I have to find some way to see if what it needed is provided
                             # by what we are removing - if it is then remove it -otherwise its a real dep problem - move along
                             if reqname[0] == '/':
-                                whatprovides = tsfordeps.dbMatch('basenames', reqname)
+                                whatprovides = _ts.dbMatch('basenames', reqname)
                             else:
-                                whatprovides = tsfordeps.dbMatch('provides', reqname)
+                                whatprovides = _ts.dbMatch('provides', reqname)
                                 
                             if whatprovides:
                                 for provhdr in whatprovides:
