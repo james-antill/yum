@@ -111,7 +111,7 @@ def main(args):
 
     if cmds[0] not in ('update', 'upgrade', 'install','info', 'list', 'erase',\
                        'grouplist','groupupdate','groupinstall','clean', \
-                       'remove', 'provides'):
+                       'remove', 'provides', 'check-update'):
         usage()
     process=cmds[0]
     
@@ -285,7 +285,7 @@ def main(args):
 def usage():
     print _("""
     Usage:  yum [options] <update | upgrade | install | info | erase | list |
-            clean | provides>
+            clean | provides | check-update>
                 
          Options:
           -c [config file] - specify the config file to use

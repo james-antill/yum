@@ -718,19 +718,22 @@ def download_headers(HeaderInfo, nulist):
                 
 def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmDBInfo, obsdict):
     from yummain import usage
+    
+    basecmd = cmds.pop(0)
+    
     if conf.uid != 0:
-        if cmds[0] in ['install','update','clean','upgrade','erase']:
+        if basecmd in ['install','update','clean','upgrade','erase']:
             errorlog(0, _('You need to be root to perform these commands'))
             sys.exit(1)
-    if cmds[0] == 'install':
-        cmds.remove(cmds[0])
+    
+    if basecmd == 'install':
         if len(cmds) == 0:
             errorlog(0, _('Need to pass a list of pkgs to install'))
             usage()
         else:
             pkgaction.installpkgs(tsInfo, nulist, cmds, HeaderInfo, rpmDBInfo)
-    elif cmds[0] == 'provides':
-        cmds.remove(cmds[0])
+    
+    elif basecmd == 'provides':
         if len(cmds) == 0:
             errorlog(0, _('Need a provides to match'))
             usage()
@@ -740,84 +743,90 @@ def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmD
             log(2, _('Looking in installed packages for a providing package'))
             pkgaction.whatprovides(cmds, nulist, rpmDBInfo,1)
         sys.exit(0)
-    elif cmds[0] == 'update':
-        cmds.remove(cmds[0])
+    
+    elif basecmd == 'update':
         if len(cmds) == 0:
             pkgaction.updatepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, obslist, 'all')
         else:
             pkgaction.updatepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, obslist, cmds)
-    elif cmds[0] == 'upgrade':
-        cmds.remove(cmds[0])
+    
+    elif basecmd == 'upgrade':
         if len(cmds) == 0:
             pkgaction.upgradepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, obslist, obsdict, 'all')
-    elif cmds[0] == 'erase' or cmds[0] == 'remove':
-        cmds.remove(cmds[0])
+    
+    elif basecmd in ('erase', 'remove'):
         if len(cmds) == 0:
             errorlog (0, _('Need to pass a list of pkgs to erase'))
             usage()
         else:
             pkgaction.erasepkgs(tsInfo, rpmDBInfo, cmds)
-    elif cmds[0] == 'list':
-        cmds.remove(cmds[0])
+    
+    elif basecmd == 'check-update':
+        if len(uplist) > 0:
+            pkgaction.listpkginfo(uplist, 'all', HeaderInfo, 1)
+            sys.exit(100)
+        else:
+            sys.exit(0)
+            
+    elif basecmd == 'list':
         if len(cmds) == 0:
-            pkgaction.listpkgs(nulist, 'all', HeaderInfo)
+            pkgaction.listpkginfo(nulist, 'all', HeaderInfo, 1)
             sys.exit(0)
         else:
             if cmds[0] == 'updates':
-                pkgaction.listpkgs(uplist, 'updates', HeaderInfo)
+                pkgaction.listpkginfo(uplist, 'updates', HeaderInfo, 1)
             elif cmds[0] == 'available':
-                pkgaction.listpkgs(newlist, 'all', HeaderInfo)
+                pkgaction.listpkginfo(newlist, 'all', HeaderInfo, 1)
             elif cmds[0] == 'installed':
                 pkglist = rpmDBInfo.NAkeys()
-                pkgaction.listpkgs(pkglist, 'all', rpmDBInfo)
+                pkgaction.listpkginfo(pkglist, 'all', rpmDBInfo, 1)
             elif cmds[0] == 'extras':
                 pkglist=[]
                 for (name, arch) in rpmDBInfo.NAkeys():
                     if not HeaderInfo.exists(name, arch):
                         pkglist.append((name,arch))
                 if len(pkglist) > 0:
-                    pkgaction.listpkgs(pkglist, 'all', rpmDBInfo)
+                    pkgaction.listpkginfo(pkglist, 'all', rpmDBInfo, 1)
                 else:
                     log(2, _('No Packages installed not included in a repository'))
             else:    
                 log(2, _('Looking in Available Packages:'))
-                pkgaction.listpkgs(nulist, cmds, HeaderInfo)
+                pkgaction.listpkginfo(nulist, cmds, HeaderInfo, 1)
                 log(2, _('Looking in Installed Packages:'))
                 pkglist = rpmDBInfo.NAkeys()
-                pkgaction.listpkgs(pkglist, cmds, rpmDBInfo)
+                pkgaction.listpkginfo(pkglist, cmds, rpmDBInfo, 1)
         sys.exit(0)
-    elif cmds[0] == 'info':
-        cmds.remove(cmds[0])
+    
+    elif basecmd == 'info':
         if len(cmds) == 0:
-            pkgaction.listpkginfo(nulist, 'all', HeaderInfo)
+            pkgaction.listpkginfo(nulist, 'all', HeaderInfo, 0)
             sys.exit(0)
         else:
             if cmds[0] == 'updates':
-                pkgaction.listpkginfo(uplist, 'updates', HeaderInfo)
+                pkgaction.listpkginfo(uplist, 'updates', HeaderInfo, 0)
             elif cmds[0] == 'available':
-                pkgaction.listpkginfo(newlist, 'all', HeaderInfo)
+                pkgaction.listpkginfo(newlist, 'all', HeaderInfo, 0)
             elif cmds[0] == 'installed':
                 pkglist=rpmDBInfo.NAkeys()
-                pkgaction.listpkginfo(pkglist,'all', rpmDBInfo)
+                pkgaction.listpkginfo(pkglist,'all', rpmDBInfo, 0)
             elif cmds[0] == 'extras':
                 pkglist=[]
                 for (name, arch) in rpmDBInfo.NAkeys():
                     if not HeaderInfo.exists(name, arch):
                         pkglist.append((name,arch))
                 if len(pkglist) > 0:
-                    pkgaction.listpkginfo(pkglist, 'all', rpmDBInfo)
+                    pkgaction.listpkginfo(pkglist, 'all', rpmDBInfo, 0)
                 else:
                     log(2, _('No Packages installed not included in a repository'))
             else:    
                 log(2, _('Looking in Available Packages:'))
-                pkgaction.listpkginfo(nulist, cmds, HeaderInfo)
+                pkgaction.listpkginfo(nulist, cmds, HeaderInfo, 0)
                 log(2, _('Looking in Installed Packages:'))
                 pkglist=rpmDBInfo.NAkeys()
-                pkgaction.listpkginfo(pkglist, cmds, rpmDBInfo)
+                pkgaction.listpkginfo(pkglist, cmds, rpmDBInfo, 0)
         sys.exit(0)
 
-    elif cmds[0] == 'clean':
-        cmds.remove(cmds[0])
+    elif basecmd == 'clean':
         if len(cmds) == 0 or cmds[0] == 'all':
             log(2, _('Cleaning packages and old headers'))
             clean_up_packages()

@@ -70,45 +70,37 @@ def installpkgs(tsnevral,nulist,userlist,hinevral,rpmnevral):
         errorlog(1, _("No Packages Available for Update or Install"))
     
 
-def listpkgs(pkglist, userlist, nevral):
+def listpkginfo(pkglist, userlist, nevral, short):
     if len(pkglist) > 0:
+        if short:
+            log(2, "%-40s %-10s %s" %(_('Name'),_('Arch'),_('Version')))
+            log(2, "-" * 80)
         pkglist.sort(clientStuff.nasort)
-        print "%-40s %-10s %s" %(_('Name'),_('Arch'),_('Version'))
-        print "-" * 80
         if type(userlist) is types.StringType:
             if userlist=='all' or userlist =='updates':
                 for (name, arch) in pkglist:
-                    (e,v,r)=nevral.evr(name,arch)
-                    print "%-40s %-10s %s-%s" %(name, arch, v, r)
+                    if short:
+                        (e,v,r)=nevral.evr(name,arch)
+                        print "%-40s %-10s %s-%s" %(name, arch, v, r)
+                    else:
+                        hdr=nevral.getHeader(name,arch)
+                        displayinfo(hdr)
+                        del hdr
                 print ' '
         else:    
             for (name,arch) in pkglist:
                 for n in userlist:
                     if n == name or fnmatch.fnmatch(name, n):
-                        (e,v,r)=nevral.evr(name,arch)
-                        print "%-40s %-10s %s-%s" %(name, arch, v, r)
+                        if short:
+                            (e,v,r)=nevral.evr(name,arch)
+                            print "%-40s %-10s %s-%s" %(name, arch, v, r)
+                        else:
+                            hdr=nevral.getHeader(name,arch)
+                            displayinfo(hdr)
+                            del hdr
             print ' '
     else:
-        print _("No Packages Available")
-            
-def listpkginfo(pkglist, userlist, nevral):
-    if len(pkglist) > 0:
-        pkglist.sort(clientStuff.nasort)
-        if type(userlist) is types.StringType:
-            if userlist=='all' or userlist=='updates':
-                for (name, arch) in pkglist:
-                    hdr=nevral.getHeader(name,arch)
-                    displayinfo(hdr)
-                    del hdr
-        else:    
-            for (name,arch) in pkglist:
-                for n in userlist:
-                    if n == name or fnmatch.fnmatch(name, n):
-                        hdr=nevral.getHeader(name,arch)
-                        displayinfo(hdr)
-                        del hdr
-    else:
-        print _("No Packages Available")
+        print _("No Packages Available to List")
 
 def displayinfo(hdr):
     print _("Name   : %s") % hdr[rpm.RPMTAG_NAME]
