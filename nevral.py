@@ -297,11 +297,11 @@ class nevral:
                                 self.add((name,e,v,r,arch,l,i),'ed')
                                 log(4, 'Got Erase Dep: %s, %s' %(name,arch))
                             else:
-                                archlist = archwork.availablearchs(self,name)
+                                archlist = archwork.availablearchs(self, reqname)
                                 if len(archlist) > 0:
                                     arch = archwork.bestarch(archlist)
                                     self.setPkgState(name, arch, 'ud')
-                                    log(4, 'Got Extra Dep: %s, %s' %(name,arch))
+                                    log(4, 'Got Extra Dep: %s, %s' %(reqname,arch))
                                 else:
                                     unresolvable = 1
                                     log(4, 'unresolvable - %s needs %s' % (name, rpmUtils.formatRequire(reqname, reqversion, flags)))
