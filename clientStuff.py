@@ -26,6 +26,8 @@ import archwork
 import fnmatch
 import pkgaction
 import callback
+import rpmUtils
+
 
 try:
     # This is a convenient way to make keepalive optional.
@@ -110,24 +112,25 @@ def HeaderInfoNevralLoad(filename, nevral, serverid):
     in_file = open(filename, 'r')
     info = in_file.readlines()
     in_file.close()
-
+    archlist = archwork.compatArchList()
     for line in info:
         (envraStr, rpmpath) = string.split(line, '=')
         (epoch, name, ver, rel, arch) = stripENVRA(envraStr)
         rpmpath = string.replace(rpmpath, '\n', '')
-        if not nameInExcludes(name):
-            if conf.pkgpolicy == 'last':
-                nevral.add((name, epoch, ver, rel, arch, rpmpath, serverid), 'a')
-            else:
-                if nevral.exists(name, arch):
-                    (e1, v1, r1) = nevral.evr(name, arch)
-                    (e2, v2, r2) = (epoch, ver, rel)    
-                    rc = compareEVR((e1, v1, r1), (e2, v2, r2))
-                    if (rc < 0):
-                        # ooo  the second one is newer - push it in.
-                        nevral.add((name, epoch, ver, rel, arch, rpmpath, serverid), 'a')
-                else:
+        if arch in archlist:
+            if not nameInExcludes(name):
+                if conf.pkgpolicy == 'last':
                     nevral.add((name, epoch, ver, rel, arch, rpmpath, serverid), 'a')
+                else:
+                    if nevral.exists(name, arch):
+                        (e1, v1, r1) = nevral.evr(name, arch)
+                        (e2, v2, r2) = (epoch, ver, rel)    
+                        rc = rpmUtils.compareEVR((e1, v1, r1), (e2, v2, r2))
+                        if (rc < 0):
+                            # ooo  the second one is newer - push it in.
+                            nevral.add((name, epoch, ver, rel, arch, rpmpath, serverid), 'a')
+                    else:
+                        nevral.add((name, epoch, ver, rel, arch, rpmpath, serverid), 'a')
 
 
 def nameInExcludes(name):

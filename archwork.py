@@ -60,7 +60,7 @@ def bestarch(archlist):
     return currentarch
 
 
-def availablearchs(hinevral, name):
+def compatArchList():
     archdict = {}
     archdict['i386']=['i386','i486','i586','i686','athlon','noarch']
     archdict['alpha']=['alpha','alphaev6','noarch']
@@ -72,15 +72,18 @@ def availablearchs(hinevral, name):
     archdict['x86_64']=['noarch','x86_64']
     archdict['parisc']=['hppa2.0','hppa1.2','hppa1.2','hppa1.1','hppa1.0','paris','noarch']
     myarch=getArch()
-    archlist = []
     if archdict.has_key(myarch):
-        for arch in archdict[myarch]:
-            if hinevral.exists(name, arch):
-                archlist.append(arch)
+        archlist = archdict[myarch]
     else:
-        for arch in myarch, 'noarch':
-            if hinevral.exists(name, arch):
-                archlist.append(arch)
+        archlist = [myarch, 'noarch']
+    return archlist
+    
+def availablearchs(hineveral, name)
+    archlist = compatArchList()
+    finalarchs = []
+    for arch in archlist:
+        if hinevral.exists(name, arch):
+            finalarchs.append(arch)
     return archlist
 
 
