@@ -881,6 +881,15 @@ def create_final_ts(tsInfo):
                 if not rpmUtils.checkRpmMD5(rpmloc):
                     errorlog(0, 'Damaged RPM %s, removing.' % (rpmloc))
                     os.unlink(rpmloc)
+                else:
+                    rpmobj = rpmUtils.RPM_Work(rpmloc)
+                    hdre = pkghdr['epoch']
+                    hdrv = pkghdr['version']
+                    hdrr = pkghdr['release']
+                    (rpme, rpmv, rpmr) = rpmobj.evr()
+                    if (rpme, rpmv, rpmr) != (hdre, hdrv, hdrr):
+                        errorlog(0, 'NonMatching RPM version, %s, removing.' %(rpmloc))
+                        os.unlink(rpmloc)
 
             # gotten rid of the bad ones
             # now lets download things
