@@ -1,3 +1,112 @@
+2003-10-19 17:34  skvidal
+
+	* configure.in, yum-daily.spec, yum.spec, yummain.py: 
+	update misc files for 2.0.4 ver tag
+
+2003-10-19 17:09  skvidal
+
+	* README, po/ru.po, po/yum.pot: 
+	- update the russian translations - make reference to the yum howto
+	from README
+
+2003-10-15 00:01  skvidal
+
+	* callback.py, clientStuff.py, i18n.py, nevral.py, pkgaction.py,
+	pullheaders.py, serverStuff.py, yummain.py, po/pygettext.py: 
+	apply most, but not all of grigory bakunov's translation patches.
+
+2003-10-13 08:17  skvidal
+
+	* docs/: yum.8, yum.conf.5: 
+	a few documentation changes
+
+2003-10-11 16:20  skvidal
+
+	* archwork.py, config.py: 
+	arch clean ups and make release-ver search for something PROVIDING
+	the distroverpkg string - not just named it.
+
+2003-10-10 16:37  skvidal
+
+	* clientStuff.py, rpmUtils.py, yummain.py: 
+	fix for broken error reporting for file and other conflicts.
+	
+	corrected
+
+2003-10-08 19:04  skvidal
+
+	* depchecktree.py, yum-7.x.spec: 
+	removed unused files
+
+2003-10-05 23:27  skvidal
+
+	* archwork.py, clientStuff.py, nevral.py, pkgaction.py,
+	rpmUtils.py, yummain.py, docs/yum.8: 
+	implement search function modify the provides functionality make
+	yum remove entries from the HeaderInfo nevral if the headers are
+	not accessible (caching-only mode enabled) disable progress bars
+	for header.info downloads
+
+2003-09-27 15:21  skvidal
+
+	* pkgaction.py, etc/yum.init, etc/yum.logrotate: 
+	- made yum provides assume */ option in front unless *?/ in user
+	string - made logs only rotate after logfiles grow over 30KB -
+	never if empty - patched yum init - few cleanup patches from Marko
+	Myllynen - made provides search faster by not doing stupid things
+	w/lists
+
+2003-09-27 13:31  skvidal
+
+	* clientStuff.py, config.py, yummain.py, docs/yum.conf.5: 
+	make the progress meter happen (just enable what michael had there
+	but make it play nicely with the -d <2 levels.	Make retries=6
+	instead of 3 by default.
+
+2003-09-27 02:49  skvidal
+
+	* config.py: 
+	throttle != installroot
+
+2003-09-21 22:52  skvidal
+
+	* clientStuff.py, nevral.py, yum-daily.spec: 
+	added a nevral.serverid method fixed up situation where you have
+	pkgpolicy=last and you have more than one of any pkg.arch in a
+	single repo.
+	
+	also bump/fix the yum-daily version string
+
+2003-09-21 20:51  skvidal
+
+	* nevral.py: 
+	update out of dep loop fix - test only for the moment
+
+2003-09-18 02:16  skvidal
+
+	* docs/yum.8: 
+	doc fix old-headers -> oldheaders
+
+2003-09-17 23:58  skvidal
+
+	* clientStuff.py, yummain.py: 
+	typo and logging output change
+
+2003-09-10 23:32  skvidal
+
+	* serverStuff.py: 
+	cleanup yum-arch -d output
+
+2003-09-09 21:34  skvidal
+
+	* clientStuff.py: make errors on writing to cache dir as user a bit
+	more civilized
+
+2003-09-08 22:06  skvidal
+
+	* ChangeLog: 
+	Mark officially as 2.0.3
+
 2003-09-08 22:05  skvidal
 
 	* configure.in, yum.spec, yummain.py: 
@@ -152,11 +261,6 @@
 2003-08-09 09:16  skvidal
 
 	* clientStuff.py: left out a % - thanks to ville skytta
-
-2003-08-09 01:56  skvidal
-
-	* yum-daily.spec: file yum-daily.spec was initially added on branch
-	yum-rpm_4_2_branch.
 
 2003-08-09 01:56  skvidal
 
@@ -408,11 +512,6 @@
 
 	* Makefile.in: 
 	add failover to makefile
-
-2003-05-27 13:32  skvidal
-
-	* failover.py: file failover.py was initially added on branch
-	yum-rpm_4_2_branch.
 
 2003-05-27 13:32  skvidal
 
@@ -745,16 +844,6 @@
 
 2003-04-05 18:08  skvidal
 
-	* progress_meter.py: file progress_meter.py was initially added on
-	branch yum-rpm_4_2_branch.
-
-2003-04-05 18:08  skvidal
-
-	* urlgrabber.py: file urlgrabber.py was initially added on branch
-	yum-rpm_4_2_branch.
-
-2003-04-05 18:08  skvidal
-
 	* progress_meter.py, urlgrabber.py: 
 	new urlgrabber functions - much more robust and option-ridden ;)
 	progress_meter fun - both of these from michael stenner
@@ -842,16 +931,6 @@
 	* comps.py: 
 	added comps.py - copy out of rhpl from red hat linux phoebe3
 	brought into yum to avoid dep
-
-2003-03-25 01:51  skvidal
-
-	* comps.py: file comps.py was initially added on branch
-	yum-rpm_4_2_branch.
-
-2003-03-25 01:51  skvidal
-
-	* yumcomps.py: file yumcomps.py was initially added on branch
-	yum-rpm_4_2_branch.
 
 2003-03-25 01:51  skvidal
 
@@ -1074,33 +1153,8 @@
 
 2003-02-19 13:57  skvidal
 
-	* po/ru.po: file ru.po was initially added on branch
-	yum-rpm_4_2_branch.
-
-2003-02-19 13:57  skvidal
-
-	* po/yum.pot: file yum.pot was initially added on branch
-	yum-rpm_4_2_branch.
-
-2003-02-19 13:57  skvidal
-
-	* po/Makefile.in: file Makefile.in was initially added on branch
-	yum-rpm_4_2_branch.
-
-2003-02-19 13:57  skvidal
-
-	* po/pygettext.py: file pygettext.py was initially added on branch
-	yum-rpm_4_2_branch.
-
-2003-02-19 13:57  skvidal
-
 	* po/: Makefile.in, pygettext.py, ru.po, yum.pot: 
 	Added all the needed po files
-
-2003-02-18 00:55  skvidal
-
-	* rpmUtils.py: file rpmUtils.py was initially added on branch
-	yum-rpm_4_2_branch.
 
 2003-02-18 00:55  skvidal
 
@@ -1118,11 +1172,6 @@
 
 	* Makefile.in, yummain.py: 
 	remove translate.py entirely add a _ inside yummain.py
-
-2003-02-15 22:33  skvidal
-
-	* i18n.py: file i18n.py was initially added on branch
-	yum-rpm_4_2_branch.
 
 2003-02-15 22:33  skvidal
 
@@ -1199,11 +1248,6 @@
 	implemented most of file:// support  - need to clean it up some
 	more.
 
-2003-02-09 16:13  skvidal
-
-	* keepalive.py: file keepalive.py was initially added on branch
-	yum-rpm_4_2_branch.
-
 2003-02-07 00:53  skvidal
 
 	* clientStuff.py, grubcfg.py, lilocfg.py, nevral.py,
@@ -1253,353 +1297,29 @@
 	disabled/broken: - sig checking - disk size checking before install
 	- probably most of the lilo/grub updating code
 
-2003-01-17 16:58  skvidal
-
-	* yumlock.py: 
-	added yumlock from michael stenner for locking functionality made
-	yum support lockfiles for root uses
-
 2002-12-22 12:52  skvidal
 
-	* ChangeLog, Makefile.in, configure.in, yum-7.x.spec, yum.spec: 
+	* yum-7.x.spec: 
 	Update to 0.9.4 - split into two spec files for 7.x and 8.0
-
-2002-12-19 23:12  skvidal
-
-	* bin/: yum, yum-arch: 
-	fixed sys.path.insert
-
-2002-12-09 00:46  skvidal
-
-	* ChangeLog: look an updated changelog
-
-2002-12-09 00:38  skvidal
-
-	* TODO, docs/yum.conf.5: 
-	doc update for excludes changes
-
-2002-12-09 00:37  skvidal
-
-	* clientStuff.py, nevral.py, yum.conf: 
-	
-	make fnmatch glob excludes work
-
-2002-12-08 20:30  skvidal
-
-	* clientStuff.py: 
-	simple edits
-
-2002-12-06 18:46  skvidal
-
-	* ChangeLog, clientStuff.py: 
-	not quite complete changes for excludes
-
-2002-12-05 14:46  skvidal
-
-	* clientStuff.py: fix to use in_file.readlines() instead of dumb
-	line by line in HeaderInfoNevralLoad
-	
-	Thanks to Bor for that patch
-
-2002-12-05 14:43  skvidal
-
-	* pkgaction.py: added stuff into the kernel updating so if it can't
-	find either bootloader it exits nicely and notifies the user on the
-	console and in the yum.log stopgap to deal with ydl and other
-	non-x86 systems
-
-2002-12-05 13:00  skvidal
-
-	* bin/: yum, yum-arch: 
-	fix append vs insert to avoid namespace collision
-
-2002-10-22 18:12  skvidal
-
-	* archwork.py, callback.py, clientStuff.py, depchecktree.py,
-	nevral.py, pkgaction.py, pullheaders.py, serverStuff.py,
-	up2datetheft.py: 
-	fix rpm404 import in clientStuff and everywhere to deal with
-	exception handling on 7.x machines. This is ugly but theoretically
-	it is temporary.
-
-2002-10-20 21:58  skvidal
-
-	* ChangeLog: 
-	Changelog updates
-
-2002-10-20 21:46  skvidal
-
-	* configure.in, yum.spec: 
-	updated to 0.9.3 in spec and configure
-
-2002-10-20 21:26  skvidal
-
-	* docs/: yum-arch.8, yum.8: 
-	updated docs for  list extras and yum-arch -l
-
-2002-10-19 15:13  skvidal
-
-	* pkgaction.py: 
-	changed layout for yum info
-
-2002-10-18 14:28  skvidal
-
-	* clientStuff.py, pkgaction.py: 
-	yum info extras work added groups and arch to the display fields in
-	yum info.
-
-2002-10-18 01:42  skvidal
-
-	* clientStuff.py, pkgaction.py: 
-	stubs in place for per-server-section gpg-keyrings
-
-2002-10-18 01:35  skvidal
-
-	* clientStuff.py, pkgaction.py: 
-	made updates only operate on update-able packages.  so 'yum update
-	somepkgnotyetinstalled' won't install that package
-	
-	also made yum clean headers remove the header.info file as well as
-	the .hdr files
-
-2002-10-18 00:56  skvidal
-
-	* pullheaders.py, serverStuff.py: 
-	yum-arch -l implemented to make yum-arch pay attention to symlinks
-
-2002-10-14 01:11  skvidal
-
-	* clientStuff.py: 
-	made the header load catch bad headers and exit nicely w/ a real
-	error.
-
-2002-10-14 00:34  skvidal
-
-	* clientStuff.py, depchecktree.py: 
-	few more rpm vs rpm404 fixes and yum list extras is implemented. 
-	not documented (of course)
-
-2002-10-13 01:16  skvidal
-
-	* archwork.py, callback.py, clientStuff.py, depchecktree.py,
-	nevral.py, pkgaction.py, pullheaders.py, serverStuff.py,
-	up2datetheft.py: 
-	update all files for changes to make things potentially work for
-	rpm 4.1 and rpm 4.0.4 so it should work on rhl 7.X and 8.0
-
-2002-09-26 17:15  skvidal
-
-	* nevral.py: 
-	
-	updated nevral dep resolution to use the bestarch - not the first
-	arch.  thanks to slack for finding this.
-
-2002-09-25 17:32  skvidal
-
-	* nevral.py: 
-	add change to fix arch dep resolve for non-kernel bestarch
-	resolution also adds more logging/debug info here.
-
-2002-09-25 01:00  skvidal
-
-	* pkgaction.py: 
-	fix dumbass update bug when looping through archs - its nice to
-	actually finish the list before exiting <sigh>
-
-2002-09-13 00:09  skvidal
-
-	* clientStuff.py: 
-	fixed stupid diskspace check backtrace cleaned up a few comma space
-	problems
-
-2002-08-26 23:44  skvidal
-
-	* ChangeLog: 
-	updated changelog
-
-2002-08-26 23:41  skvidal
-
-	* docs/yum.8: 
-	updated docs to list yum list and yum info options
-
-2002-08-26 23:30  skvidal
-
-	* yum.conf: 
-	updated conf file - in / too :)
-
-2002-08-26 23:29  skvidal
-
-	* etc/yum.conf: 
-	updated conf file
 
 2002-08-26 23:18  skvidal
 
-	* Makefile.in, configure.in, pullheaders.py, serverStuff.py,
-	yum.conf, yum.spec, yummain.py, docs/yum-arch.8, docs/yum.8,
-	etc/yum.conf, etc/yum.cron: 
+	* etc/yum.cron: 
 	Bumped version number Fixed -h and --help in yum-arch Moved yum and
 	yum-arch to /usr/bin updated docs updated cron jobs made conf file
 	have more meaning and use.
 
 2002-08-26 23:15  skvidal
 
-	* bin/: Makefile.in, yum, yum-arch: 
+	* bin/Makefile.in: 
 	added to repository moved from /sbin
 
-2002-08-26 00:22  skvidal
-
-	* archwork.py, pkgaction.py: 
-	pychecker run caught a couple of mistakes
-
-2002-08-25 00:23  skvidal
-
-	* callback.py: fixed an odd divide by zero error under rpm404 in
-	(null)
-
-2002-08-24 16:15  skvidal
-
-	* ChangeLog, archwork.py: 
-	changelog update - fix - no newline at end of archwork.py
-
-2002-08-24 16:11  skvidal
-
-	* archwork.py, clientStuff.py, config.py, nevral.py,
-	pullheaders.py, yummain.py: 
-	ok, I swear, I think this is all of them - the imports are now at
-	the top of the files excepting some very odd little cases.
-
-2002-08-24 15:52  skvidal
-
-	* callback.py, pkgaction.py: 
-	yay - more fun import fixes
-
-2002-08-24 15:47  skvidal
-
-	* serverStuff.py: 
-	missed one
-
-2002-08-24 15:43  skvidal
-
-	* pkgaction.py, serverStuff.py: 
-	clean up some dumb import statements
-
-2002-08-23 16:15  skvidal
-
-	* pkgaction.py, pullheaders.py: 
-	make depcheck happen first in yum-arch -d - just so you know if
-	stuff is broken
-	
-	fix - wording on error message in pkgaction
-
-2002-08-23 00:34  skvidal
-
-	* clientStuff.py: made yum list and yum info match syntacticly
-
-2002-08-23 00:28  skvidal
-
-	* ChangeLog: [no log message]
-
-2002-08-23 00:28  skvidal
-
-	* clientStuff.py, pkgaction.py: 
-	made yum info work on the installed pkgs too made yum list
-	installed dtrt/work made yum list availabe exist instead of yum
-	list new - it was confusingly named
-
-2002-08-16 22:41  skvidal
-
-	* yummain.py: added mode so clean commands are always run in
-	cache-only mode.  need to make cache-only  brighter but this is
-	probably going to be ok for now
-
-2002-08-16 17:07  skvidal
-
-	* ChangeLog: 
-	changelog update
-
-2002-08-16 17:07  skvidal
-
-	* clientStuff.py, yummain.py, docs/yum.8: 
-	updated docs and misc to note the changes in functionality
-
 2002-08-16 16:59  skvidal
 
-	* ChangeLog: 
-	changelog update
-
-2002-08-16 16:59  skvidal
-
-	* clientStuff.py, config.py, logger.py, pkgaction.py, yummain.py: 
+	* logger.py: 
 	
 	added the new logger module made non-root runs work properly made
 	'provides' work as non-root and work better in general
-
-2002-08-13 18:18  skvidal
-
-	* pkgaction.py: change how provides works a bit
-
-2002-08-13 18:18  skvidal
-
-	* clientStuff.py: make updates for yum list new - so it works
-	change how provides works a bit
-
-2002-08-07 22:16  skvidal
-
-	* clientStuff.py, nevral.py, pkgaction.py, yum.conf, yummain.py: 
-	added yum whatprovides support made non-root-run be caching-only
-
-2002-08-03 01:46  skvidal
-
-	* clientStuff.py, config.py, yummain.py: 
-	add -C option to work out of the cache make things faster by not
-	caring about obsoletes unless its during an operation where it
-	matters (upgrade)
-
-2002-07-31 00:23  skvidal
-
-	* pkgaction.py: 
-	stub in place for findrequires/findprovides so I can start a yum
-	find [thing] and have yum tell the user what pkg its in.
-
-2002-07-30 23:51  skvidal
-
-	* clientStuff.py: 
-	added some debugging information to the final diskspace-ts check.
-	
-	I think something odd is happening there when it comes to
-	conflicting pkgs.
-
-2002-07-21 23:13  skvidal
-
-	* yummain.py: 
-	usage patch from Bor
-
-2002-07-19 01:03  skvidal
-
-	* ChangeLog: 
-	updated changelog
-
-2002-07-19 00:54  skvidal
-
-	* pkgaction.py, docs/yum.8: 
-	fix a duplication in listpkgs and add 'info' to the man page
-
-2002-07-19 00:48  skvidal
-
-	* yummain.py: 
-	clean up main() some - make it shorted - break out cmd parsing to a
-	separate function. pychecker no longer tells me I'm a loser.
-
-2002-07-19 00:00  skvidal
-
-	* clientStuff.py, pkgaction.py, yum.conf, yummain.py: 
-	made yum info [pkgname] work.  not documented yet - probably not
-	finished yet either.
-
-2002-07-11 18:13  skvidal
-
-	* ChangeLog, configure.in, yum.spec: 
-	updated for 0.9.1 <sigh>
 
 2002-07-11 18:10  skvidal
 
@@ -1608,47 +1328,9 @@
 	
 	yum -R not yum -r <sigh>
 
-2002-07-11 16:56  skvidal
-
-	* ChangeLog, configure.in, yum.spec: 
-	 bumped to 0.9.0
-	ChangeLog updated
-
-2002-07-11 16:55  skvidal
-
-	* yum.conf: 
-	fixed conf file
-
-2002-07-11 16:52  skvidal
-
-	* clientStuff.py, config.py, pkgaction.py, yum.conf, yum.spec,
-	yummain.py, docs/yum.conf.5: 
-	fixed gpg checking to make gpghome configurable and gpgkeyring made
-	gpg checking more like up2date's updated docs to reflect this fixed
-	the updatehrdlist function (again)
-
-2002-07-11 09:58  skvidal
-
-	* yummain.py, docs/yum.8: 
-	change -r option to -R
-
-2002-07-10 02:04  skvidal
-
-	* ChangeLog: 
-	changelog changed by cvs2cl
-
-2002-07-10 01:52  skvidal
-
-	* archwork.py, clientStuff.py, nevral.py, serverStuff.py,
-	yummain.py: 
-	pychecker fixes the world.
-	
-	wow - I found a lot of soon-to-be-discovered problems w/o having to
-	stumble on them on my own :)
-
 2002-07-09 15:01  skvidal
 
-	* yummain.py, docs/yum.8, etc/yum.cron: 
+	* etc/yum.cron: 
 	make -r command work correctly
 
 2002-07-09 14:30  skvidal
@@ -1656,519 +1338,42 @@
 	* AUTHORS: 
 	Updated Authors file
 
-2002-07-08 10:12  skvidal
-
-	* ChangeLog: 
-	updated the changelog!
-
-2002-07-08 01:47  skvidal
-
-	* clientStuff.py: 
-	fixes a case where a pkg changes arch in an update.  also fixes
-	some problems in the getupdatedhdrlist function
-
-2002-07-03 21:41  skvidal
-
-	* clientStuff.py: 
-	
-	cleaned up some dumb spacing things
-
-2002-07-03 01:33  skvidal
-
-	* docs/yum.8: 
-	add -c into man page
-
-2002-07-03 01:26  skvidal
-
-	* ChangeLog: 
-	new changelog
-
-2002-07-03 01:26  skvidal
-
-	* ChangeLog, archwork.py, clientStuff.py, config.py, nevral.py,
-	yummain.py: 
-	cleaned up comma space issues and single vs double quotes. Not
-	finished but a lot better. Also fixed a bizarre overlooked bug in
-	nevral load that would have almost never have been hit but could
-	have been.
-
-2002-07-01 11:18  skvidal
-
-	* yummain.py: 
-	fix things being out of order - pointed out by icon
-
-2002-07-01 02:08  skvidal
-
-	* Makefile.in: 
-	date stamps for daily
-
 2002-07-01 01:26  skvidal
 
-	* Makefile.in, docs/Makefile.in, etc/Makefile.in: 
+	* docs/Makefile.in, etc/Makefile.in: 
 	add entries to Makefiles to make a daily tar-ball option
-
-2002-07-01 01:01  skvidal
-
-	* clientStuff.py, config.py, nevral.py, yummain.py: 
-	
-	switched from tabs to spaces modified startup so a -c [config file]
-	option is available probably broke the world moving shit around.
 
 2002-06-30 02:53  skvidal
 
-	* archwork.py, callback.py, clientStuff.py, config.py,
-	depchecktree.py, iutil.py, lilo.py, lilocfg.py, nevral.py,
-	pkgaction.py, pullheaders.py, serverStuff.py, translate.py,
-	yummain.py: 
+	* lilo.py: 
 	all files modified for tab->space conversion.,
 	
 	god, shit will probably break
 
-2002-06-30 00:43  skvidal
-
-	* yum.spec: 
-	fixed the spec file.
-
-2002-06-29 15:15  skvidal
-
-	* clientStuff.py, pullheaders.py, yum.spec: 
-	my doesn't that just suck - occasionally rpm.labelCompare returns <
-	-1 <boggle> thanks to icon and hunter
-
-2002-06-28 22:03  skvidal
-
-	* docs/yum-arch.8: 
-	
-	fixed typo from yup to yum :) thanks icon
-
-2002-06-21 13:55  skvidal
-
-	* TODO: 
-	more extreme wishlist items
-
-2002-06-19 20:05  skvidal
-
-	* ChangeLog: 
-	updated changelog
-
-2002-06-19 20:05  skvidal
-
-	* Makefile.in, docs/yum.8: 
-	updated docs to reflect addition of "upgrade" command
-
-2002-06-19 20:00  skvidal
-
-	* clientStuff.py, configure.in, pkgaction.py, yum.spec, yummain.py:
-	
-	added os.unlink on checkSig made a differentation from update to
-	upgrade upgrade includes obsoletes iff there is no update for the
-	same package update does not include obsoletes.
-
-2002-06-17 14:21  skvidal
-
-	* ChangeLog: 
-	Look Look a real ChangeLog!
-
 2002-06-16 12:04  skvidal
 
-	* TODO, configure.in, yum.spec, etc/yum.cron: 
+	* etc/yum.cron: 
 	spec file and configure changes, add -e 0 to yum.cron
-
-2002-06-16 01:00  skvidal
-
-	* clientStuff.py, yummain.py: 
-	make the non-gzipped header reading actually work
-
-2002-06-16 00:44  skvidal
-
-	* clientStuff.py: clean up dumb-o in clientStuff.py
-
-2002-06-16 00:41  skvidal
-
-	* clientStuff.py, pullheaders.py, serverStuff.py, docs/yum-arch.8: 
-	make gzip'd headers work - used most of grigory's patch
-
-2002-06-15 17:41  skvidal
-
-	* ChangeLog, pkgaction.py: 
-	Fixed dumb bug - thanks to Grigory Bakunov
-
-2002-06-14 16:18  skvidal
-
-	* configure.in, yum.spec, yummain.py: 
-	fix spec file, back <sigh> update configure, again.
-	
-	add dumbass check for undeleted vars in yummain.py
-
-2002-06-14 09:43  skvidal
-
-	* Makefile.in, configure.in: 
-	Added entries for yum.spec's version to be automatically changed
-	with configure
-
-2002-06-13 21:01  skvidal
-
-	* docs/: yum.8, yum.conf.5: updated man pages to reflect errorlevel
-	and -e options
-
-2002-06-13 20:56  skvidal
-
-	* clientStuff.py, config.py, nevral.py, pkgaction.py, yummain.py: 
-	change errorlogs so they are leveled add -e option to set errorlog
-	level = default is 2 which means print all errors even if they
-	aren't really serious
-
-2002-06-13 10:42  skvidal
-
-	* configure.in, yum.spec: 
-	bumped version number, again.
-
-2002-06-13 10:38  skvidal
-
-	* pullheaders.py: 
-	fix logger.py class change in pullheaders.py (doh!)
-
-2002-06-13 08:09  skvidal
-
-	* configure.in, yum.spec: 
-	updated ver number after fixing kinda serious kernel problem,
-	earlier
-
-2002-06-13 08:07  skvidal
-
-	* yummain.py: 
-	if we return errors from the tsfin.run then we want to exit with an
-	error condition, not continue and possibly fuckup lilo.conf or
-	grub.conf
-
-2002-06-13 08:03  skvidal
-
-	* clientStuff.py: 
-	fix a problem where yum would attempt to install all the archs of
-	kernels installed.  Read the comment in
-	clientStuff.getupdatehdrlist (line 283 or so) for an explanation
-
-2002-06-13 00:19  skvidal
-
-	* yum.spec: 
-	duh
-
-2002-06-13 00:18  skvidal
-
-	* TODO, callback.py, clientStuff.py, config.py, configure.in,
-	nevral.py, pkgaction.py, yummain.py: 
-	made the cmd line args nice and tidy made the logging make more
-	sense made the rpm callback quiet when it should be quiet
-
-2002-06-12 18:09  skvidal
-
-	* yummain.py: [no log message]
 
 2002-06-12 16:09  skvidal
 
-	* callback.py, clientStuff.py, logger.py, nevral.py, pkgaction.py: 
+	* logger.py: 
 	fix a lot of -d # logging problems.  made logging more consistent. 
 	file logs still need to be used more cmdline options need to be
 	pushed into the config class and handled in callback.py
-
-2002-06-12 16:08  skvidal
-
-	* yummain.py: 
-	fix the logfile need to make yummain non-root-happy.
-
-2002-06-12 16:06  skvidal
-
-	* yummain.py: 
-	logs work like this:
-	
-	log(2,"words") 2 is default - print to stdout - nothing fancy
-	anything above 2 is debug to stdout errorlog is print to stderr
-	filelog is print to conf.logfile
-	
-	when you yum -d # - the number is what level of those logs you want
-	to see.
-	
-	if the number is 3 then you see all logs at level 3 or lower (this
-	only effects the 'log' object - errorlog and filelog ALWAYS happen)
-	
-	yum -d 0 should show nothing b/c there is nothing that low.
-
-2002-06-11 15:23  skvidal
-
-	* yummain.py: 
-	add a message to tell people more about what is going on.
-
-2002-06-11 10:07  skvidal
-
-	* nevral.py, yum.spec: 
-	<sigh> the dependency loops grow ever longer.
-	
-	I want to write out a complete diagram of all possible states for
-	this loop.
-	
-	then just fulfill them all. That'd probably be best.
-
-2002-06-11 09:42  skvidal
-
-	* configure.in: 
-	bumped version
-
-2002-06-11 09:40  skvidal
-
-	* nevral.py: 
-	more debugging info.
-
-2002-06-11 08:03  skvidal
-
-	* pkgaction.py: 
-	fixing thinko in pkg installs should be (name,bestarch) not
-	(name,arch)
-
-2002-06-11 00:33  skvidal
-
-	* nevral.py: 
-	and once more, with feeling so much pain
-
-2002-06-11 00:30  skvidal
-
-	* nevral.py: 
-	this might help some of the conflict problems.	it at least targets
-	a particular problem
-
-2002-06-10 23:52  skvidal
-
-	* yummain.py: 
-	its amazing what you learn when someone tells you specifically
-	where in the fucking MODULE source to look for it.  <sigh>
-
-2002-06-10 23:38  skvidal
-
-	* nevral.py, pkgaction.py: 
-	"fixes" and an intelligent comment
-
-2002-06-10 23:06  skvidal
-
-	* TODO, clientStuff.py, nevral.py, pkgaction.py, yummain.py: 
-	attempt to solve stupid update/install conflicts.
-	
-	might have to fudge conflicts like anaconda does.
-
-2002-06-09 17:42  skvidal
-
-	* nevral.py: 
-	one letter fix to the kernel upgrade problem.
-
-2002-06-09 17:04  skvidal
-
-	* nevral.py: 
-	<sigh>
-
-2002-06-09 17:03  skvidal
-
-	* nevral.py: 
-	ridiculous special case for the kernel.  I think I'm going to cry
-
-2002-06-09 16:31  skvidal
-
-	* pkgaction.py: 
-	test to see if this fixes an obsoleting problem
-
-2002-06-09 16:12  skvidal
-
-	* nevral.py: 
-	GAH! one more dep problem - I think this should solve it.  I hope
-	please
-
-2002-06-09 14:04  skvidal
-
-	* nevral.py, yummain.py: 
-	After much pain and agony recursive erase dependencies appear to
-	work.  I need to comment A LOT more in nevral.nevral.resolvedeps
-	but it appears to work "mostly" correct.
-
-2002-06-09 12:25  skvidal
-
-	* configure.in, yum.spec: 
-	iterate version to 0.8.2 - update spec file too
-
-2002-06-09 12:20  skvidal
-
-	* TODO: 
-	remove client-side excludes todo item
-
-2002-06-09 12:18  skvidal
-
-	* clientStuff.py, config.py, nevral.py, docs/yum.conf.5: 
-	nevral	- put back the thinko b/c I'm really a dumbass and
-	shouldn't program this early.  yum.conf.5 - add exclude option
-	clientStuff - add support for client-side excludes from
-	updates/installs config.py - add support for exclude option
-	excludes are a space separated list of pkgs to exclude - it is in
-	the [main] section of the yum.conf file.
-
-2002-06-09 11:53  skvidal
-
-	* clientStuff.py, yummain.py: 
-	clean ups trying to fix a depresolve bug
-
-2002-06-09 11:53  skvidal
-
-	* nevral.py: 
-	fix a depresolve thinko
-
-2002-06-09 11:36  skvidal
-
-	* serverStuff.py: 
-	fix dumbass display issue on depcheck
-
-2002-06-09 02:09  skvidal
-
-	* TODO, config.py, pkgaction.py, yummain.py: 
-	
-	implemented sigchecking - gpg and md5. md5 will always happen gpg
-	will only happen if gpgcheck=1 is set in the yum.conf file in each
-	server section ie:
-	
-	[serverid] baseurl=blarg name=blarg gpgcheck=1
-
-2002-06-09 01:48  skvidal
-
-	* TODO: 
-	Prioritized and cleaned up TODO list.
-
-2002-06-09 01:34  skvidal
-
-	* TODO, clientStuff.py, yummain.py, docs/yum.8: 
-	implemented yum clean * - updated man page to reflect that change
-
-2002-06-09 00:40  skvidal
-
-	* clientStuff.py, yummain.py: 
-	Reorder things in yummain and clientStuff a little to make
-	yummain.main() shorter and perhaps easier to follow.
-
-2002-06-08 20:13  skvidal
-
-	* docs/yum.conf.5: 
-	real conf file man page
-
-2002-06-08 18:12  skvidal
-
-	* docs/yum-arch.8: 
-	yum-arch has _some_ meaning and should work
-
-2002-06-08 18:12  skvidal
-
-	* docs/yum.8: 
-	man page now has some meaning
-
-2002-06-08 12:33  skvidal
-
-	* yummain.py: 
-	--help -h and just typing 'yum' now work to display the usage. 
-	That was annoying the crap out of me.
-
-2002-06-08 12:12  skvidal
-
-	* yum.conf, yummain.py: 
-	consistent sort order in the servers list. using sort()
-
-2002-06-08 09:12  skvidal
-
-	* ChangeLog, configure.in, yum.spec: 
-	changed ver to 0.8.1
-
-2002-06-08 02:41  skvidal
-
-	* ChangeLog, TODO, pkgaction.py, yummain.py: 
-	added yum list updates command
-
-2002-06-08 02:22  skvidal
-
-	* Makefile.in: 
-	Added ChangeLog to Makefile.in
-
-2002-06-08 02:21  skvidal
-
-	* ChangeLog, TODO: 
-	
-	added Changelog - updated TODO
-
-2002-06-08 02:11  skvidal
-
-	* clientStuff.py, config.py, yum.conf: 
-	clientStuff.py: made the headerinfo nevral do pkgpolicy for last vs
-	newest - default is newest. this means that the servers are loaded
-	in the order they appear in the conf file. If you have
-	pkgpolicy=last then the last server's pkgs if they conflict/collide
-	with the others will win.
-	
-	pkgpolicy=newest (or nothing) will mean the newest pkgs get into
-	the headerInfonevral.
-	
-	modifications to config.py to accomodate this yum.conf to show it.
-
-2002-06-08 01:31  skvidal
-
-	* TODO, clientStuff.py: 
-	clientstuff.py: make http url error spit out the url too TODO: more
-	fun and painful things
-
-2002-06-07 23:42  skvidal
-
-	* clientStuff.py, config.py, pkgaction.py, yum.conf: 
-	Made urlgrab handle ftp urls and better broken url handling made
-	config allow http and ftp urls fixed dumbass comma in pkgaction
-	example changed in yum.conf
-
-2002-06-07 20:31  skvidal
-
-	* TODO: 
-	updated for docs information
 
 2002-06-07 19:00  skvidal
 
 	* README: 
 	Updated theory and use
 
-2002-06-07 01:37  skvidal
+2002-06-07 01:11  skvidal
 
-	* TODO: [no log message]
-
-2002-06-07 01:37  skvidal
-
-	* pkgaction.py: 
-	Added in checksig and cleanpackages functions  - cleanpackages
-	needs to be fleshed out.
-
-2002-06-07 01:27  skvidal
-
-	* yummain.py: 
-	added note in yummain where sigchecking should go
-
-2002-06-07 01:14  skvidal
-
-	* yum.spec: 
-	fix the source
-
-2002-06-07 01:12  skvidal
-
-	* yum.spec: 
-	Changed the %setup to not have -n
+	* COPYING, INSTALL, install-sh, mkinstalldirs, py-compile: Yum
+	first import
 
 2002-06-07 01:11  skvidal
 
-	* COPYING, INSTALL, bootloadercfg.py, checkbootloader.py,
-	grubcfg.py, install-sh, mkinstalldirs, py-compile, etc/yum.init,
-	etc/yum.logrotate: Yum first import
-
-2002-06-07 01:11  skvidal
-
-	* AUTHORS, Makefile.in, TODO, README, archwork.py, callback.py,
-	clientStuff.py, config.py, configure.in, depchecktree.py, iutil.py,
-	lilo.py, lilocfg.py, logger.py, nevral.py, pkgaction.py,
-	pullheaders.py, serverStuff.py, up2datetheft.py, yum.conf,
-	yum.spec, translate.py, yummain.py, docs/Makefile.in,
-	docs/yum-arch.8, docs/yum.8, docs/yum.conf.5, etc/Makefile.in,
-	etc/yum.conf, etc/yum.cron: Initial revision
+	* AUTHORS, README, lilo.py, logger.py, docs/Makefile.in,
+	etc/Makefile.in, etc/yum.cron: Initial revision
 
