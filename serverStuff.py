@@ -16,13 +16,7 @@
 
 import os
 import sys
-try:
-    import rpm404
-    rpm = rpm404
-except ImportError, e:
-    import rpm
-    rpm404 = rpm
-    
+import rpm
 import gzip
 import string
 
@@ -111,10 +105,11 @@ def readHeader(rpmfn):
     # read the header from the rpm if its an rpm, from a file its a file
     # return 'source' if its a src.rpm - something useful here would be good probably.
     if string.lower(rpmfn[-4:]) == '.rpm':
+        ts = rpm.TransactionSet('',rpm._RPMVSF_NOSIGNATURES)
         fd = os.open(rpmfn, os.O_RDONLY)
-        (h,src) = rpm.headerFromPackage(fd)
+        h = ts.hdrFromFdno(fd)
         os.close(fd)
-        if src:
+        if h[rpm.RPMTAG_SOURCEPACKAGE]:
             return 'source'
         else:
             return h
@@ -152,7 +147,7 @@ def formatRequire (name, version, flags):
     return string
 
 def depchecktree(rpmlist):
-    ts = rpm.TransactionSet('/')
+    ts = rpm.TransactionSet('', rpm._RPMVSF_NOSIGNATURES)
     error=0
     msgs=[]
     currpm=0
@@ -164,12 +159,14 @@ def depchecktree(rpmlist):
         sys.stdout.write("\rChecking deps %d %% complete" %(percent))
         sys.stdout.flush()
         h = readHeader(rpmfn)
-        
         if h != 'source':
-            ts.add(h, h[rpm.RPMTAG_NAME], 'i')
+            print h[rpm.RPMTAG_NAME]
+            ts.addInstall(h, h[rpm.RPMTAG_NAME], 'i')
             log("adding %s" % h[rpm.RPMTAG_NAME])       
-    errors = ts.depcheck()
+    errors = ts.check()
+    print errors
     if errors:
+        print 'errors found'
         for ((name, version, release), (reqname, reqversion), \
             flags, suggest, sense) in errors:
             if sense==rpm.RPMDEP_SENSE_REQUIRES:

@@ -222,11 +222,11 @@ def main(args):
         dbfin = clientStuff.openrpmdb(0, '/')
     
     tsfin = clientStuff.create_final_ts(tsInfo, dbfin)
-
+    
     if conf.uid == 0:
         # sigh - the magical "order" command - nice of this not to really be documented anywhere.
         tsfin.order()
-        errors = tsfin.run(0, 0, callback.install_callback, '')
+        errors = tsfin.run(callback.install_callback, '')
         if errors:
             errorlog(0, 'Errors installing:')
             for error in errors:

@@ -19,13 +19,7 @@
 
 import os
 import sys
-try:
-    import rpm404
-    rpm = rpm404
-except ImportError, e:
-    import rpm
-    rpm404 = rpm
-    
+import rpm
 import serverStuff
 from logger import Logger
 

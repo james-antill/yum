@@ -15,13 +15,7 @@
 # Copyright 2002 Duke University 
 
 import string
-try:
-    import rpm404
-    rpm = rpm404
-except ImportError, e:
-    import rpm
-    rpm404 = rpm
-
+import rpm
 import os
 import sys
 import gzip
@@ -132,24 +126,20 @@ def nameInExcludes(name):
 def openrpmdb(option=0, dbpath=None):
     dbpath = "/var/lib/rpm/"
     rpm.addMacro("_dbpath", dbpath)
-
     try:
-        db = rpm.opendb(option)
+        db = rpm.TransactionSet()
     except rpm.error, e:
         raise RpmError(_("Could not open RPM database for reading. Perhaps it is already in use?"))
-    
     return db
-
 
 def rpmdbNevralLoad(nevral):
     rpmdbdict = {}
-    db = openrpmdb()
+    ts = rpm.TransactionSet()
     serverid = 'db'
     rpmloc = 'in_rpm_db'
-    index = db.firstkey()
-    while index:
-        rpmdbh = db[index]
-        (epoch, name, ver, rel, arch) = getENVRA(rpmdbh)
+    hdrs = ts.dbMatch()
+    for hdr in hdrs:
+        (epoch, name, ver, rel, arch) = getENVRA(hdr)
         # deal with multiple versioned dupes and dupe entries in localdb
         if not rpmdbdict.has_key((name, arch)):
             rpmdbdict[(name, arch)] = (epoch, ver, rel)
@@ -161,7 +151,6 @@ def rpmdbNevralLoad(nevral):
                 rpmdbdict[(name, arch)] = (epoch, ver, rel)
             elif (rc == 0):
                 log(4, 'dupe entry in rpmdb %s %s' % (name, arch))
-        index = db.nextkey(index)
     for value in rpmdbdict.keys():
         (name, arch) = value
         (epoch, ver, rel) = rpmdbdict[value]
@@ -180,22 +169,20 @@ def readHeader(rpmfn):
                 h = rpm.headerLoad(fd.read())
             except rpm404.error,e:
                 errorlog(0,'Damaged Header %s' % rpmfn)
-                return None
+                sys.exit(1)
             except rpm.error, e:
                 errorlog(0,'Damaged Header %s' % rpmfn)
-                return None
+                sys.exit(1)
         except IOError,e:
             fd = open(rpmfn, 'r')
             try:
                 h = rpm.headerLoad(fd.read())
             except rpm404.error,e:
                 errorlog(0,'Damaged Header %s' % rpmfn)
-                return None
+                sys.exit(1)
             except rpm.error, e:
                 errorlog(0,'Damaged Header %s' % rpmfn)
-                return None
-        except ValueError, e:
-            return None
+                sys.exit(1)
     fd.close()
     return h
 
@@ -516,27 +503,21 @@ def clean_up_old_headers(rpmDBInfo, HeaderInfo):
         hdrdir = conf.serverhdrdir[serverid]
         hdrlist = getfilelist(hdrdir, '.hdr', hdrlist)
     for hdrfn in hdrlist:
-        todel = 0
         hdr = readHeader(hdrfn)
-        if hdr == None:
-            errorlog(0, 'Possibly damaged Header %s' % hdrfn)
-            pass
-        else:
-            (e, n, v, r, a) = getENVRA(hdr)
-            if rpmDBInfo.exists(n, a):
-                (e1, v1, r1) = rpmDBInfo.evr(n, a)
-                rc = compareEVR((e1, v1, r1), (e, v, r))
-                # if the rpmdb has an equal or better rpm then delete
-                # the header
-                if (rc >= 0):
-                    todel = todel + 1
-                    log(6, 'Header %s should be deleted' % hdrfn)
-            if not HeaderInfo.exists(n, a):
-                # if its not in the HeaderInfo nevral anymore just kill it
-                todel = todel + 1
-                log(6, 'Deleting Header %s' % hdrfn)
-            if todel > 0:
+        (e, n, v, r, a) = getENVRA(hdr)
+        if rpmDBInfo.exists(n, a):
+            (e1, v1, r1) = rpmDBInfo.evr(n, a)
+            rc = compareEVR((e1, v1, r1), (e, v, r))
+            # if the rpmdb has an equal or better rpm then delete
+            # the header
+            if (rc >= 0):
+                log(4, 'Deleting Header %s' % hdrfn)
                 os.unlink(hdrfn)
+        if not HeaderInfo.exists(n, a):
+            # if its not in the HeaderInfo nevral anymore just kill it
+            log(4, 'Deleting Header %s' % hdrfn)
+            os.unlink(hdrfn)
+            
 
 def printtime():
     import time
@@ -575,40 +556,16 @@ def get_package_info_from_servers(conf, HeaderInfo):
         HeaderInfoNevralLoad(headerinfofn, HeaderInfo, serverid)
 
 
-def checkheader(headerfile, name, arch):
-    #return true(1) if the header is good
-    #return  false(0) if the header is bad
-    # test is fairly rudimentary - read in header - read two portions of the header
-    h = readHeader(headerfile)
-    if h == None:
-        return 0
-    else:
-        if name != h[rpm.RPMTAG_NAME] or arch != h[rpm.RPMTAG_ARCH]:
-            return 0
-    return 1
-
 def download_headers(HeaderInfo, nulist):
     for (name, arch) in nulist:
-        # if header exists - it gets checked
-        # if header does not exist it gets downloaded then checked
-        # this should happen in a loop - up to 3 times
-        # if we can't get a good header after 3 tries we bail.
-        checkpass = 1
-        LocalHeaderFile = HeaderInfo.localHdrPath(name, arch)
-        RemoteHeaderFile = HeaderInfo.remoteHdrUrl(name, arch)
-        while checkpass <= 3:
-            if os.path.exists(LocalHeaderFile):
-                log(4, 'cached %s' % LocalHeaderFile)
-            else:
-                log(2, 'getting %s' % LocalHeaderFile)
-                urlgrab(RemoteHeaderFile, LocalHeaderFile, 'nohook')
-            if checkheader(LocalHeaderFile, name, arch):
-                    break
-            else:
-                log(3, 'damaged header %s try - %d' % (LocalHeaderFile, checkpass))
-                checkpass = checkpass + 1
-                os.unlink(LocalHeaderFile)
-                good = 0
+        # this should do something real, like, oh I dunno, check the header 
+        # but I'll be damned if I know how
+        if os.path.exists(HeaderInfo.localHdrPath(name, arch)):
+            log(4, 'cached %s' % (HeaderInfo.hdrfn(name, arch)))
+            pass
+        else:
+            log(2, 'getting %s' % (HeaderInfo.hdrfn(name, arch)))
+            urlgrab(HeaderInfo.remoteHdrUrl(name, arch), HeaderInfo.localHdrPath(name, arch), 'nohook')
 
 def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmDBInfo, obsdict):
     import pkgaction
@@ -738,7 +695,7 @@ def create_final_ts(tsInfo, rpmdb):
     import callback
     # download the pkgs to the local paths and add them to final transaction set
     # might be worth adding the sigchecking in here
-    tsfin = rpm.TransactionSet('/', rpmdb)
+    tsfin = rpm.TransactionSet()
     for (name, arch) in tsInfo.NAkeys():
         pkghdr = tsInfo.getHeader(name, arch)
         rpmloc = tsInfo.localRpmPath(name, arch)
@@ -750,10 +707,10 @@ def create_final_ts(tsInfo, rpmdb):
                 log(2, 'Getting %s' % (os.path.basename(tsInfo.localRpmPath(name, arch))))
                 urlgrab(tsInfo.remoteRpmUrl(name, arch), tsInfo.localRpmPath(name, arch))
             # sigcheck here :)
-            pkgaction.checkRpmMD5(rpmloc)
+            #pkgaction.checkRpmMD5(rpmloc)
             if conf.servergpgcheck[serverid]:
                 pkgaction.checkRpmSig(rpmloc, serverid)
-            tsfin.add(pkghdr, (pkghdr, rpmloc), 'u')
+            tsfin.addInstall(pkghdr, (pkghdr, rpmloc), 'u')
         elif tsInfo.state(name, arch) == 'i':
             if os.path.exists(tsInfo.localRpmPath(name, arch)):
                 log(4, 'Using cached %s' % (os.path.basename(tsInfo.localRpmPath(name, arch))))
@@ -761,24 +718,27 @@ def create_final_ts(tsInfo, rpmdb):
                 log(2, 'Getting %s' % (os.path.basename(tsInfo.localRpmPath(name, arch))))
                 urlgrab(tsInfo.remoteRpmUrl(name, arch), tsInfo.localRpmPath(name, arch))
             # sigchecking we will go
-            pkgaction.checkRpmMD5(rpmloc)
+            #pkgaction.checkRpmMD5(rpmloc)
             if conf.servergpgcheck[serverid]:
                 pkgaction.checkRpmSig(rpmloc, serverid)
-            tsfin.add(pkghdr, (pkghdr, rpmloc), 'i')
+            tsfin.addInstall(pkghdr, (pkghdr, rpmloc), 'i')
             #theoretically, at this point, we shouldn't need to make pkgs available
         elif tsInfo.state(name, arch) == 'a':
             pass
         elif tsInfo.state(name, arch) == 'e' or tsInfo.state(name, arch) == 'ed':
-            tsfin.remove(name)
+            tsfin.addErase(name)
 
     #one last test run for diskspace
-    log(2, 'Calculating available disk space - this could take a bit')
-    tserrors = tsfin.run(rpm.RPMTRANS_FLAG_TEST, ~rpm.RPMPROB_FILTER_DISKSPACE, callback.install_callback, '')
-    
-    if tserrors:
-        log(2, 'Error: Disk space Error')
-        errorlog(0, 'You appear to have insufficient disk space to handle these packages')
-        sys.exit(1)
+#    log(2, 'Calculating available disk space - this could take a bit')
+#    tsfin.setFlags(rpm.RPMTRANS_FLAG_TEST)
+#    tsfin.setProbFilter(~rpm.RPMPROB_FILTER_DISKSPACE)
+#    tserrors = tsfin.run(callback.install_callback, '')
+#    tsfin.setFlags(0)
+#    tsfin.setProbFilter(0)
+#    if tserrors:
+#        log(2, 'Error: Disk space Error')
+#        errorlog(0, 'You appear to have insufficient disk space to handle these packages')
+#        sys.exit(1)
     return tsfin
     
 

@@ -16,19 +16,12 @@
 
 import os
 import clientStuff
-try:
-    import rpm404
-    rpm = rpm404
-except ImportError, e:
-    import rpm
-    rpm404 = rpm
-    
+import rpm
 import string
 import sys
 import archwork
 
 class nevral:
-
     def __init__(self):
         self.rpmbyname = {}
         self.rpmbynamearch = {}
@@ -64,20 +57,14 @@ class nevral:
         else: 
             if l == 'in_rpm_db':
                 # we're in the rpmdb - get the header from there
-                db = clientStuff.openrpmdb()
-                rpms = db.findbyname(name)
-                # this needs to do A LOT MORE if it find multiples
-                for rpm in rpms:
-                    pkghdr = db[rpm]
-                    return pkghdr
+                ts = rpm.TransactionSet()
+                hindexes = ts.dbMatch('name', name)
+                for hdr in hindexes:
+                    return hdr
             else:
                 # we're in a .hdr file
                 pkghdr = clientStuff.readHeader(self.localHdrPath(name, arch))
-                if pkghdr == None:
-                    errorlog(0, 'Bad Header for pkg %s.%s trying to get headers for the nevral - exiting' % (name, arch))
-                    sys.exit(1)
-                else:
-                    return pkghdr
+                return pkghdr  
 
     def NAkeys(self):
         keys = self.rpmbynamearch.keys()
@@ -196,8 +183,7 @@ class nevral:
         unresolvable = 0
         while CheckDeps==1 or (conflicts != 1 and unresolvable != 1 ):
             errors=[]
-            db = clientStuff.openrpmdb(0)
-            ts = rpm.TransactionSet('/',db)
+            ts = rpm.TransactionSet('/')
             for (name, arch) in self.NAkeys(): 
                 if self.state(name, arch) in ('u','ud','iu'):
                     log(4,'Updating: %s, %s' % (name, arch))
@@ -208,30 +194,30 @@ class nevral:
                         bestarch = archwork.bestarch(kernarchlist)
                         if arch == bestarch:
                             log(3, 'Found best kernel arch: %s' %(arch))
-                            ts.add(pkghdr,(pkghdr,rpmloc),'i')
+                            ts.addInstall(pkghdr,(pkghdr,rpmloc),'i')
                             ((e, v, r, a, l, i), s)=self._get_data(name,arch)
                             self.add((name,e,v,r,arch,l,i),'i')
                         else:
                             log(3, 'Removing dumb kernel with silly arch %s' %(arch))
-                            ts.add(pkghdr,(pkghdr,rpmloc),'a')
+                            ts.addInstall(pkghdr,(pkghdr,rpmloc),'a')
                             ((e,v,r,a,l,i),s)=self._get_data(name,arch)
                             self.add((name,e,v,r,arch,l,i),'a')
                     else:
-                        ts.add(pkghdr,(pkghdr,rpmloc),'u')
+                        ts.addInstall(pkghdr,(pkghdr,rpmloc),'u')
                     
                 elif self.state(name,arch) == 'i':
                     log(4,'Installing: %s, %s' % (name, arch))
                     rpmloc = self.rpmlocation(name, arch)
                     pkghdr = self.getHeader(name, arch)
-                    ts.add(pkghdr,(pkghdr,rpmloc),'i')
+                    ts.addInstall(pkghdr,(pkghdr,rpmloc),'i')
                 elif self.state(name,arch) == 'a':
                     rpmloc = self.rpmlocation(name, arch)
                     pkghdr = self.getHeader(name, arch)
-                    ts.add(pkghdr,(pkghdr,rpmloc),'a')
+                    ts.addInstall(pkghdr,(pkghdr,rpmloc),'a')
                 elif self.state(name,arch) == 'e' or self.state(name,arch) == 'ed':
                     log(4,'Erasing: %s-%s' % (name,arch))
-                    ts.remove(name)
-            deps=ts.depcheck()
+                    ts.addErase(name)
+            deps=ts.check()
             CheckDeps = 0
             if not deps:
                 return (0, 'Success - deps resolved')
@@ -274,11 +260,10 @@ class nevral:
                             CheckDeps=1
                         else:
                             # this is horribly ugly but I have to find some way to see if what it needed is provided
-                            # by what we are removing - if it is thien remove it -otherwise its a real dep problem - move along
-                            whatprovides = db.findbyprovides(reqname)
-                            if len(whatprovides)>0:
-                                for provide in whatprovides:
-                                    provhdr=db[provide]
+                            # by what we are removing - if it is then remove it -otherwise its a real dep problem - move along
+                            whatprovides = ts.dbMatch('provides', reqname)
+                            if whatprovides:
+                                for provhdr in whatprovides:
                                     if self.state(provhdr[rpm.RPMTAG_NAME],provhdr[rpm.RPMTAG_ARCH]) in ('e','ed'):
                                         ((e,v,r,a,l,i),s)=rpmDBInfo._get_data(name)
                                         self.add((name,e,v,r,a,l,i),'ed')
@@ -322,9 +307,5 @@ class nevral:
                         conflicts=1
             log(4, 'whee dep loop')
             del ts
-            del db
             if len(errors) > 0:
                 return(1, errors)
-            
-
-   
