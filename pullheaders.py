@@ -33,6 +33,10 @@ rpmUtils.ts = ts
 serverStuff.ts = ts
 
 def main():
+    tempheaderdir = '.newheaders'
+    tempheaderinfo = tempheaderdir + '/' + 'header.info'
+    oldheaderdir = '.oldheaders'
+    oldheaderinfo = oldheaderdir + '/' + 'header.info'
     headerdir = 'headers'
     headerinfo = headerdir + '/' + 'header.info'
     if  len(sys.argv) < 2:
@@ -112,27 +116,27 @@ def main():
             print _("All dependencies resolved and no conflicts detected")
     
     if cmds['writehdrs']:
+        # this should flow like this:
+        # make sure the tempheaderdir is made, etc
+        # check on the headerdir too
+        # make the newheaders and header.info in tempheaderdir
+        # mv the headers dir to .oldheaders
+        # mv .newheaders to headers
+        # clean out the old .hdrs
+        # remove the .oldheaders/header.info
+        # remove the .oldheaders dir
         # if the headerdir exists and its a file then we're in deep crap
-        if os.path.isfile(headerdir):
-            print _("%s is a file") % (headerdir)
+        if not checkandMakeDir(headerdir):
+            sys.exit(1)
+        if not checkandMakeDir(tempheaderdir):
             sys.exit(1)
 
-        # if it doesn't exist then make the dir
-        if not os.path.exists(headerdir):
-            os.mkdir(headerdir)
-        # done with the sanity checks, on to the cleanups
-        
-        # looks for a list of .hdr files and the header.info file
-        hdrlist = serverStuff.getfilelist(headerdir, '.hdr', [], 0)
-        removeCurrentHeaders(headerdir, hdrlist)
-        removeHeaderInfo(headerinfo)
-        
         # generate the new headers
-        rpminfo = genhdrs(rpms, headerdir, cmds)
-
+        rpminfo = genhdrs(rpms, tempheaderdir, cmds)
+        
         # Write header.info file
         print _("\nWriting header.info file")
-        headerfd = open(headerinfo, "w")
+        headerfd = open(tempheaderinfo, "w")
         for item in rpminfo.keys():
             (name,arch) = item
             (epoch, ver, rel, rpmloc) = rpminfo[item]
@@ -140,9 +144,55 @@ def main():
             headerfd.write(info)
         headerfd.close()
 
+        try:
+            os.rename(headerdir, oldheaderdir)
+        except OSError, e:
+            print _("Error moving %s to %s, fatal") % (headerdir, oldheaderdir)
+            sys.exit(1)
+        
+        try:
+            os.rename(tempheaderdir, headerdir)
+        except OSError, e:
+            print _("Error moving %s to %s, fatal") % (headerdir, oldheaderdir)
+            # put the old dir back, don't leave everything broken
+            print _("Putting back old headers")
+            os.rename(oldheaderdir, headerdir)
+            sys.exit(1)
+        
+        # looks for a list of .hdr files and the header.info file
+        hdrlist = serverStuff.getfilelist(oldheaderdir, '.hdr', [], 0)
+        removeCurrentHeaders(oldheaderdir, hdrlist)
+        removeHeaderInfo(oldheaderinfo)
+        os.rmdir(oldheaderdir)
+
+
     # take us home mr. data
     os.chdir(curdir)
 
+def checkandMakeDir(dir):
+    """check out the dir and make it, if possible, return 1 if done, else return 0"""
+    if os.path.exists(dir):
+        if not os.path.isdir(dir):
+            print _("%s is not a dir") % dir
+            result = 0
+        else:
+            if not os.access(dir, os.W_OK):
+                print _("%s is not writable") % dir
+                result = 0
+            else:
+                print _("%s already exists and is writable, overwriting") % dir
+                result = 1
+    else:
+        try:
+            os.mkdir(dir)
+        except OSError, e:
+            print _('Error creating dir %s: %s') % (dir, e)
+            result = 0
+        else:
+            result = 1
+    return result
+            
+        
 def removeCurrentHeaders(headerdir, hdrlist):
     """remove the headers before building the new ones"""
     for hdr in hdrlist:
