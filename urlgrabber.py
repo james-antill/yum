@@ -16,6 +16,11 @@ except ImportError, msg:
     urllib2 = urllib
 
 try:
+    from httplib import HTTPException
+except ImportError, msg:
+    HTTPException = None
+
+try:
     # This is a convenient way to make keepalive optional.
     # Just rename the module so it can't be imported.
     from keepalive import HTTPHandler
@@ -36,6 +41,7 @@ class URLGrabError(IOError):
       4  - IOError on fetch
       5  - OSError on fetch
       6  - no content length header when we expected one
+      7  - HTTPException
 
     Negative codes are reserved for use by functions passed in to
     retrygrab with checkfunc.
@@ -124,7 +130,7 @@ def set_bandwidth(new_bandwidth):
 
 def retrygrab(url, filename=None, copy_local=0, close_connection=0,
               progress_obj=None, throttle=None, bandwidth=None,
-              numtries=3, retrycodes=[-1,2,4,5,6], checkfunc=None):
+              numtries=3, retrycodes=[-1,2,4,5,6,7], checkfunc=None):
     """a wrapper function for urlgrab that retries downloads
 
     The args for retrygrab are the same as urlgrab except for numtries,
@@ -266,6 +272,9 @@ def urlgrab(url, filename=None, copy_local=0, close_connection=0,
         raise URLGrabError(4, _('IOError: %s') % (e, ))
     except OSError, e:
         raise URLGrabError(5, _('OSError: %s') % (e, ))
+    except HTTPException, e:
+        raise URLGrabError(7, _('HTTP Error (%s): %s') % \
+                           (e.__class__.__name__, e))
 
     # this is a cute little hack - if there isn't a "Content-Length"
     # header then its probably something generated dynamically, such
@@ -294,6 +303,9 @@ def urlgrab(url, filename=None, copy_local=0, close_connection=0,
         raise URLGrabError(4, _('IOError: %s') % (e, ))
     except OSError, e:
         raise URLGrabError(5, _('OSError: %s') % (e, ))
+    except HTTPException, e:
+        raise URLGrabError(7, _('HTTP Error (%s): %s') % \
+                           (e.__class__.__name__, e))
 
     return filename
 
