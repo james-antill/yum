@@ -44,7 +44,7 @@ def main():
     del args[-1]
     for arg in args:
         if arg == "-v":
-            log.verbosity = 4
+            cmds['loud'] = 1
         elif arg == "-d":
             cmds['checkdeps'] = 1
         elif arg == "-n":
@@ -57,8 +57,9 @@ def main():
             cmds['usesymlinks'] = 1
         elif arg == "-q":
             cmds['quiet'] = 1
-        elif arg == "-L":
+        elif arg == "-vv":
             cmds['loud'] = 1
+            log.verbosity = 4
         if arg in ['-h','--help']:
             serverStuff.Usage()
     #save where we are right now

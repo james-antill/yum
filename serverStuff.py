@@ -121,15 +121,15 @@ def readHeader(rpmfn):
 
 def Usage():
     print "Usage:"
-    print "yum-arch [-v] [-z] [-l] [-c] [-n] [-d] [-q] [-L] (path of dir where headers/ should/does live)"
-    print "   -d = check dependencies and conflicts in tree"
-    print "   -v = print debugging information"
-    print "   -n = don't generate headers"
-    print "   -c = check pkgs with gpg and md5 checksums - cannot be used with -n"
-    print "   -z = gzip compress the headers [default, will be deprecated as an option]"
-    print "   -l = use symlinks as valid rpms when building headers"
-    print "   -L = make the display louder"
-    print "   -q = make the display more quiet"
+    print "yum-arch [-v] [-z] [-l] [-c] [-n] [-d] [-q] [-vv] (path of dir where headers/ should/does live)"
+    print "   -d  = check dependencies and conflicts in tree"
+    print "   -v  = more verbose output"
+    print "   -vv = even more verbose output"
+    print "   -n  = don't generate headers"
+    print "   -c  = check pkgs with gpg and md5 checksums - cannot be used with -n"
+    print "   -z  = gzip compress the headers [default, will be deprecated as an option]"
+    print "   -l  = use symlinks as valid rpms when building headers"
+    print "   -q  = make the display more quiet"
     sys.exit(1)
 
 
@@ -164,7 +164,7 @@ def depchecktree(rpmlist):
         if h != 'source':
             print h[rpm.RPMTAG_NAME]
             ts.addInstall(h, h[rpm.RPMTAG_NAME], 'i')
-            log("adding %s" % h[rpm.RPMTAG_NAME])       
+            log(2, "adding %s" % h[rpm.RPMTAG_NAME])       
     errors = ts.check()
     print errors
     if errors:
