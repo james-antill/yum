@@ -21,6 +21,9 @@ import urlparse
 import string
 import urllib
 
+from i18n import _
+
+
 class yumconf:
 
     def __init__(self, configfile = '/etc/yum.conf'):
@@ -31,13 +34,13 @@ class yumconf:
             try:
                 self.cfg.readfp(configfh)
             except ConfigParser.MissingSectionHeaderError, e:
-                print 'Error accessing URL: %s' % configfile
+                print _('Error accessing URL: %s') % configfile
                 sys.exit(1)
         else:
             if os.access(configfile, os.R_OK):
                 self.cfg.read(configfile)
             else:
-                print 'Error accessing File: %s' % configfile
+                print _('Error accessing File: %s') % configfile
                 sys.exit(1)
         self.servers = []
         self.servername = {}
@@ -99,7 +102,7 @@ class yumconf:
                         (s,b,p,q,f,o) = urlparse.urlparse(self.serverurl[section])
                         # currently only allowing http, ftp and file url types
                         if s not in ['http', 'ftp', 'file']:
-                            print 'Not using ftp, http or file for servers, Aborting - %s' % (self.serverurl[section])
+                            print _('Not using ftp, http or file for servers, Aborting - %s') % (self.serverurl[section])
                             sys.exit(1)
                         cache = os.path.join(self.cachedir,section)
                         pkgdir = os.path.join(cache, 'packages')
@@ -108,16 +111,16 @@ class yumconf:
                         self.serverpkgdir[section] = pkgdir
                         self.serverhdrdir[section] = hdrdir
                     else:
-                        print 'Error: Cannot find baseurl or name for server \'%s\'. Skipping' %(section)    
+                        print _('Error: Cannot find baseurl or name for server \'%s\'. Skipping') %(section)    
         else:
-            print 'Insufficient server config - no servers found. Aborting.'
+            print _('Insufficient server config - no servers found. Aborting.')
             sys.exit(1)
 
     def _getoption(self, section, option):
         try:
             return self.cfg.get(section, option)
         except ConfigParser.NoSectionError, e:
-            print 'Failed to find section: %s' % section
+            print _('Failed to find section: %s') % section
         except ConfigParser.NoOptionError, e:
             return None
         

@@ -30,4 +30,4 @@ dnl Checks for typedefs, structures, and compiler characteristics.
 
 dnl Checks for library functions.
 
-AC_OUTPUT(bin/Makefile etc/Makefile Makefile docs/Makefile)
+AC_OUTPUT(bin/Makefile etc/Makefile Makefile docs/Makefile po/Makefile )

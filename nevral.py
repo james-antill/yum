@@ -20,6 +20,8 @@ import rpm
 import string
 import sys
 import archwork
+from i18n import _
+
 
 class nevral:
     def __init__(self):
@@ -53,7 +55,7 @@ class nevral:
     def getHeader(self, name, arch=None):
         ((e,v,r,a,l,i),state) = self._get_data(name, arch)
         if state == None:
-            errorlog(0, 'Header for pkg %s not found' % (name))
+            errorlog(0, _('Header for pkg %s not found') % (name))
             sys.exit(1)
             return None
         else: 
@@ -66,7 +68,7 @@ class nevral:
                 # we're in a .hdr file
                 pkghdr = clientStuff.readHeader(self.localHdrPath(name, arch))
                 if pkghdr == None:
-                    errorlog(0, 'Bad Header for pkg %s.%s trying to get headers for the nevral - exiting' % (name, arch))
+                    errorlog(0, _('Bad Header for pkg %s.%s trying to get headers for the nevral - exiting') % (name, arch))
                     sys.exit(1)
                 else:
                     return pkghdr

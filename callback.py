@@ -19,6 +19,8 @@ import rpm
 import os
 import sys
 
+from i18n import _
+
 callbackfilehandles = {}
 def install_callback(what, bytes, total, h, user):
     if what == rpm.RPMCALLBACK_TRANS_PROGRESS:
@@ -38,7 +40,7 @@ def install_callback(what, bytes, total, h, user):
             callbackfilehandles[handle]=fd
             return fd
         else:
-            print "No header - huh?"
+            print _("No header - huh?")
   
     elif what == rpm.RPMCALLBACK_INST_CLOSE_FILE:
         hdr = None

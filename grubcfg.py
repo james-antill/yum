@@ -10,7 +10,7 @@
 
 import os,sys
 import iutil
-from translate import _, N_, cat
+from i18n import _
 import time
 import string
 from up2datetheft import findDepLocal

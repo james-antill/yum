@@ -24,9 +24,12 @@ import pkgaction
 import callback
 import time
 import random
+import locale
 import rpm
+
 from logger import Logger
 from config import yumconf
+from i18n import _
 
 def parseCmdArgs(args):
     
@@ -41,7 +44,7 @@ def parseCmdArgs(args):
     try:
         gopts, cmds = getopt.getopt(args, 'Cc:hR:e:d:y', ['help'])
     except getopt.error, e:
-        errorlog(0, 'Options Error: %s' % e)
+        errorlog(0, _('Options Error: %s') % e)
         usage()
    
     try: 
@@ -58,7 +61,7 @@ def parseCmdArgs(args):
         if yumconffile:
             conf=yumconf(configfile=yumconffile)
         else:
-            errorlog(0, 'Cannot find any conf file.')
+            errorlog(0, _('Cannot find any conf file.'))
             sys.exit(1)
         # who are we:
         conf.uid=os.geteuid()
@@ -85,14 +88,16 @@ def parseCmdArgs(args):
             if o =='-C':
                 conf.cache=1
     except ValueError, e:
-        errorlog(0, 'Options Error: %s' % e)
+        errorlog(0, _('Options Error: %s') % e)
         usage()
         
     return (log, errorlog, filelog, conf, cmds)
     
 def main(args):
     """This does all the real work"""
-        
+
+    locale.setlocale(locale.LC_ALL, '')
+
     if len(args) < 1:
         usage()
     (log, errorlog, filelog, conf, cmds) = parseCmdArgs(args)
@@ -100,7 +105,7 @@ def main(args):
         cmds = conf.commands
 
     if len (cmds) < 1:
-        errorlog(0, 'Options Error: no commands found')
+        errorlog(0, _('Options Error: no commands found'))
         usage()
 
     if cmds[0] not in ('update', 'upgrade', 'install','info', 'list', 'erase',\
@@ -159,12 +164,12 @@ def main(args):
     #  nulist == combination of the two
     #  obslist == packages obsoleting a package we have installed
     ################################################################################
-    log(2, 'Finding updated packages')
+    log(2, _('Finding updated packages'))
     (uplist, newlist, nulist) = clientStuff.getupdatedhdrlist(HeaderInfo, rpmDBInfo)
-    log(2, 'Downloading needed headers')
+    log(2, _('Downloading needed headers'))
     clientStuff.download_headers(HeaderInfo, nulist)
     if cmds[0] == 'upgrade':
-        log(2, 'Finding obsoleted packages')
+        log(2, _('Finding obsoleted packages'))
         obsdict=clientStuff.returnObsoletes(HeaderInfo, rpmDBInfo, nulist)
         obslist=obsdict.keys()
     else:
@@ -193,7 +198,7 @@ def main(args):
     # if for some reason we've gotten all the way through this step with 
     # an empty tsInfo then exit and be confused :)
     if len(tsInfo.NAkeys()) < 1:
-        log(2, 'No actions to take')
+        log(2, _('No actions to take'))
         sys.exit(0)
         
     if process not in ('erase', 'remove'):
@@ -204,13 +209,13 @@ def main(args):
                 log(6,'making available: %s' % name)
                 tsInfo.add((name, e, v, r, arch, l, i), 'a')
 
-    log(2, 'Resolving dependencies')
+    log(2, _('Resolving dependencies'))
     (code, msgs) = tsInfo.resolvedeps(rpmDBInfo)
     if code == 1:
         for msg in msgs:
             print msg
         sys.exit(1)
-    log(2, 'Dependencies resolved')
+    log(2, _('Dependencies resolved'))
     
     # prompt for use permission to do stuff in tsInfo - list all the actions 
     # (i, u, e, ed, ud,iu(installing, but marking as 'u' in the actual ts, just 
@@ -221,7 +226,7 @@ def main(args):
     clientStuff.printactions(i_list, u_list, e_list, ud_list, ed_list)
     if conf.assumeyes==0:
         if clientStuff.userconfirm():
-            errorlog(1, 'Exiting on user command.')
+            errorlog(1, _('Exiting on user command.'))
             sys.exit(1)
     
     # Test run for disk space checks
@@ -232,7 +237,7 @@ def main(args):
     tserrors = tstest.run(callback.install_callback, '')
     if tserrors:
         log(2, 'Error: Disk space Error')
-        errorlog(0, 'You appear to have insufficient disk space to handle these packages')
+        errorlog(0, _('You appear to have insufficient disk space to handle these packages'))
         sys.exit(1)
     tstest.closeDB()
     del tstest
@@ -245,7 +250,7 @@ def main(args):
         tsfin.order()
         errors = tsfin.run(callback.install_callback, '')
         if errors:
-            errorlog(0, 'Errors installing:')
+            errorlog(0, _('Errors installing:'))
             for error in errors:
                 errorlog(0, error)
             sys.exit(1)
@@ -260,15 +265,15 @@ def main(args):
         clientStuff.shortlogactions(i_list, u_list, e_list, ud_list, ed_list)
         
     else:
-        errorlog(1, 'You\'re not root, we can\'t install things')
+        errorlog(1, _('You\'re not root, we can\'t install things'))
         sys.exit(0)
         
-    log(2, 'Transaction(s) Complete')
+    log(2, _('Transaction(s) Complete'))
     sys.exit(0)
 
 
 def usage():
-    print """
+    print _("""
     Usage:  yum [options] <update | upgrade | install | info | erase | list |
             clean | provides>
                 
@@ -280,7 +285,7 @@ def usage():
           -R [time in minutes] - set the max amount of time to randonly run in.
           -C run from cache only - do not update the cache
           -h, --help this screen
-    """
+    """)
     sys.exit(1)
     
 if __name__ == "__main__":

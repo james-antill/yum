@@ -20,6 +20,7 @@ import sys
 import os
 sys.path.insert(1,'/usr/lib/yum')
 import yummain
+from i18n import _
 import yumlock
 
 uid = os.geteuid()
@@ -38,7 +39,7 @@ if uid == 0:
             os.unlink(lockfile)
             yumlock.lock(lockfile, mypid, 0644)
         else:
-            print 'Existing lock %s. Aborting, running program.' % lockfile
+            print _('Existing lock %s. Aborting, running program.') % lockfile
             sys.exit(1)
 
 try:
@@ -48,12 +49,12 @@ except SystemExit, e:
         yumlock.unlock(lockfile)
     sys.exit(e)
 except KeyboardInterrupt, e:
-    print 'Exiting on User Cancel'
+    print _('Exiting on User Cancel')
     if uid == 0:
         yumlock.unlock(lockfile)
     sys.exit(1)
 except IOError, (errno, strerror):
-    print 'IOError - # %s - %s' % (errno, strerror)
+    print _('IOError - # %s - %s') % (errno, strerror)
     if uid == 0:
         yumlock.unlock(lockfile)
     sys.exit(1)

@@ -37,6 +37,8 @@ try:
 except ImportError, msg:
     keepalive_handler = None
 
+from i18n import _
+
 def stripENVRA(foo):
     archIndex = string.rfind(foo, '.')
     arch = foo[archIndex+1:]
@@ -180,14 +182,14 @@ def readHeader(rpmfn):
             try: 
                 h = rpm.headerLoad(fd.read())
             except rpm.error, e:
-                errorlog(0,'Damaged Header %s' % rpmfn)
+                errorlog(0,_('Damaged Header %s') % rpmfn)
                 return None
         except IOError,e:
             fd = open(rpmfn, 'r')
             try:
                 h = rpm.headerLoad(fd.read())
             except rpm.error, e:
-                errorlog(0,'Damaged Header %s' % rpmfn)
+                errorlog(0,_('Damaged Header %s') % rpmfn)
                 return None
         except ValueError, e:
             return None
@@ -314,8 +316,8 @@ def urlgrab(url, filename=None, copy_local=0, close_connection=0):
             try: fo.close_connection()
             except AttributeError: pass
     except IOError, e:
-        errorlog(0, 'IOError: %s'  % (e))
-        errorlog(0, 'URL: %s' % (url))
+        errorlog(0, _('IOError: %s')  % (e))
+        errorlog(0, _('URL: %s') % (url))
         sys.exit(1)
 
     # this is a cute little hack - if there isn't a "Content-Length"
@@ -323,8 +325,8 @@ def urlgrab(url, filename=None, copy_local=0, close_connection=0):
     # as php, cgi, a directory listing, or an error message.  It is
     # probably not what we want.
     if not hdr is None and not hdr.has_key('Content-Length'):
-        errorlog(0, 'ERROR: Url Return no Content-Length  - something is wrong')
-        errorlog(0, 'URL: %s' % (url))
+        errorlog(0, _('ERROR: Url Return no Content-Length  - something is wrong'))
+        errorlog(0, _('URL: %s') % (url))
         sys.exit(1)
     return filename
 
@@ -431,21 +433,21 @@ def actionslists(nevral):
     return install_list, update_list, erase_list, updatedeps_list, erasedeps_list
     
 def printactions(i_list, u_list, e_list, ud_list, ed_list):
-    log(2, 'I will do the following:')
+    log(2, _('I will do the following:'))
     for pkg in i_list:
         (name,arch) = pkg
-        log(2, '[install: %s.%s]' % (name, arch))
+        log(2, _('[install: %s.%s]') % (name, arch))
     for pkg in u_list:
         (name,arch) = pkg
-        log(2, '[update: %s.%s]' % (name, arch))
+        log(2, _('[update: %s.%s]') % (name, arch))
     for pkg in e_list:
         (name,arch) = pkg
-        log(2, '[erase: %s.%s]' % (name, arch))
+        log(2, _('[erase: %s.%s]') % (name, arch))
     if len(ud_list) > 0:
-        log(2, 'I will install/upgrade these to satisfy the depedencies:')
+        log(2, _('I will install/upgrade these to satisfy the depedencies:'))
         for pkg in ud_list:
             (name, arch) = pkg
-            log(2, '[deps: %s.%s]' %(name, arch))
+            log(2, _('[deps: %s.%s]') %(name, arch))
     if len(ed_list) > 0:
         log(2, 'I will erase these to satisfy the depedencies:')
         for pkg in ed_list:
@@ -647,24 +649,24 @@ def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmD
     from yummain import usage
     if conf.uid != 0:
         if cmds[0] in ['install','update','clean','upgrade','erase']:
-            errorlog(0, 'You need to be root to perform these commands')
+            errorlog(0, _('You need to be root to perform these commands'))
             sys.exit(1)
     if cmds[0] == 'install':
         cmds.remove(cmds[0])
         if len(cmds) == 0:
-            errorlog(0, 'Need to pass a list of pkgs to install')
+            errorlog(0, _('Need to pass a list of pkgs to install'))
             usage()
         else:
             pkgaction.installpkgs(tsInfo, nulist, cmds, HeaderInfo, rpmDBInfo)
     elif cmds[0] == 'provides':
         cmds.remove(cmds[0])
         if len(cmds) == 0:
-            errorlog(0, 'Need a provides to match')
+            errorlog(0, _('Need a provides to match'))
             usage()
         else:
-            log(2, 'Looking in available packages for a providing package')
+            log(2, _('Looking in available packages for a providing package'))
             pkgaction.whatprovides(cmds, nulist, HeaderInfo,0)
-            log(2, 'Looking in installed packages for a providing package')
+            log(2, _('Looking in installed packages for a providing package'))
             pkgaction.whatprovides(cmds, nulist, rpmDBInfo,1)
         sys.exit(0)
     elif cmds[0] == 'update':
@@ -680,7 +682,7 @@ def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmD
     elif cmds[0] == 'erase' or cmds[0] == 'remove':
         cmds.remove(cmds[0])
         if len(cmds) == 0:
-            errorlog (0, 'Need to pass a list of pkgs to erase')
+            errorlog (0, _('Need to pass a list of pkgs to erase'))
             usage()
         else:
             pkgaction.erasepkgs(tsInfo, rpmDBInfo, cmds)
@@ -705,11 +707,11 @@ def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmD
                 if len(pkglist) > 0:
                     pkgaction.listpkgs(pkglist, 'all', rpmDBInfo)
                 else:
-                    log(2, 'No Packages installed not included in a repository')
+                    log(2, _('No Packages installed not included in a repository'))
             else:    
-                log(2, 'Looking in Available Packages:')
+                log(2, _('Looking in Available Packages:'))
                 pkgaction.listpkgs(nulist, cmds, HeaderInfo)
-                log(2, 'Looking in Installed Packages:')
+                log(2, _('Looking in Installed Packages:'))
                 pkglist = rpmDBInfo.NAkeys()
                 pkgaction.listpkgs(pkglist, cmds, rpmDBInfo)
         sys.exit(0)
@@ -734,11 +736,11 @@ def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmD
                 if len(pkglist) > 0:
                     pkgaction.listpkginfo(pkglist, 'all', rpmDBInfo)
                 else:
-                    log(2, 'No Packages installed not included in a repository')
+                    log(2, _('No Packages installed not included in a repository'))
             else:    
-                log(2, 'Looking in Available Packages:')
+                log(2, _('Looking in Available Packages:'))
                 pkgaction.listpkginfo(nulist, cmds, HeaderInfo)
-                log(2, 'Looking in Installed Packages:')
+                log(2, _('Looking in Installed Packages:'))
                 pkglist=rpmDBInfo.NAkeys()
                 pkgaction.listpkginfo(pkglist, cmds, rpmDBInfo)
         sys.exit(0)
@@ -746,20 +748,20 @@ def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmD
     elif cmds[0] == 'clean':
         cmds.remove(cmds[0])
         if len(cmds) == 0 or cmds[0] == 'all':
-            log(2, 'Cleaning packages and old headers')
+            log(2, _('Cleaning packages and old headers'))
             clean_up_packages()
             clean_up_old_headers(rpmDBInfo, HeaderInfo)
         elif cmds[0] == 'packages':
-            log(2, 'Cleaning packages')
+            log(2, _('Cleaning packages'))
             clean_up_packages()
         elif cmds[0] == 'headers':
-            log(2, 'Cleaning all headers')
+            log(2, _('Cleaning all headers'))
             clean_up_headers()
         elif cmds[0] == 'oldheaders':
-            log(2, 'Cleaning old headers')
+            log(2, _('Cleaning old headers'))
             clean_up_old_headers(rpmDBInfo, HeaderInfo)
         else:
-            errorlog(0, 'Invalid clean option %s' % cmds[0])
+            errorlog(0, _('Invalid clean option %s') % cmds[0])
             sys.exit(1)
         sys.exit(0)    
     else:
@@ -767,7 +769,6 @@ def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmD
 
 def create_final_ts(tsInfo):
     # download the pkgs to the local paths and add them to final transaction set
-    # might be worth adding the sigchecking in here
     # FIXME plug sigchecking back in here both md5 and gpg
     tsfin = rpm.TransactionSet('/')
     for (name, arch) in tsInfo.NAkeys():
@@ -800,7 +801,7 @@ def create_final_ts(tsInfo):
 
 def checkGPGInstallation():
     if not os.access("/usr/bin/gpg", os.X_OK):
-        errorlog(0, "Error: GPG is not installed")
+        errorlog(0, _("Error: GPG is not installed"))
         return 1
     return 0
     

@@ -27,12 +27,14 @@ import re
 import string
 import rpm
 
+from i18n import _
+
 debug = 0
 
 
 def Usage():
     # yah, duh.
-    print "%s dirs you want to check" % (sys.argv[0])
+    print _("%s dirs you want to check") % (sys.argv[0])
     sys.exit(1)
 
 def log(mess):
@@ -123,11 +125,11 @@ def main():
     
     (error,msgs) = depchecktree(treerpmlist)
     if error==1:
-        print "Errors within the dir(s):\n %s" % sys.argv[1:]
+        print _("Errors within the dir(s):\n %s") % sys.argv[1:]
         for msg in msgs:
             print "   " + msg
     else:
-        print "All dependencies resolved and no conflicts detected"
+        print _("All dependencies resolved and no conflicts detected")
     
 if __name__ == "__main__":
     main()

@@ -19,6 +19,8 @@ import sys
 import rpm
 import gzip
 import string
+from i18n import _
+
 
 def cleanHeader(header):
   # remove the below tags from all headers
@@ -120,16 +122,16 @@ def readHeader(rpmfn):
         return h
 
 def Usage():
-    print "Usage:"
-    print "yum-arch [-v] [-z] [-l] [-c] [-n] [-d] [-q] [-vv] (path of dir where headers/ should/does live)"
-    print "   -d  = check dependencies and conflicts in tree"
-    print "   -v  = more verbose output"
-    print "   -vv = even more verbose output"
-    print "   -n  = don't generate headers"
-    print "   -c  = check pkgs with gpg and md5 checksums - cannot be used with -n"
-    print "   -z  = gzip compress the headers [default, will be deprecated as an option]"
-    print "   -l  = use symlinks as valid rpms when building headers"
-    print "   -q  = make the display more quiet"
+    print _("""Usage:
+yum-arch [-v] [-z] [-l] [-c] [-n] [-d] [-q] [-vv] (path of dir where headers/ should/does live)
+   -d  = check dependencies and conflicts in tree
+   -v  = more verbose output
+   -vv = even more verbose output
+   -n  = don't generate headers
+   -c  = check pkgs with gpg and md5 checksums - cannot be used with -n
+   -z  = gzip compress the headers [default, will be deprecated as an option]
+   -l  = use symlinks as valid rpms when building headers
+   -q  = make the display more quiet""")
     sys.exit(1)
 
 

@@ -22,6 +22,7 @@ import sys
 import rpm
 import serverStuff
 from logger import Logger
+from i18n import _
 
 log=Logger(threshold=0, default=2, prefix='', preprefix='')
 serverStuff.log = log
@@ -66,10 +67,10 @@ def main():
     curdir = os.getcwd()
     #start the sanity/stupidity checks
     if not os.path.exists(basedir):
-        print "Directory of rpms must exist"
+        print _("Directory of rpms must exist")
         serverStuff.Usage()
     if not os.path.isdir(basedir):
-        print "Directory of rpms must be a directory."
+        print _("Directory of rpms must be a directory.")
         sys.exit(1)
         
     #change to the basedir to work from w/i the path - for relative url paths
@@ -79,23 +80,23 @@ def main():
     rpms=serverStuff.getfilelist('./', '.rpm', [], cmds['usesymlinks'])
     #and a few more sanity checks
     if len(rpms) < 1:
-        print "No rpms to look at. Exiting."
+        print _("No rpms to look at. Exiting.")
         sys.exit(1)
 
     if cmds['checkdeps']:
         (error,msgs) = serverStuff.depchecktree(rpms)
         if error==1:
-            print "Errors within the dir(s):\n %s" % basedir
+            print _("Errors within the dir(s):\n %s") % basedir
             for msg in msgs:
-                print "   " + msg
+                print _("   ") + msg
             sys.exit(1)
         else:
-            print "All dependencies resolved and no conflicts detected"
+            print _("All dependencies resolved and no conflicts detected")
     
     if cmds['writehdrs']:
         #if the headerdir exists and its a file then we're in deep crap
         if os.path.isfile(headerdir):
-            print "%s is a file" % (headerdir)
+            print _("%s is a file") % (headerdir)
             sys.exit(1)
 
         #if it doesn't exist then make the dir
@@ -113,7 +114,7 @@ def main():
         rpminfo = genhdrs(rpms, headerdir, cmds)
 
         #Write header.info file
-        print "\nWriting header.info file"
+        print _("\nWriting header.info file")
         headerfd = open(headerinfo, "w")
         for item in rpminfo.keys():
             (name,arch) = item
@@ -138,13 +139,13 @@ def genhdrs(rpms,headerdir,cmds):
         percent = (currpm*100)/numrpms
         if not cmds['quiet']:
             if cmds['loud']:
-                print 'Digesting rpm - %s - %d/%d' % (rpmname, currpm, numrpms)
+                print _('Digesting rpm - %s - %d/%d') % (rpmname, currpm, numrpms)
             else:
                 sys.stdout.write('\r' + ' ' * 80)
                 sys.stdout.write("\rDigesting rpms %d %% complete: %s" % (percent,rpmname))
                 sys.stdout.flush()
         if cmds['rpmcheck']:
-            log(2,"\nChecking sig on %s" % (rpmname))
+            log(2,_("\nChecking sig on %s") % (rpmname))
             serverStuff.checkSig(rpmfn)
         header=serverStuff.readHeader(rpmfn)
         #check to ignore src.rpms
@@ -161,7 +162,7 @@ def genhdrs(rpms,headerdir,cmds):
             rpmtup = (name,arch)
             # do we already have this name.arch tuple in the dict?
             if rpminfo.has_key(rpmtup):
-                log(2,"Already found tuple: %s %s " % (name, arch))
+                log(2, _("Already found tuple: %s %s ") % (name, arch))
                 (e1, v1, r1, l1) = rpminfo[rpmtup]
                 oldhdrfile = "%s/%s-%s-%s-%s.%s.hdr" % (headerdir, name, e1, v1, r1, arch) 
                 # which one is newer?
@@ -170,7 +171,7 @@ def genhdrs(rpms,headerdir,cmds):
                     # if the more recent one in is newer then throw away the old one
                     del rpminfo[rpmtup]
                     if os.path.exists(oldhdrfile):
-                        print "\nignoring older pkg: %s" % (l1)
+                        print _("\nignoring older pkg: %s") % (l1)
                         os.unlink(oldhdrfile)
                     if rpmdelete:
                         shortheader = serverStuff.cleanHeader(header)
@@ -180,10 +181,10 @@ def genhdrs(rpms,headerdir,cmds):
                     rpminfo[rpmtup]=(epoch,ver,rel,rpmloc)
                 elif rc == 0:
                     # hmm, they match complete - warn the user that they've got a dupe in the tree
-                    print "\nignoring dupe pkg: %s" % (rpmloc)
+                    print _("\nignoring dupe pkg: %s") % (rpmloc)
                 elif rc >= 1:
                     # move along, move along, nothing more to see here
-                    print "\nignoring older pkg: %s" % (rpmloc)
+                    print _("\nignoring older pkg: %s") % (rpmloc)
             else:
                 if rpmdelete:
                     shortheader = serverStuff.cleanHeader(header)
@@ -195,7 +196,7 @@ def genhdrs(rpms,headerdir,cmds):
         else:
             log(2,"ignoring srpm: %s" % rpmfn)
     if not cmds['quiet']:
-        print "\n   Total: %d\n   Used: %d" %(numrpms, goodrpm)
+        print _("\n   Total: %d\n   Used: %d") %(numrpms, goodrpm)
     return rpminfo
 
 if __name__ == "__main__":
