@@ -195,8 +195,8 @@ def main(args):
 
     if process in ['groupupdate', 'groupinstall', 'grouplist', 'groupupgrade']:
         servers_with_groups = clientStuff.get_groups_from_servers(serverlist)
+        GroupInfo = yumcomps.Groups_Info(conf.overwrite_groups)
         if len(servers_with_groups) > 0:
-            GroupInfo = yumcomps.Groups_Info(conf.overwrite_groups)
             for serverid in servers_with_groups:
                 log(4, 'Adding Group from %s' % serverid)
                 GroupInfo.add(conf.localGroups(serverid))
