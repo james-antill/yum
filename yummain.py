@@ -207,6 +207,7 @@ def main(args):
         log(2, _('No actions to take'))
         sys.exit(0)
         
+    
     if process not in ('erase', 'remove'):
         # put available pkgs in tsInfonevral in state 'a'
         for (name, arch) in nulist:
@@ -234,7 +235,8 @@ def main(args):
         if clientStuff.userconfirm():
             errorlog(1, _('Exiting on user command.'))
             sys.exit(1)
-    
+
+    # FIXME this shouldn't be here - should be somewhere else for doing this sort of action
     # Test run for disk space checks
     tstest = clientStuff.create_final_ts(tsInfo)
     log(2, _('Calculating available disk space - this could take a bit'))
@@ -248,8 +250,10 @@ def main(args):
     tstest.closeDB()
     del tstest
     
+    # FIXME the actual run should probably be elsewhere and this should be
+    # inside a try, except set
     tsfin = clientStuff.create_final_ts(tsInfo)
-
+    
     if conf.uid == 0:
         # sigh - the magical "order" command - nice of this not to really be 
         # documented anywhere.
