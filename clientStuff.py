@@ -14,15 +14,27 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 # Copyright 2002 Duke University 
 
+import urllib2
+import urlparse
 import string
 import rpm
 import os
+import os.path
 import sys
 import gzip
 import archwork
 import fnmatch
 import pkgaction
 import callback
+try:
+    # This is a convenient way to make keepalive optional.
+    # Just rename the module so it can't be imported.
+    from keepalive import HTTPHandler
+    keepalive_handler = HTTPHandler()
+    opener = urllib2.build_opener(keepalive_handler)
+    urllib2.install_opener(opener)
+except ImportError, msg:
+    keepalive_handler = None
 
 def stripENVRA(foo):
     archIndex = string.rfind(foo, '.')
@@ -258,27 +270,71 @@ def progresshook(blocks, blocksize, total):
         print ' '
         
 
-def urlgrab(url, filename=None, nohook=None):
-    import urllib, rfc822, urlparse
+def urlgrab(url, filename=None, copy_local=0, close_connection=0):
+    """grab the file at <url> and make a local copy at <filename>
+
+    If filename is none, the basename of the url is used.
+
+    copy_local is ignored except for file:// urls, in which case it
+    specifies whether urlgrab should still make a copy of the file, or
+    simply point to the existing copy.
+
+    close_connection tells urlgrab to close the connection after
+    completion.  This is ignored unless the download happends with the
+    http keepalive handler.  Otherwise, the connection is left open
+    for further use.
+
+    urlgrab returns the filename of the local file.
+    """
+
     (scheme,host, path, parm, query, frag) = urlparse.urlparse(url)
     path = os.path.normpath(path)
     url = urlparse.urlunparse((scheme, host, path, parm, query, frag))
+
     if filename == None:
         filename = os.path.basename(path)
+    if scheme == 'file' and not copy_local:
+        # just return the name of the local file - don't make a copy
+        if os.path.isfile(path):
+            return path
+        else:
+            errorlog(0, 'Not a normal file: %s' % path)
+            errorlog(0, 'URL: %s' % url)
+            sys.exit(1)
+
+    # now fetch the file
     try:
-        (fh, hdr) = urllib.urlretrieve(url, filename)
+        fo = urllib2.urlopen(url)
+        _do_grab(filename, fo)
+        hdr = fo.info()
+        fo.close()
+        if close_connection:
+            # try and close connection
+            try: fo.close_connection()
+            except AttributeError: pass
     except IOError, e:
         errorlog(0, 'IOError: %s'  % (e))
         errorlog(0, 'URL: %s' % (url))
         sys.exit(1)
-    # this is a cute little hack - if there isn't a "Content-Length" header then its either 
-    # a 404 or a directory list either way its not what we want
-    if hdr != None:
-        if not hdr.has_key('Content-Length'):
-            errorlog(0, 'ERROR: Url Return no Content-Length  - something is wrong')
-            errorlog(0, 'URL: %s' % (url))
-            sys.exit(1)
-    return fh
+
+    # this is a cute little hack - if there isn't a "Content-Length"
+    # header then its probably something generated dynamically, such
+    # as php, cgi, a directory listing, or an error message.  It is
+    # probably not what we want.
+    if not hdr is None and not hdr.has_key('Content-Length'):
+        errorlog(0, 'ERROR: Url Return no Content-Length  - something is wrong')
+        errorlog(0, 'URL: %s' % (url))
+        sys.exit(1)
+    return filename
+
+def _do_grab(filename, fo):
+    new_fo = open(filename, 'wb')
+    bs = 1024*8
+    block = fo.read(bs)
+    while block:
+        new_fo.write(block)
+        block = fo.read(bs)
+    new_fo.close()
 
 def getupdatedhdrlist(headernevral, rpmnevral):
     "returns (name, arch) tuples of updated and uninstalled pkgs"
@@ -542,7 +598,7 @@ def get_package_info_from_servers(conf, HeaderInfo):
             os.mkdir(localhdrs)
         if not conf.cache:
             log(3, 'getting header.info from server')
-            headerinfofn = urlgrab(serverheader, localheaderinfo, 'nohook')
+            headerinfofn = urlgrab(serverheader, localheaderinfo, copy_local=1)
         else:
             log(3, 'using cached header.info file')
             headerinfofn=localheaderinfo
@@ -575,7 +631,7 @@ def download_headers(HeaderInfo, nulist):
                 log(4, 'cached %s' % LocalHeaderFile)
             else:
                 log(2, 'getting %s' % LocalHeaderFile)
-                urlgrab(RemoteHeaderFile, LocalHeaderFile, 'nohook')
+                urlgrab(RemoteHeaderFile, LocalHeaderFile, copy_local=1)
             if checkheader(LocalHeaderFile, name, arch):
                     break
             else:
@@ -583,6 +639,7 @@ def download_headers(HeaderInfo, nulist):
                 checkpass = checkpass + 1
                 os.unlink(LocalHeaderFile)
                 good = 0
+    if keepalive_handler: keepalive_handler.close_all()
                 
 def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmDBInfo, obsdict):
     from yummain import usage
@@ -709,38 +766,30 @@ def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmD
 def create_final_ts(tsInfo):
     # download the pkgs to the local paths and add them to final transaction set
     # might be worth adding the sigchecking in here
+    # FIXME plug sigchecking back in here both md5 and gpg
     tsfin = rpm.TransactionSet('/')
     for (name, arch) in tsInfo.NAkeys():
         pkghdr = tsInfo.getHeader(name, arch)
         rpmloc = tsInfo.localRpmPath(name, arch)
         serverid = tsInfo.serverid(name, arch)
-        if tsInfo.state(name, arch) in ('u', 'ud', 'iu'):
-            if os.path.exists(tsInfo.localRpmPath(name, arch)):
-                log(4, 'Using cached %s' % (os.path.basename(tsInfo.localRpmPath(name, arch))))
+        state = tsInfo.state(name, arch)
+        if state in ('u', 'ud', 'iu', 'i'): # inst/update
+            if os.path.exists(rpmloc):
+                log(4, 'Using cached %s' % (os.path.basename(rpmloc)))
             else:
-                log(2, 'Getting %s' % (os.path.basename(tsInfo.localRpmPath(name, arch))))
-                urlgrab(tsInfo.remoteRpmUrl(name, arch), tsInfo.localRpmPath(name, arch))
-            # sigcheck here :)
-            #pkgaction.checkRpmMD5(rpmloc)
+                log(2, 'Getting %s' % (os.path.basename(rpmloc)))
+                urlgrab(tsInfo.remoteRpmUrl(name, arch), rpmloc, copy_local=0)
             if conf.servergpgcheck[serverid]:
                 pkgaction.checkRpmSig(rpmloc, serverid)
-            tsfin.addInstall(pkghdr, (pkghdr, rpmloc), 'u')
-        elif tsInfo.state(name, arch) == 'i':
-            if os.path.exists(tsInfo.localRpmPath(name, arch)):
-                log(4, 'Using cached %s' % (os.path.basename(tsInfo.localRpmPath(name, arch))))
+            if state == 'i':
+                tsfin.addInstall(pkghdr, (pkghdr, rpmloc), 'i')
             else:
-                log(2, 'Getting %s' % (os.path.basename(tsInfo.localRpmPath(name, arch))))
-                urlgrab(tsInfo.remoteRpmUrl(name, arch), tsInfo.localRpmPath(name, arch))
-            # sigchecking we will go
-            #pkgaction.checkRpmMD5(rpmloc)
-            if conf.servergpgcheck[serverid]:
-                pkgaction.checkRpmSig(rpmloc, serverid)
-            tsfin.addInstall(pkghdr, (pkghdr, rpmloc), 'i')
-            #theoretically, at this point, we shouldn't need to make pkgs available
-        elif tsInfo.state(name, arch) == 'a':
+                tsfin.addInstall(pkghdr, (pkghdr, rpmloc), 'u')
+        elif state == 'a':
             pass
-        elif tsInfo.state(name, arch) == 'e' or tsInfo.state(name, arch) == 'ed':
+        elif state == 'e' or state == 'ed':
             tsfin.addErase(name)
+    if keepalive_handler: keepalive_handler.close_all()
     return tsfin
 
 

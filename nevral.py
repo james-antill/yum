@@ -20,6 +20,7 @@ import rpm
 import string
 import sys
 import archwork
+import urlparse
 
 class nevral:
     def __init__(self):
@@ -167,8 +168,15 @@ class nevral:
         if l == 'in_rpm_db':
             return l
         rpmfn = os.path.basename(l)
-        base = conf.serverpkgdir[i]
-        return base + '/' + rpmfn
+        #checking to see if this is a file url for the rpm - if so use the original location
+        (scheme, host, path, parm, query, frag) = urlparse.urlparse(conf.serverurl[i])
+        if scheme == 'file':
+            #oo - a file url - use that path
+            path = os.path.normpath((path + '/' + l))
+            return path
+        else:
+            base = conf.serverpkgdir[i]
+            return base + '/' + rpmfn
                 
     def resolvedeps(self,rpmDBInfo):
         #self == tsnevral

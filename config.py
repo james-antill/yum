@@ -80,9 +80,9 @@ class yumconf:
                         else:
                             self.servergpgcheck[section]=0
                         (s,b,p,q,f,o) = urlparse.urlparse(self.serverurl[section])
-                        # currently only allowing http and ftp servers 
-                        if s not in ['http', 'ftp']:
-                            print 'Not using ftp or http for servers, Aborting - %s' % (self.serverurl[section])
+                        # currently only allowing http, ftp and file url types
+                        if s not in ['http', 'ftp', 'file']:
+                            print 'Not using ftp, http or file for servers, Aborting - %s' % (self.serverurl[section])
                             sys.exit(1)
                         cache = os.path.join(self.cachedir,section)
                         pkgdir = os.path.join(cache, 'packages')
