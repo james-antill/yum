@@ -972,7 +972,7 @@ def grab(serverID, url, filename=None, nofail=0, copy_local=0,
     the conf class as well as the serverID.
 
     nofail -- Set to true to go through the failover object without
-       incrimenting the failures counter.  (Actually this just resets
+       incrementing the failures counter.  (Actualy this just resets
        the failures counter.)  Usefull in the yumgroups.xml special case.
 
     We do look at retrycodes here to see if we should return or failover.
