@@ -55,11 +55,11 @@ class yumconf:
         self.serverpkgdir = {}
         self.serverhdrdir = {}
         self.servercache = {}
-        self.servergpgcheck={}
-        self.serverexclude={}
+        self.servergpgcheck= {}
+        self.serverexclude= {}
         self.failoverclass = {}
         self.groupsenable = {}
-        self.excludes=[]
+        self.excludes = []
         
         #defaults
         self.cachedir = '/var/cache/yum'
@@ -87,6 +87,8 @@ class yumconf:
         self.hdlist = '/usr/share/comps/%s/hdlist' % self.yumvar['basearch']
         self.hdlist2 = '/usr/share/comps/%s/hdlist2' % self.yumvar['basearch']
         self.usecomps = 1
+        self.cachedb = '/usr/lib/rpmdb/%s-redhat-linux/redhat/' % self.yumvar['basearch']
+        self.usecachedb = 1
         self.downloadonly = 0
         self.bandwidth = None
         self.throttle = None
@@ -143,6 +145,10 @@ class yumconf:
             self.downloadonly = self.cfg.getboolean('main', 'download-only')
         if self._getoption('main','bootloader') != None:
             self.modifybootloader = self.cfg.getboolean('main', 'bootloader')
+        if self._getoption('main', 'cachedb') != None:
+            self.cachedb = self._getoption('main', 'cachedb')
+        if self._getoption('main', 'usecachedb') != None:
+            self.usecachedb = self.cfg.getboolean('main', 'usecachedb')
             
             
         # figure out what the releasever really is from the distroverpkg

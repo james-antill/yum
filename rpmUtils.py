@@ -332,6 +332,29 @@ class Rpm_Ts_Work:
             hdrobj = Header_Work(hdr)
             hwlist.append(hdrobj)
         return hwlist
+
+    def getHeadersByKeyword(self, **kwargs):
+        """return list of headers from the rpmdb matching a keyword
+            ex: getHeadersByKeyword(name='foo', version='1', release='1')
+        """
+
+        lst = []
+        hwlist = []
+        # lifted from up2date - way to easy and useful NOT to steal - thanks adrian
+        mi = self.ts.dbMatch()
+        for keyword in kwargs.keys():
+            mi.pattern(keyword, rpm.RPMMIRE_GLOB, kwargs[keyword])
+                                                                                                                             
+        # we really shouldnt be getting multiples here, but what the heck
+        for h in mi:
+            #print "%s-%s-%s.%s" % ( h['name'], h['version'], h['release'], h['arch'])
+            lst.append(h)
+        
+        for hdr in lst:
+            hdrobj = Header_Work(hdr)
+            hwlist.append(hdrobj)
+        return hwlist
+                                                                                                                             
     
     def sigChecking(self, sig):
         """pass type of check you want to occur, default is to have them off"""

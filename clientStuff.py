@@ -897,11 +897,13 @@ def download_headers(HeaderInfo, nulist):
     current = 1
     # open up our comps hdlist and hdlist2 so we can find a header we might need
     compsdict = returnCompsHeaders()
+    if conf.usecachedb and os.path.exists(conf.cachedb):
+        cachedb = rpmUtils.Rpm_Ts_Work(dbPath=conf.cachedb)
+
 
     for (name, arch) in nulist:
         LocalHeaderFile = HeaderInfo.localHdrPath(name, arch)
         RemoteHeaderFile = HeaderInfo.remoteHdrUrl(name, arch)
-        
         serverid = HeaderInfo.serverid(name, arch)
         # if we have one cached, check it, if it fails, unlink it and continue
         # as if it never existed
@@ -928,20 +930,30 @@ def download_headers(HeaderInfo, nulist):
         if not conf.cache:
             log(3, _('getting %s') % (LocalHeaderFile))
             (e, v, r) = HeaderInfo.evr(name, arch)
-            if compsdict.has_key((name, arch, e, v, r)):
+            serverid = HeaderInfo.serverid(name, arch)
+            basepath = conf.serverhdrdir[serverid]
+            hdrlist = cachedb.getHeadersByKeyword(name=name, arch=arch, version=v, release=r)
+            if len(hdrlist) > 0:
+                hdrobj = hdrlist[0] # there can be just one
+            # try the cachedb first                
+                if hdrobj.fixedEpoch() == e:
+                    log(4, _('getting %s from cachedb') % (LocalHeaderFile))
+                    hdrfn = hdrobj.writeHeader(basepath, 1)
+           # then try comps
+            elif compsdict.has_key((name, arch, e, v, r)):
                 log(4, _('getting %s from comps db') % (LocalHeaderFile))
                 hdrobj = compsdict[(name, arch, e, v, r)]
-                serverid = HeaderInfo.serverid(name, arch)
-                basepath = conf.serverhdrdir[serverid]
                 hdrfn = hdrobj.writeHeader(basepath, 1)
+            # then go and fetch it
             else:                
                 try:
                     hdrfn = grab(serverid, RemoteHeaderFile, LocalHeaderFile, copy_local=1,
-                                      checkfunc=(rpmUtils.checkheader, (name, arch), {}))
+                                        checkfunc=(rpmUtils.checkheader, (name, arch), {}))
                 except URLGrabError, e:
                     errorlog(0, _('Error getting file %s') % RemoteHeaderFile)
                     errorlog(0, '%s' % e)
                     sys.exit(1)
+                    
             HeaderInfo.setlocalhdrpath(name, arch, hdrfn)
         else:
             errorlog(1, _('Cannot download %s in caching only mode or when running as non-root user.') % RemoteHeaderFile)
@@ -951,6 +963,9 @@ def download_headers(HeaderInfo, nulist):
         current = current + 1
 
     del compsdict
+    if conf.usecachedb:
+        del cachedb
+        
     close_all()
                 
 def take_action(cmds, nulist, uplist, newlist, obsoleting, tsInfo, HeaderInfo, rpmDBInfo, obsoleted):
