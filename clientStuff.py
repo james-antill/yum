@@ -895,6 +895,11 @@ def returnCacheDBHeaders(nulist):
     returndict = {}
     if conf.usecachedb and os.path.exists(conf.cachedb):
         rpm.addMacro("_dbpath", "/")
+        # this is what jbj said to do:
+        for lock in ['__db.001', '__db.002', '__db.003']:
+            if os.path.exists(conf.cachedb + '/' + lock):
+                os.unlink(conf.cachedb + '/' + lock)
+                
         cachedb = rpmUtils.Rpm_Ts_Work(dbPath=conf.cachedb)
         cachedb.setVSFlags(-1)
     
