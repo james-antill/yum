@@ -20,6 +20,7 @@ import rpm
 import string
 import sys
 import archwork
+import rpmUtils
 from i18n import _
 
 
@@ -99,7 +100,7 @@ class nevral:
     def evr(self, name, arch=None):
         ((e,v,r,a,l,i),state) = self._get_data(name, arch)
         if state == None: 
-            return None
+            return (None, None, None)
         else:
             return (e, v, r)
 
@@ -325,7 +326,7 @@ class nevral:
                         arch = archwork.bestarch(archlist)
                         (e1, v1, r1) = rpmDBInfo.evr(reqname,arch)
                         (e2, v2, r2) = self.evr(reqname,arch)
-                        rc = clientStuff.compareEVR((e1,v1,r1), (e2,v2,r2))
+                        rc = rpmUtils.compareEVR((e1,v1,r1), (e2,v2,r2))
                         if rc<0:
                             log(4, 'conflict: setting %s to upgrade' % (reqname))
                             ((e,v,r,a,l,i),s)=self._get_data(reqname,arch)

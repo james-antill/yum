@@ -73,7 +73,7 @@ def openrpmdb():
     try:
         db = rpm.TransactionSet('/')
     except rpm.error, e:
-        errorlog(0_("Could not open RPM database for reading. Perhaps it is already in use?"))
+        errorlog(0, _("Could not open RPM database for reading. Perhaps it is already in use?"))
     return db
 
 

@@ -68,14 +68,6 @@ def stripNA(str):
     name = str[:archIndex]
     return (name, arch)
 
-def compareEVR((e1, v1, r1), (e2, v2, r2)):
-    # return 1: a is newer than b 
-    # 0: a and b are the same version 
-    # -1: b is newer than a 
-    rc = rpm.labelCompare((e1, v1, r1), (e2, v2, r2))
-    log(6, '%s, %s, %s vs %s, %s, %s = %s' % (e1, v1, r1, e2, v2, r2, rc))
-    return rc
-
 def getENVRA(header):
     if header[rpm.RPMTAG_EPOCH] == None:
         epoch = '0'
@@ -143,13 +135,6 @@ def nameInExcludes(name):
             return 1
     return 0
 
-def openrpmdb():
-    try:
-        db = rpm.TransactionSet('/')
-    except rpm.error, e:
-        raise RpmError(_("Could not open RPM database for reading. Perhaps it is already in use?"))
-    return db
-
 def rpmdbNevralLoad(nevral):
     rpmdbdict = {}
     serverid = 'db'
@@ -163,7 +148,7 @@ def rpmdbNevralLoad(nevral):
         else:
             (e1, v1, r1) = (rpmdbdict[(name, arch)])
             (e2, v2, r2) = (epoch, ver, rel)    
-            rc = compareEVR((e1,v1,r1), (e2,v2,r2))
+            rc = rpmUtils.compareEVR((e1,v1,r1), (e2,v2,r2))
             if (rc <= -1):
                 rpmdbdict[(name, arch)] = (epoch, ver, rel)
             elif (rc == 0):
@@ -231,7 +216,7 @@ def returnObsoletes(headerNevral, rpmNevral, uninstNAlist):
                     elif len(obvalue) == 3:
                         (e1, v1, r1) = rpmNevral.evr(name, arch)
                         (e2, v2, r2) = str_to_version(obvalue[3])
-                        rc = compareEVR((e1, v1, r1), (e2, v2, r2))
+                        rc = rpmUtils.compareEVR((e1, v1, r1), (e2, v2, r2))
                         if obvalue[2] == '>':
                             if rc >= 1:
                                 obsdict[(name, arch)]=obvalue[0]
@@ -364,12 +349,12 @@ def getupdatedhdrlist(headernevral, rpmnevral):
             if rpmnevral.exists(name, arch):
                 archlist = archwork.availablearchs(rpmnevral, name)
                 bestarch = archwork.bestarch(archlist)
-                rc = compareEVR(headernevral.evr(name, arch), rpmnevral.evr(name, bestarch))
+                rc = rpmUtils.compareEVR(headernevral.evr(name, arch), rpmnevral.evr(name, bestarch))
                 if (rc > 0):
                     if not uplist_archdict.has_key(name):
                         uplist_archdict[name]=bestarch
                     else:
-                        rc = compareEVR(headernevral.evr(name, bestarch), headernevral.evr(name, uplist_archdict[name]))
+                        rc = rpmUtils.compareEVR(headernevral.evr(name, bestarch), headernevral.evr(name, uplist_archdict[name]))
                         if (rc > 0):
                             finalarch = archwork.bestarch([bestarch, uplist_archdict[name]])
                             if finalarch == bestarch:
@@ -380,12 +365,12 @@ def getupdatedhdrlist(headernevral, rpmnevral):
                 if arch == bestarch:
                     rpmarchlist = archwork.availablearchs(rpmnevral, name)
                     bestrpmarch = archwork.bestarch(rpmarchlist)
-                    rc = compareEVR(headernevral.evr(name, arch), rpmnevral.evr(name, bestrpmarch))
+                    rc = rpmUtils.compareEVR(headernevral.evr(name, arch), rpmnevral.evr(name, bestrpmarch))
                     if (rc > 0):
                         if not uplist_archdict.has_key(name):
                             uplist_archdict[name]=bestarch
                         else:
-                            rc = compareEVR(headernevral.evr(name, bestarch), headernevral.evr(name, uplist_archdict[name]))
+                            rc = rpmUtils.compareEVR(headernevral.evr(name, bestarch), headernevral.evr(name, uplist_archdict[name]))
                             if (rc > 0):
                                 finalarch = archwork.bestarch([bestarch, uplist_archdict[name]])
                                 if finalarch == bestarch:
@@ -566,7 +551,7 @@ def clean_up_old_headers(rpmDBInfo, HeaderInfo):
         (e, n, v, r, a) = getENVRA(hdr)
         if rpmDBInfo.exists(n, a):
             (e1, v1, r1) = rpmDBInfo.evr(n, a)
-            rc = compareEVR((e1, v1, r1), (e, v, r))
+            rc = rpmUtils.compareEVR((e1, v1, r1), (e, v, r))
             # if the rpmdb has an equal or better rpm then delete
             # the header
             if (rc >= 0):

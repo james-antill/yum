@@ -78,12 +78,12 @@ def compatArchList():
         archlist = [myarch, 'noarch']
     return archlist
     
-def availablearchs(hineveral, name)
+def availablearchs(nevral, name):
     archlist = compatArchList()
     finalarchs = []
     for arch in archlist:
-        if hinevral.exists(name, arch):
+        if nevral.exists(name, arch):
             finalarchs.append(arch)
-    return archlist
+    return finalarchs
 
 

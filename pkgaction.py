@@ -21,6 +21,7 @@ import clientStuff
 import fnmatch
 import archwork
 import types
+import rpmUtils
 from i18n import _
 
 
@@ -43,7 +44,7 @@ def installpkgs(tsnevral,nulist,userlist,hinevral,rpmnevral):
                     if rpmnevral.exists(name,bestarch):
                         (e1,v1,r1)=rpmnevral.evr(name,bestarch)
                         (e2,v2,r2)=hinevral.evr(name,bestarch)
-                        rc = clientStuff.compareEVR((e1,v1,r1),(e2,v2,r2))
+                        rc = rpmUtils.compareEVR((e1,v1,r1),(e2,v2,r2))
                         if rc < 0:
                             #we should be upgrading this
                             log(4,"Switching to upgrading %s" % (name))
