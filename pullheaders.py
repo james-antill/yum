@@ -35,10 +35,13 @@ serverStuff.ts = ts
 def main():
     tempheaderdir = '.newheaders'
     tempheaderinfo = tempheaderdir + '/' + 'header.info'
+    tempsrcheaderinfo = tempheaderdir + '/' + 'header.src.info'
     oldheaderdir = '.oldheaders'
     oldheaderinfo = oldheaderdir + '/' + 'header.info'
+    oldsrcheaderinfo = oldheaderdir + '/' + 'header.src.info'
     headerdir = 'headers'
     headerinfo = headerdir + '/' + 'header.info'
+    srcheaderinfo = headerdir + '/' + 'header.src.info'
     if  len(sys.argv) < 2:
         serverStuff.Usage()
     cmds = {}
@@ -47,6 +50,7 @@ def main():
     cmds['rpmcheck'] = 0
     cmds['compress'] = 1
     cmds['usesymlinks'] = 0
+    cmds['dosrpms'] = 0
     cmds['quiet'] = 0
     cmds['loud'] = 0
     args = sys.argv[1:]
@@ -65,6 +69,8 @@ def main():
             cmds['compress'] = 1
         elif arg == "-l":
             cmds['usesymlinks'] = 1
+        elif arg == "-s":
+            cmds['dosrpms'] = 1
         elif arg == "-q":
             cmds['quiet'] = 1
         elif arg == "-vv":
@@ -96,6 +102,10 @@ def main():
         if os.path.exists(headerdir):
             hdrlist = serverStuff.getfilelist(headerdir, '.hdr', [], 0)
             removeCurrentHeaders(headerdir, hdrlist)
+            if cmds['dorpms']:
+                removeHeaderInfo(srcheaderinfo)
+                srcheaderfd = open(srcheaderinfo, "w")
+                srcheaderfd.close()
             removeHeaderInfo(headerinfo)
             headerfd = open(headerinfo, "w")
             headerfd.close()
@@ -137,11 +147,18 @@ def main():
         # Write header.info file
         print _("\nWriting header.info file")
         headerfd = open(tempheaderinfo, "w")
+        if cmds['dosrpms']:
+            srcheaderfd = open(tempsrcheaderinfo, "w")
         for item in rpminfo.keys():
-            (name,arch) = item
-            (epoch, ver, rel, rpmloc) = rpminfo[item]
+            (name,epoch, ver, rel, arch, source) = item
+            rpmloc = rpminfo[item]
             info = "%s:%s-%s-%s.%s=%s\n" % (epoch, name, ver, rel, arch, rpmloc)
-            headerfd.write(info)
+            if source:
+                srcheaderfd.write(info)
+            else:
+                headerfd.write(info)
+        if cmds['dosrpms']:
+            srcheaderfd.close()
         headerfd.close()
 
         try:
@@ -163,8 +180,8 @@ def main():
         hdrlist = serverStuff.getfilelist(oldheaderdir, '.hdr', [], 0)
         removeCurrentHeaders(oldheaderdir, hdrlist)
         removeHeaderInfo(oldheaderinfo)
+        removeHeaderInfo(oldsrcheaderinfo)
         os.rmdir(oldheaderdir)
-
 
     # take us home mr. data
     os.chdir(curdir)
@@ -210,14 +227,18 @@ def removeHeaderInfo(headerinfo):
         try:
             os.unlink(headerinfo)
         except OSerror, e:
-            print _('Cannot delete header.info - check perms') % hdr
+            print _('Cannot delete %s - check perms') % headerinfo
             
 
 def genhdrs(rpms,headerdir,cmds):
+    """ Take a list of rpms, a place to put the headers and a config dictionary.
+        outputs .hdr files and returns a dict containing all the header entries.
+    """
     rpminfo = {}
     numrpms = len(rpms)
     goodrpm = 0
     currpm = 0
+    srpms = 0
     for rpmfn in rpms:
         rpmname = os.path.basename(rpmfn)
         currpm=currpm + 1
@@ -235,49 +256,39 @@ def genhdrs(rpms,headerdir,cmds):
                 log(0, _("\n\nProblem with gpg sig or md5sum on %s\n\n") % rpmfn)
                 sys.exit(1)
         hobj = rpmUtils.RPM_Work(rpmfn)
-        #check to ignore src.rpms
         if hobj.hdr is None:
-            log(2, "\nignoring bad rpm: %s" % rpmfn)        
-        elif hobj.isSource():
-            log(2, "\nignoring srpm: %s" % rpmfn)
+            log(2, "\nignoring bad rpm: %s" % rpmfn)
         else:
             (name, epoch, ver, rel, arch) = hobj.nevra()
+            if hobj.isSource():
+                if not cmds['dosrpms']:
+                    if cmds['loud']:
+                        print "\nignoring srpm: %s" % rpmfn
+                    continue
+                    
             if epoch is None:
                 epoch = '0'
+                
             rpmloc = rpmfn
             rpmstat = os.stat(rpmfn)
             rpmmtime = rpmstat[-2]
             rpmatime = rpmstat[-3]
-            rpmtup = (name, arch)
+            rpmtup = (name, epoch, ver, rel, arch, hobj.isSource())
             # do we already have this name.arch tuple in the dict?
             if rpminfo.has_key(rpmtup):
-                log(2, _("Already found tuple: %s %s ") % (name, arch))
-                (e1, v1, r1, l1) = rpminfo[rpmtup]
-                oldhdrfile = "%s/%s-%s-%s-%s.%s.hdr" % (headerdir, name, e1, v1, r1, arch) 
-                # which one is newer?
-                rc = rpmUtils.compareEVR((e1,v1,r1), (epoch, ver, rel))
-                if rc <= -1:
-                    # if the more recent one in is newer then throw away the old one
-                    del rpminfo[rpmtup]
-                    if os.path.exists(oldhdrfile):
-                        print _("\nignoring older pkg: %s") % (l1)
-                        os.unlink(oldhdrfile)
-                    headerloc = hobj.writeHeader(headerdir, cmds['compress'])
-                    os.utime(headerloc, (rpmatime, rpmmtime))
-                    rpminfo[rpmtup]=(epoch,ver,rel,rpmloc)
-                elif rc == 0:
-                    # hmm, they match complete - warn the user that they've got a dupe in the tree
-                    print _("\nignoring dupe pkg: %s") % (rpmloc)
-                elif rc >= 1:
-                    # move along, move along, nothing more to see here
-                    print _("\nignoring older pkg: %s") % (rpmloc)
-            else:
-                headerloc = hobj.writeHeader(headerdir, cmds['compress'])
-                os.utime(headerloc, (rpmatime, rpmmtime))
-                rpminfo[rpmtup]=(epoch,ver,rel,rpmloc)
-                goodrpm = goodrpm + 1
+                log(2, _("Already found tuple: %s %s:\n%s ") % (name, arch, rpmfn))
+                
+            headerloc = hobj.writeHeader(headerdir, cmds['compress'])
+            os.utime(headerloc, (rpmatime, rpmmtime))
+            
+            if hobj.isSource():
+                srpms = srpms + 1
+                
+            rpminfo[rpmtup]=rpmloc
+            goodrpm = goodrpm + 1
+            
     if not cmds['quiet']:
-        print _("\n   Total: %d\n   Used: %d") %(numrpms, goodrpm)
+        print _("\n   Total: %d\n   Used: %d\n   Src: %d") %(numrpms, goodrpm, srpms)
     return rpminfo
 
 

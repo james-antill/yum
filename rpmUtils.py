@@ -182,7 +182,11 @@ class RPM_Base_Work:
         (name, epoch, ver, rel, arch) = self.nevra()
         if epoch is None:
             epoch = '0'
-        headerfn = "%s/%s-%s-%s-%s.%s.hdr" % (headerdir, name, epoch, ver, rel, arch)
+        if self.isSource():
+            headerfn = "%s/%s-%s-%s-%s.%s.src.hdr" % (headerdir, name, epoch, ver, rel, arch)
+        else:
+            headerfn = "%s/%s-%s-%s-%s.%s.hdr" % (headerdir, name, epoch, ver, rel, arch)
+
         if compress:
             headerout = _gzipOpen(headerfn, "w")
         else:
