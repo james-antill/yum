@@ -89,6 +89,14 @@ list of packages that should only ever be installed, never updated - kernels
 in particular fall into this category. Defaults to kernel, kernel-smp,
 kernel-bigmem, kernel-enterprise, kernel-debug, kernel-unsupported.
 
+.IP \fBbootloader \fR
+boolean - defaults to 1. This tells yum whether or not to modify the
+bootloader (lilo, grub) when installing new kernels.
+
+.IP \fBdownload-only \fR
+boolean - defaults to 0. This tells yum whether or not to only download the
+needed packages, not install them.
+
 .SH "[server] options"
 .LP 
 The server section(s) take the following form:

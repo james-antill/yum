@@ -91,6 +91,7 @@ class yumconf:
         self.throttle = None
         self.retries = 6
         self.keepalive = 1
+        self.modifybootloader = 1
         self.progress_obj = progress_meter.text_progress_meter(fo=sys.stdout)
         self.installroot = '/'
         self.installonlypkgs = ['kernel', 'kernel-bigmem', 'kernel-enterprise',
@@ -137,8 +138,10 @@ class yumconf:
             self.hdlist2 = self._getoption('main', 'hdlist2')
         if self._getoption('main','usecomps') != None:
             self.usecomps = self.cfg.getboolean('main', 'usecomps')
-        if self._getoption('main','downloadonly') != None:
-            self.downloadonly = self.cfg.getboolean('main', 'downloadonly')
+        if self._getoption('main','download-only') != None:
+            self.downloadonly = self.cfg.getboolean('main', 'download-only')
+        if self._getoption('main','bootloader') != None:
+            self.modifybootloader = self.cfg.getboolean('main', 'bootloader')
             
             
         # figure out what the releasever really is from the distroverpkg

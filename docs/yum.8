@@ -128,6 +128,13 @@ Takes a package name or wildcard for a package. You can list this option
 more than once on the command line to exclude more than one package name
 or wildcard
 .PP 
+.IP "\fB\--download-only\fP" 
+This tells yum whether or not to only download the needed packages, not
+install them.
+.PP 
+.IP "\fB\--installroot\fP" 
+Takes one argument - tells yum what path to use as root (default to '/')
+.PP 
 .SH "LIST OPTIONS"
 The following are the ways which you can invoke \fByum\fP in list
 mode\&.  Note that all \fBlist\fP commands include information on the

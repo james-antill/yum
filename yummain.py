@@ -368,7 +368,8 @@ def main(args):
         del tsfin
         
         # Check to see if we've got a new kernel and put it in the right place in grub/lilo
-        pkgaction.kernelupdate(tsInfo)
+        if conf.modifybootloader:
+            pkgaction.kernelupdate(tsInfo)
         
         # log what we did and also print it out
         clientStuff.filelogactions(i_list, u_list, e_list, ud_list, ed_list, tsInfo)
