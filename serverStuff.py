@@ -85,7 +85,6 @@ def depchecktree(rpmlist):
             _ts.addInstall(hobj.hdr, hobj.name(), 'i')
             log(2, "adding %s" % hobj.name())
     errors = _ts.check()
-    print errors
     if errors:
         print 'errors found'
         for ((name, version, release), (reqname, reqversion), \

@@ -198,7 +198,6 @@ def checkandMakeDir(dir):
                 print _("%s is not writable") % dir
                 result = 0
             else:
-                print _("%s already exists and is writable, overwriting") % dir
                 result = 1
     else:
         try:
@@ -277,7 +276,7 @@ def genhdrs(rpms,headerdir,cmds):
             rpmtup = (name, epoch, ver, rel, arch, hobj.isSource())
             # do we already have this name.arch tuple in the dict?
             if rpminfo.has_key(rpmtup):
-                log(2, _("Already found tuple: %s %s:\n%s ") % (name, arch, rpmfn))
+                log(2, _("\nAlready found tuple: %s %s:\n%s ") % (name, arch, rpmfn))
                 
             headerloc = hobj.writeHeader(headerdir, cmds['compress'])
             os.utime(headerloc, (rpmatime, rpmmtime))
