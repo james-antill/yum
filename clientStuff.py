@@ -25,7 +25,7 @@ import fnmatch
 import pkgaction
 import callback
 import rpmUtils
-from urlgrabber import close_all, urlgrab, URLGrabError
+from urlgrabber import close_all, urlgrab, URLGrabError, retrygrab
 
 from i18n import _
 
@@ -598,9 +598,10 @@ def get_groups_from_servers(serveridlist):
         if not conf.cache:
             log(3, 'getting groups from server: %s' % serverid)
             try:
-                localgroupfile = urlgrab(remotegroupfile, localgroupfile, copy_local=1)
+                localgroupfile = retrygrab(remotegroupfile, localgroupfile, copy_local=1)
             except URLGrabError, e:
-                log(3, 'Error getting file %s' % remotegroupfile)
+                errorlog(1, 'Error getting file %s' % remotegroupfile)
+                errorlog(1, 'Error was %s' % e)
         else:
             if os.path.exists(localgroupfile):
                 log(3, 'using cached groups from server: %s' % serverid)
