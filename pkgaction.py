@@ -17,6 +17,7 @@
 import os
 import sys
 import rpm
+import re
 import clientStuff
 import fnmatch
 import archwork
@@ -421,16 +422,21 @@ def whatprovides(usereq, nulist, nevral, localrpmdb):
     # push all of provides+files+dirs into a dict dict[pkg]=list
     # deal with "where the hell is the pkg - hi or rpm
     # figure out how to make nevral.getHeader more robust
+    
+    wildcards = re.compile("[\?\*\/].*")
     results = 0
     if localrpmdb == 0:
         for (name, arch) in nulist:
             hdr = nevral.getHeader(name, arch)
-            fullprovideslist = hdr[rpm.RPMTAG_PROVIDES]
-            if hdr[rpm.RPMTAG_FILENAMES] != None:
-                fullprovideslist = fullprovideslist + hdr[rpm.RPMTAG_FILENAMES]
-            if hdr[rpm.RPMTAG_DIRNAMES] != None:
-                fullprovideslist = fullprovideslist + hdr[rpm.RPMTAG_DIRNAMES]
+            fullprovideslist = []
+            fullprovideslist.extend(hdr['providename'])
+            fullprovideslist.extend(hdr['filenames'])
+            dirnames = hdr['dirnames']
+            if dirnames is not None:
+                fullprovideslist.extend(dirnames)
             for req in usereq:
+                if not wildcards.match(req):
+                    req = '*/' + req
                 for item in fullprovideslist:
                     log(6, '%s vs %s' % (item, req))
                     if req == item or fnmatch.fnmatch(item, req):
@@ -442,18 +448,17 @@ def whatprovides(usereq, nulist, nevral, localrpmdb):
         for hdrobj in matchlist:
             name = hdrobj.name()
             arch = hdrobj.arch()
-            filenames = []
             filenames = hdrobj._getTag('filenames')
             provides = hdrobj._getTag('providename')
             dirnames = hdrobj._getTag('dirnames')
             fullprovideslist = []
-            if provides != None:
-                fullprovideslist = fullprovideslist + provides
-            if filenames != None:
-                fullprovideslist = fullprovideslist + filenames
-            if dirnames != None:
-                fullprovideslist = fullprovideslist + dirnames
+            fullprovideslist.extend(provides)
+            fullprovideslist.extend(filenames)
+            if dirnames is not None:
+                fullprovideslist.extend(dirnames)
             for req in usereq:
+                if not wildcards.match(req):
+                    req = '*/' + req
                 for item in fullprovideslist:
                     log(5, '%s vs %s' % (item, req))
                     if req == item or fnmatch.fnmatch(item, req):
