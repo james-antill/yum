@@ -245,6 +245,9 @@ def genhdrs(rpms,headerdir,cmds):
             if epoch is None:
                 epoch = '0'
             rpmloc = rpmfn
+            rpmstat = os.stat(rpmfn)
+            rpmmtime = rpmstat[-2]
+            rpmatime = rpmstat[-3]
             rpmtup = (name, arch)
             # do we already have this name.arch tuple in the dict?
             if rpminfo.has_key(rpmtup):
@@ -260,6 +263,7 @@ def genhdrs(rpms,headerdir,cmds):
                         print _("\nignoring older pkg: %s") % (l1)
                         os.unlink(oldhdrfile)
                     headerloc = hobj.writeHeader(headerdir, cmds['compress'])
+                    os.utime(headerloc, (rpmatime, rpmmtime))
                     rpminfo[rpmtup]=(epoch,ver,rel,rpmloc)
                 elif rc == 0:
                     # hmm, they match complete - warn the user that they've got a dupe in the tree
@@ -269,6 +273,7 @@ def genhdrs(rpms,headerdir,cmds):
                     print _("\nignoring older pkg: %s") % (rpmloc)
             else:
                 headerloc = hobj.writeHeader(headerdir, cmds['compress'])
+                os.utime(headerloc, (rpmatime, rpmmtime))
                 rpminfo[rpmtup]=(epoch,ver,rel,rpmloc)
                 goodrpm = goodrpm + 1
     if not cmds['quiet']:

@@ -8,6 +8,7 @@ import sys
 from i18n import _
 from urlgrabber import URLGrabError
 from zlib import error as zlibError
+from gzip import write32u, FNAME
 
 
 def checkheader(headerfile, name, arch):
@@ -109,6 +110,27 @@ def openrpmdb():
     return db
 
 
+# this is done to make the hdr writing _more_ sane for rsync users especially
+__all__ = ["GzipFile","open"]
+
+class GzipFile(gzip.GzipFile):
+    def _write_gzip_header(self):
+        self.fileobj.write('\037\213')             # magic header
+        self.fileobj.write('\010')                 # compression method
+        fname = self.filename[:-3]
+        flags = 0
+        if fname:
+            flags = FNAME
+        self.fileobj.write(chr(flags))
+        write32u(self.fileobj, long(0))
+        self.fileobj.write('\002')
+        self.fileobj.write('\377')
+        if fname:
+            self.fileobj.write(fname + '\000')
+
+
+def _gzipOpen(filename, mode="rb", compresslevel=9):
+    return GzipFile(filename, mode, compresslevel)
 
 class RPM_Base_Work:
 
@@ -162,7 +184,7 @@ class RPM_Base_Work:
             epoch = '0'
         headerfn = "%s/%s-%s-%s-%s.%s.hdr" % (headerdir, name, epoch, ver, rel, arch)
         if compress:
-            headerout = gzip.open(headerfn, "w")
+            headerout = _gzipOpen(headerfn, "w")
         else:
             headerout = open(headerfn, "w")
         headerout.write(self.hdr.unload(1))
