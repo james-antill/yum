@@ -44,10 +44,10 @@ def getDiskPart(dev):
     
     # hack off the trailing 'p' from /dev/cciss/*, for example
     if name[-1] == 'p':
-	for letter in name:
-	    if letter not in string.letters and letter != "/":
-		name = name[:-1]
-		break
+        for letter in name:
+            if letter not in string.letters and letter != "/":
+                name = name[:-1]
+                break
 
     if cut < 0:
         partNum = int(dev[cut:]) - 1
