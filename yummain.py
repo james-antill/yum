@@ -16,6 +16,7 @@
 
 
 import os
+import fcntl
 import sys
 import getopt
 import clientStuff
@@ -83,7 +84,9 @@ def parseCmdArgs(args):
         log=Logger(threshold=conf.debuglevel, file_object=sys.stdout)
         # syslog-style log
         if conf.uid == 0:
-            logfile=open(conf.logfile,"a")
+            logfd=os.open(conf.logfile, os.O_WRONLY, os.O_APPEND)
+            logfile = os.fdopen(logfd, 'a')
+            fcntl.fcntl(logfd, fcntl.F_SETFD)
             filelog=Logger(threshold=10, file_object=logfile,preprefix=clientStuff.printtime())
         else:
             filelog=Logger(threshold=10, file_object=None,preprefix=clientStuff.printtime())
