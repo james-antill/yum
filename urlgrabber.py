@@ -256,9 +256,10 @@ def urlgrab(url, filename=None, copy_local=0, close_connection=0,
         if bandwidth == None: bandwidth = _bandwidth
         raw_throttle = bandwidth * throttle
 
-    # now fetch the file
+    # initiate the connection & get the headers
     try:
         fo = urllib2.urlopen(url)
+        hdr = fo.info()
     except ValueError, e:
         raise URLGrabError(1, _('Bad URL: %s') % (e, ))
     except IOError, e:
@@ -266,9 +267,15 @@ def urlgrab(url, filename=None, copy_local=0, close_connection=0,
     except OSError, e:
         raise URLGrabError(5, _('OSError: %s') % (e, ))
 
-    try:
-        hdr = fo.info()
+    # this is a cute little hack - if there isn't a "Content-Length"
+    # header then its probably something generated dynamically, such
+    # as php, cgi, a directory listing, or an error message.  It is
+    # probably not what we want.
+    if not hdr is None and not hdr.has_key('Content-Length'):
+        raise URLGrabError(6, _('ERROR: Url Return no Content-Length  - something is wrong'))
 
+    # download and store the file
+    try:
         if progress_obj is None:
             _do_grab(filename, fo, progress_obj, raw_throttle)
         else:
@@ -287,13 +294,6 @@ def urlgrab(url, filename=None, copy_local=0, close_connection=0,
         raise URLGrabError(4, _('IOError: %s') % (e, ))
     except OSError, e:
         raise URLGrabError(5, _('OSError: %s') % (e, ))
-
-    # this is a cute little hack - if there isn't a "Content-Length"
-    # header then its probably something generated dynamically, such
-    # as php, cgi, a directory listing, or an error message.  It is
-    # probably not what we want.
-    if not hdr is None and not hdr.has_key('Content-Length'):
-        raise URLGrabError(6, _('ERROR: Url Return no Content-Length  - something is wrong'))
 
     return filename
 
