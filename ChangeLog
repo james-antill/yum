@@ -1,3 +1,10 @@
+2003-04-07 01:07  skvidal
+
+	* ChangeLog, Makefile.in, configure.in, yum.spec, docs/yum.8,
+	etc/yum.conf, po/Makefile.in: 
+	All the misc updates and changes - fix up the specfiles, fix up the
+	conf file, etc etc
+
 2003-04-07 00:19  skvidal
 
 	* clientStuff.py: 
