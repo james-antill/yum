@@ -28,6 +28,8 @@ import rpmUtils
 # which groups are around.
 # maybe parse the files, populate the fields as much as possible then sweep
 # through and calculate things after all the .xml files have been added
+# need to deal with groupname vs groupid
+
 class Groups_Info:
     def __init__(self, overwrite_groups=0):
         self.group_installed = {}
@@ -115,42 +117,71 @@ class Groups_Info:
                     print '%s not optional, default or mandatory - ignoring' % name
                 
             for sub_group_id in thisgroup.groups.keys():
-                if self.group_by_id.has_key(sub_group_id):
-                    self.sub_groups[groupname].append(self.group_by_id[sub_group_id])
+                if sub_group_id in self.sub_groups[groupname]:
+                    print 'Duplicate group entry %s in %s' % (sub_group_id, groupname)
                 else:
-                    print '%s group id does not exist' % sub_group_id
-                    
+                    self.sub_groups[groupname].append(sub_group_id)
             
             metapkgobj = thisgroup.metapkgs
             for metapkg in metapkgobj.keys():
                 (type, metapkgid) = metapkgobj[metapkg]
-                if self.group_by_id.has_key(metapkgid):
-                    name_as_group =  self.group_by_id[metapkgid]
-                else:
-                    name_as_group = metapkgid
-                    print '%s group id does not exist' % metapkgid
-                        
                 if type == u'mandatory':
-                    self.mandatory_metapkgs[groupname].append(name_as_group)
+                    self.mandatory_metapkgs[groupname].append(metapkgid)
                 elif type == u'optional':
-                    self.optional_metapkgs[groupname].append(name_as_group)
+                    self.optional_metapkgs[groupname].append(metapkgid)
                 elif type == u'default':
-                    self.default_metapkgs[groupname].append(name_as_group)
+                    self.default_metapkgs[groupname].append(metapkgid)
                 else:
-                    print '%s not optional, default or mandatory - ignoring' % name
+                    print '%s not optional, default or mandatory - ignoring' % metapkgid
                     
-        # now we have the data populated
-        # time to vet it against the rpmdb
-        #self._installedgroups()
-        # populate our pkgs_per_group dict with which pkgs we have in which
-        # group for quick, painless lookup
-        #self._pkgs_per_group()
-        
         
     def compileGroups(self):
+        self._correctGroups()
         self._installedgroups()
         self._pkgs_per_group()
         
+    def _correctGroups(self):
+        for key in self.sub_groups.keys():
+            newlist = []
+            for id in self.sub_groups[key]:
+                if self.group_by_id.has_key(id):
+                    if not self.group_by_id[id] in newlist:
+                        newlist.append(self.group_by_id[id])
+                else:
+                    print 'Invalid group id %s' % id
+            self.sub_groups[key] = newlist
+        
+        for key in self.mandatory_metapkgs.keys():
+            newlist = []
+            for id in self.mandatory_metapkgs[key]:
+                if self.group_by_id.has_key(id):
+                    if not self.group_by_id[id] in newlist:
+                        newlist.append(self.group_by_id[id])
+                else:
+                    print 'Invalid metapkg id %s' % id
+            self.mandatory_metapkgs[key] = newlist
+            
+        for key in self.default_metapkgs.keys():
+            newlist = []
+            for id in self.default_metapkgs[key]:
+                if self.group_by_id.has_key(id):
+                    if not self.group_by_id[id] in newlist:
+                        newlist.append(self.group_by_id[id])
+                else:
+                    print 'Invalid metapkg id %s' % id
+            self.default_metapkgs[key] = newlist
+
+        for key in self.optional_metapkgs.keys():
+            newlist = []
+            for id in self.optional_metapkgs[key]:
+                if self.group_by_id.has_key(id):
+                    if not self.group_by_id[id] in newlist:
+                        newlist.append(self.group_by_id[id])
+                else:
+                    print 'Invalid metapkg id %s' % id
+            self.optional_metapkgs[key] = newlist
+
+            
     def _installedgroups(self):
         for groupname in self.grouplist:
             if len(self.mandatory_pkgs[groupname]) > 0:
@@ -252,8 +283,9 @@ class Groups_Info:
 
 def main():
     compsgrpfun = Groups_Info()
-    compsgrpfun.add('./comps.xml')
     compsgrpfun.add('./othercomps.xml')
+    compsgrpfun.add('./comps.xml')
+    compsgrpfun.compileGroups()
     #compsgrpfun._dumppkgs('all_installed')
     list = compsgrpfun.groupTree(sys.argv[1])
     print list
