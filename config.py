@@ -80,6 +80,12 @@ class yumconf:
         self.distroverpkg = 'redhat-release'
         self.yumvar['basearch'] = archwork.getArch()
         self.yumvar['arch'] = os.uname()[4]
+        # this is ugly and dirty like Zebra - but I'd like for a lot of users
+        # of fedora to hush about the header download until I get the
+        # new metadata work done.
+        self.hdlist = '/usr/share/comps/i386/hdlist'
+        self.hdlist2 = '/usr/share/comps/i386/hdlist2'
+        self.usecomps = 1
         self.bandwidth = None
         self.throttle = None
         self.retries = 6
@@ -124,7 +130,13 @@ class yumconf:
             self.retries = self.cfg.getint('main','retries')
         if self._getoption('main', 'installroot') != None:
             self.installroot = self._getoption('main','installroot')
-
+        if self._getoption('main', 'hdlist') != None:
+            self.hdlist = self._getoption('main', 'hdlist')
+        if self._getoption('main', 'hdlist2') != None:
+            self.hdlist2 = self._getoption('main', 'hdlist2')
+        if self._getoption('main','usecomps') != None:
+            self.usecomps = self.cfg.getboolean('main', 'uscomps')
+            
             
         # figure out what the releasever really is from the distroverpkg
         self.yumvar['releasever'] = self._getsysver()

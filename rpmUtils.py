@@ -1,4 +1,5 @@
 #!/usr/bin/python -tt
+# GPL HERE
 
 import rpm
 import types
@@ -210,12 +211,18 @@ class RPM_Base_Work:
         a = self._getTag('arch')
         return (n, e, v, r, a)
     
+    def fixedEpoch(self):
+        epoch = self._getTag('epoch')
+        if epoch is None:
+            epoch = '0'
+        
+        return epoch
+        
     def writeHeader(self, headerdir, compress):
     # write the header out to a file with the format: name-epoch-ver-rel.arch.hdr
     # return the name of the file it just made - no real reason :)
         (name, epoch, ver, rel, arch) = self.nevra()
-        if epoch is None:
-            epoch = '0'
+        epoch = self.fixedEpoch()
         if self.isSource():
             headerfn = "%s/%s-%s-%s-%s.src.hdr" % (headerdir, name, epoch, ver, rel)
         else:

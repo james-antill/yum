@@ -851,9 +851,43 @@ def get_package_info_from_servers(serveridlist, HeaderInfo):
         log(4,'headerinfofn: ' + headerinfofn)
         HeaderInfoNevralLoad(headerinfofn, HeaderInfo, serverid)
 
+def returnCompsHeaders():
+    """return dict of headers from the comps hdlist[2] files
+       dict is format {(n, a, e, v, r): hdr_work objects}"""
+    
+    returndict = {}
+    if conf.usecomps:
+        fd = None
+        fd2 = None
+        if os.path.exists(conf.hdlist):
+            fd = os.open(conf.hdlist, os.O_RDONLY)
+            if os.path.exists(conf.hdlist2): # only open this one if the other one exists
+                fd2 = os.open(conf.hdlist2, os.O_RDONLY)
+        if fd:
+            hdrlist = rpm.readHeaderListFromFD(fd)
+        if fd2:
+            rpm.mergeHeaderListFromFd(hdrlist, fd, 1000004)
+
+        del fd
+        del fd2
+        
+        for hdr in hdrlist:
+            hdrobj = rpmUtils.Header_Work(hdr)
+            (n,e,v,r,a) = hdrobj.nevra()
+            e = hdrobj.fixedEpoch()
+            returndict[(n, a, e, v, r, a)] = hdrobj
+
+        del hdrlist
+
+    return returndict        
+
+       
 def download_headers(HeaderInfo, nulist):
     total = len(nulist)
     current = 1
+    # open up our comps hdlist and hdlist2 so we can find a header we might need
+    compsdict = returnCompsHeaders()
+    
     for (name, arch) in nulist:
         LocalHeaderFile = HeaderInfo.localHdrPath(name, arch)
         RemoteHeaderFile = HeaderInfo.remoteHdrUrl(name, arch)
@@ -883,13 +917,20 @@ def download_headers(HeaderInfo, nulist):
                 
         if not conf.cache:
             log(3, _('getting %s') % (LocalHeaderFile))
-            try:
-                hdrfn = grab(serverid, RemoteHeaderFile, LocalHeaderFile, copy_local=1,
-                                  checkfunc=(rpmUtils.checkheader, (name, arch), {}))
-            except URLGrabError, e:
-                errorlog(0, _('Error getting file %s') % RemoteHeaderFile)
-                errorlog(0, '%s' % e)
-                sys.exit(1)
+            (e, v, r) = HeaderInfo.evr(name, arch)
+            if compsdict.has_key((name, arch, e, v, r)):
+                hdrobj = compsdict[(name, arch, e, v, r)]
+                serverid = HeaderInfo.serverid(name, arch)
+                basepath = conf.serverhdrdir[i]
+                hdrfn = hdrobj.writeHeader(basepath, 1)
+            else:                
+                try:
+                    hdrfn = grab(serverid, RemoteHeaderFile, LocalHeaderFile, copy_local=1,
+                                      checkfunc=(rpmUtils.checkheader, (name, arch), {}))
+                except URLGrabError, e:
+                    errorlog(0, _('Error getting file %s') % RemoteHeaderFile)
+                    errorlog(0, '%s' % e)
+                    sys.exit(1)
             HeaderInfo.setlocalhdrpath(name, arch, hdrfn)
         else:
             errorlog(1, _('Cannot download %s in caching only mode or when running as non-root user.') % RemoteHeaderFile)
