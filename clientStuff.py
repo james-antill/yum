@@ -898,16 +898,16 @@ def returnCacheDBHeaders(nulist):
         cachedb = rpmUtils.Rpm_Ts_Work(dbPath=conf.cachedb)
         cachedb.setVSFlags(-1)
     
-    mi = cachedb.dbMatch()
-    for h in mi:
-        hdrobj = rpmUtils.Header_Work(h)
-        (n,e,v,r,a) = hdrobj.nevra()
-        e = hdrobj.fixedEpoch()
-        if (n, a) in nulist:
-            returndict[(n, a, e, v, r)] = hdrobj
-    del mi
-    del cachedb
-    rpm.delMacro("_dbpath")
+        mi = cachedb.dbMatch()
+        for h in mi:
+            hdrobj = rpmUtils.Header_Work(h)
+            (n,e,v,r,a) = hdrobj.nevra()
+            e = hdrobj.fixedEpoch()
+            if (n, a) in nulist:
+                returndict[(n, a, e, v, r)] = hdrobj
+        del mi
+        del cachedb
+        rpm.delMacro("_dbpath")
      
     return returndict
          
