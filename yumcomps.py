@@ -141,11 +141,15 @@ class Groups_Info:
                     
         # now we have the data populated
         # time to vet it against the rpmdb
-        self._installedgroups()
+        #self._installedgroups()
         # populate our pkgs_per_group dict with which pkgs we have in which
         # group for quick, painless lookup
-        self._pkgs_per_group()
+        #self._pkgs_per_group()
         
+        
+    def compileGroups(self):
+        self._installedgroups()
+        self._pkgs_per_group()
         
     def _installedgroups(self):
         for groupname in self.grouplist:
