@@ -632,7 +632,14 @@ def get_package_info_from_servers(serveridlist, HeaderInfo):
             os.mkdir(localhdrs)
         if not conf.cache:
             log(3, 'getting header.info from server')
-            headerinfofn = urlgrab(serverheader, localheaderinfo, copy_local=1)
+            try:
+                # FIXME this should do a test here too of the headerinfo file
+                # if it is empty then just ignore the repo and move along
+                headerinfofn = retrygrab(serverheader, localheaderinfo, copy_local=1)
+            except URLGrabError, e:
+                errorlog(0, 'Error getting file %s' % serverheader)
+                errorlog(0, '%s' % e)
+                sys.exit(1)
         else:
             log(3, 'using cached header.info file')
             headerinfofn = localheaderinfo
@@ -665,7 +672,12 @@ def download_headers(HeaderInfo, nulist):
                 log(5, 'cached %s' % LocalHeaderFile)
             else:
                 log(2, 'getting %s' % LocalHeaderFile)
-                hdrfn = urlgrab(RemoteHeaderFile, LocalHeaderFile, copy_local=1)
+                try:
+                    hdrfn = retrygrab(RemoteHeaderFile, LocalHeaderFile, copy_local=1)
+                except URLGrabError, e:
+                    errorlog(0, 'Error getting file %s' % RemoteHeaderFile)
+                    errorlog(0, '%s' % e)
+                    sys.exit(1)
                 HeaderInfo.setlocalhdrpath(name, arch, hdrfn)
             if checkheader(LocalHeaderFile, name, arch):
                     break
@@ -825,7 +837,12 @@ def create_final_ts(tsInfo):
                 log(4, 'Using cached %s' % (os.path.basename(rpmloc)))
             else:
                 log(2, 'Getting %s' % (os.path.basename(rpmloc)))
-                localrpmpath = urlgrab(tsInfo.remoteRpmUrl(name, arch), rpmloc, copy_local=0)
+                try:
+                    localrpmpath = retrygrab(tsInfo.remoteRpmUrl(name, arch), rpmloc, copy_local=0) 
+                except URLGrabError, e:
+                    errorlog(0, 'Error getting file %s' % remotegroupfile)
+                    errorlog(0, '%s' % e)
+                    sys.exit(1)
                 tsInfo.setlocalrpmpath(name, arch, localrpmpath)
             # we now actually have the rpm and we know where it is - so use it
             rpmloc = tsInfo.localRpmPath(name, arch)
