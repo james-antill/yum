@@ -292,8 +292,13 @@ def main():
     compsgrpfun.add('./comps.xml')
     compsgrpfun.compileGroups()
     #compsgrpfun._dumppkgs('all_installed')
-    list = compsgrpfun.groupTree(sys.argv[1])
-    print list
+    try:
+        groups = compsgrpfun.groupTree(sys.argv[1])
+        pkgs = compsgrpfun.pkgTree(sys.argv[1])
+        print groups
+        print pkgs
+    except KeyError, e:
+        print 'No Group named %s' % sys.argv[1]
 
 
 if __name__ == '__main__':
