@@ -600,7 +600,6 @@ def get_groups_from_servers(serveridlist):
             try:
                 localgroupfile = retrygrab(remotegroupfile, localgroupfile, copy_local=1)
             except URLGrabError, e:
-                if e.errno == 2:
                 errorlog(1, 'Error getting file %s' % remotegroupfile)
                 errorlog(1, '%s' % e)
         else:
