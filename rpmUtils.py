@@ -226,11 +226,11 @@ class Rpm_Ts_Work:
     def sigChecking(self, sig):
         """pass type of check you want to occur, default is to have them off"""
         if sig == 'md5':
-            #turn off everything but md5 - and we need the check the payload
+            #turn off everything but md5 - and we need to the check the payload
             self.ts.setVSFlags(~(rpm.RPMVSF_NOMD5|rpm.RPMVSF_NEEDPAYLOAD))
         elif sig == 'none':
             # turn off everything - period
-            self.ts.setVSFlags(rpm._RPMVSF_NOSIGNATURES)
+            self.ts.setVSFlags(~(rpm._RPMVSF_NOSIGNATURES))
         elif sig == 'default':
             # set it back to the default
             self.ts.setVSFlags(rpm.RPMVSF_DEFAULT)

@@ -33,9 +33,6 @@ from logger import Logger
 from config import yumconf
 from i18n import _
 
-#get this out of the way early
-# put here to clean up any rpmdb locking problems
-rpm.addMacro("__dbi_cdb", "create private mpool mp_mmapsize=16Mb mp_size=1Mb")
 
 def parseCmdArgs(args):
     

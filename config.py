@@ -74,6 +74,8 @@ class yumconf:
         self.yumvar['basearch'] = archwork.getArch()
         self.yumvar['arch'] = os.uname()[4]
         releasever = None
+        self.bandwidth = None
+        self.throttle = None
         
         if self._getoption('main','cachedir') != None:
             self.cachedir = self._getoption('main','cachedir')
@@ -95,7 +97,11 @@ class yumconf:
             self.overwrite_groups = self.cfg.getboolean('main', 'overwrite_groups')
         if self._getoption('main', 'distroverpkg') != None:
             self.distroverpkg = self._getoption('main','distroverpkg')
-        
+        if self._getoption('main', 'bandwidth') != None:
+            self.bandwidth = self._getoption('main','bandwidth')
+        if self._getoption('main', 'throttle') != None:
+            self.throttle = self._getoption('main','throttle')
+
         # figure out what the releasever really is from the distroverpkg
         self.yumvar['releasever'] = self._getsysver(self.distroverpkg)
         
@@ -162,6 +168,7 @@ class yumconf:
 
     def _getsysver(self, verpkg):
         ts = rpm.TransactionSet()
+        ts.setVSFlags(~(rpm._RPMVSF_NOSIGNATURES|rpm._RPMVSF_NODIGESTS))
         idx = ts.dbMatch('name', self.distroverpkg)
         # we're going to take the first one - if there is more than one of these
         # then the user needs a beating
@@ -170,7 +177,9 @@ class yumconf:
         else:
             hdr = idx.next()
             releasever = hdr['version']
-
+        del hdr
+        del idx
+        del ts
         return releasever
     
     def _getEnvVar(self):

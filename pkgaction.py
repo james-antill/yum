@@ -179,15 +179,20 @@ def upgradepkgs(tsnevral, hinevral, rpmnevral, nulist, uplist, obsoleted, obsole
 
 def erasepkgs(tsnevral,rpmnevral,userlist):
     #mark for erase iff the userlist item exists in the rpmnevral
+    # one thing this should do - it should look at the name of each item and see
+    # if it is specifying a certain version of a pkg
+    # if so it should parse the version and make sure we have it installed
+    # if so then mark that SPECIFIC version for removal.
+    
     for n in userlist:
         foundit = 0
         for (name,arch) in rpmnevral.NAkeys():
             if n == name or fnmatch.fnmatch(name, n):
-                foundit=1
+                foundit = 1
                 log(4,"Erasing %s" % (name))
                 ((e, v, r, a, l, i), s)=rpmnevral._get_data(name,arch)
-                tsnevral.add((name,e,v,r,a,l,i),'e')                
-        if foundit==0:
+                tsnevral.add((name,e,v,r,a,l,i),'e')
+        if foundit == 0:
             errorlog(0, _("Erase: No matches for %s") % n)
             sys.exit(1)
 
