@@ -461,7 +461,7 @@ def printactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
     for pkg in u_list:
         (name,arch) = pkg
         (e, v, r) = nevral.evr(name, arch)
-        pkgstring = '%s:%s-%s-%s.%s' (e, name, v, r, arch)
+        pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
         log(2, _('[update: %s]') % pkgstring)
     for pkg in e_list:
         (name,arch) = pkg
