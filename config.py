@@ -63,6 +63,7 @@ class yumconf:
         self.cache = 0
         self.uid = 0
         self.commands = None
+        self.exactarch = 0
         
         if self._getoption('main','cachedir') != None:
             self.cachedir=self._getoption('main','cachedir')
@@ -84,7 +85,9 @@ class yumconf:
             self.gpgkeyring=self._getoption('main', 'gpgkeyring')
         if self._getoption('main','commands') != None:
             self.commands=string.split(self._getoption('main', 'commands'),' ')
-            
+        if self._getoption('main','exactarch') != None:
+            self.exactarch=self.cfg.getboolean('main', 'exactarch')
+
         if len(self.cfg.sections()) > 1:
             for section in self.cfg.sections(): # loop through the list of sections
                 if section != 'main': # must be a serverid
