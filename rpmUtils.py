@@ -22,21 +22,23 @@ def checkheader(headerfile, name, arch):
 def checkRpmMD5(package):
     """take a package, check it out by trying to open it, return 1 if its good
        return 0 if it's not"""
-    ts.setVSFlags(~(rpm.RPMVSF_NOMD5|rpm.RPMVSF_NEEDPAYLOAD))
+    ts.sigChecking('md5')
     fdno = os.open(package, os.O_RDONLY)
     try:
         ts.hdrFromFdno(fdno)
     except rpm.error, e:
         os.close(fdno)
+        ts.sigChecking('default')
         return 0
     os.close(fdno)
+    ts.sigChecking('default')
     return 1
 
 def checkSig(package, serverid=None):
     """ take a package, check it's sigs, return 0 if they are all fine, return 
     1 if the gpg key can't be found, 3 if the key is not trusted, 2 if the 
     header is in someway damaged"""
-    ts.setVSFlags(0)
+    ts.sigChecking('default')
     fdno = os.open(package, os.O_RDONLY)
     try:
         ts.hdrFromFdno(fdno)
@@ -89,7 +91,7 @@ class RPM_Base_Work:
     def _getTag(self, tag):
         if self.hdr is None:
             errorlog(0, _('Got an empty Header, something has gone wrong'))
-            #should raise a yum error here
+            #FIXME should raise a yum error here
             sys.exit(1)
         return self.hdr[tag]
     
@@ -182,15 +184,15 @@ class RPM_Work(RPM_Base_Work):
             self.hdr = None
         os.close(fd)
     
-class RPM_DB_Work:
+class Rpm_Ts_Work:
     """This should operate on groups of headers/matches/etc in the rpmdb - ideally it will 
     operate with a list of the Base objects above, so I can refer to any one object there
     not sure the best way to do this yet, more thinking involved"""
-    def __init__(self, dbPath):
+    def __init__(self, dbPath='/'):
         self.ts = rpm.TransactionSet(dbPath)
         
         self.methods = ['addInstall', 'addErase', 'run', 'check', 'order', 'hdrFromFdno',
-                   'closeDB']
+                   'closeDB', 'dbMatch', 'setFlags', 'setVSFlags', 'setProbFilter']
                    
     def __getattr__(self, attribute):
         if attribute in self.methods:
@@ -211,13 +213,14 @@ class RPM_DB_Work:
     def sigChecking(self, sig):
         """pass type of check you want to occur, default is to have them off"""
         if sig == 'md5':
-            #turn off everything bug md5 - and we need the check the payload
+            #turn off everything but md5 - and we need the check the payload
             self.ts.setVSFlags(~(rpm.RPMVSF_NOMD5|rpm.RPMVSF_NEEDPAYLOAD))
         elif sig == 'none':
             # turn off everything - period
-            self.ts.setVSFlags(rpm.RPMVSF_NOSIGNATURES)
+            self.ts.setVSFlags(rpm._RPMVSF_NOSIGNATURES)
         elif sig == 'default':
             # set it back to the default
             self.ts.setVSFlags(rpm.RPMVSF_DEFAULT)
         else:
             raise AttributeError, sig
+    

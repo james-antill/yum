@@ -145,7 +145,8 @@ def main(args):
     rpmUtils.conf = conf
     
     # get our ts together that we'll use all over the place
-    ts = rpm.TransactionSet('/')
+    ts = rpmUtils.Rpm_Ts_Work()
+    ts.sigChecking('none')
     clientStuff.ts = ts
     pkgaction.ts = ts
     nevral.ts = ts

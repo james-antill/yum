@@ -57,6 +57,7 @@ class nevral:
         ((e,v,r,a,l,i),state) = self._get_data(name, arch)
         if state == None:
             errorlog(0, _('Header for pkg %s not found') % (name))
+            #FIXME: should return none and/or raise Exception
             sys.exit(1)
             return None
         else: 
@@ -70,6 +71,7 @@ class nevral:
                 pkghdr = clientStuff.readHeader(self.localHdrPath(name, arch))
                 if pkghdr == None:
                     errorlog(0, _('Bad Header for pkg %s.%s trying to get headers for the nevral - exiting') % (name, arch))
+                    # FIXME - should raise exception and be handled elsewhere
                     sys.exit(1)
                 else:
                     return pkghdr
@@ -189,10 +191,56 @@ class nevral:
         ((e,v,r,a,l,i),state) = self._get_data(name, arch)
         self.localrpmpath[(name, arch)] = path
 
-    def resolvedeps(self,rpmDBInfo):
+    def setPkgState(self, name, arch, newstate):
+        ((e,v,r,a,l,i),state) = self._get_data(name, arch)
+        self.add((name,e,v,r,arch,l,i), newstate)
+        
+    def populateTs(self, addavailable = 1):
+        installonlypkgs = ['kernel', 'kernel-bigmem', 'kernel-enterprise',
+                           'kernel-smp', 'kernel-debug']
+                           
+        _ts = rpmUtils.Rpm_Ts_Work('/')
+        for (name, arch) in self.NAkeys(): 
+            if self.state(name, arch) in ('u','ud','iu'):
+                log(4,'Updating: %s, %s' % (name, arch))
+                rpmloc = self.rpmlocation(name, arch)
+                pkghdr = self.getHeader(name, arch)
+                if name in installonlypkgs:
+                    kernarchlist = archwork.availablearchs(self,name)
+                    bestarch = archwork.bestarch(kernarchlist)
+                    if arch == bestarch:
+                        log(3, 'Found best kernel arch: %s' %(arch))
+                        _ts.addInstall(pkghdr,(pkghdr,rpmloc),'i')
+                        self.setPkgState(name, arch, 'i')
+                    else:
+                        log(3, 'Removing dumb kernel with silly arch %s' %(arch))
+                        if addavailable:
+                            _ts.addInstall(pkghdr,(pkghdr,rpmloc),'a')
+                        self.setPkgState(name, arch, 'a')
+                else:
+                    log(5, 'Not a kernel, adding to ts')
+                    _ts.addInstall(pkghdr,(pkghdr,rpmloc),'u')
+                    
+            elif self.state(name,arch) == 'i':
+                log(4, 'Installing: %s, %s' % (name, arch))
+                rpmloc = self.rpmlocation(name, arch)
+                pkghdr = self.getHeader(name, arch)
+                _ts.addInstall(pkghdr,(pkghdr,rpmloc),'i')
+            elif self.state(name,arch) == 'a':
+                if addavailable:
+                    log(7, 'Adding %s into \'a\' state' % name)
+                    rpmloc = self.rpmlocation(name, arch)
+                    pkghdr = self.getHeader(name, arch)
+                    _ts.addInstall(pkghdr,(pkghdr,rpmloc),'a')
+                else:
+                    pass
+            elif self.state(name,arch) == 'e' or self.state(name,arch) == 'ed':
+                log(4, 'Erasing: %s-%s' % (name,arch))
+                _ts.addErase(name)
+        return _ts
+        
+    def resolvedeps(self, rpmDBInfo):
         #self == tsnevral
-        #create db
-        #create ts
         #populate ts
         #depcheck
         #parse deps, if they exist, change nevral pkg states
@@ -204,46 +252,21 @@ class nevral:
         CheckDeps = 1
         conflicts = 0
         unresolvable = 0
+        
+        # this does a quick dep check with adding all the archs
+        # keeps mem usage small in the easy/quick case
+        _ts = self.populateTs(addavailable = 0)
+        deps = _ts.check()
+        if not deps:
+            log(5, 'Quick Check only')
+            return (0, 'Success - deps resolved')
+        del deps
+        del _ts
+        log(5, 'Long Check')
         while CheckDeps==1 or (conflicts != 1 and unresolvable != 1 ):
             errors=[]
-            tsfordeps = rpm.TransactionSet('/')
-            for (name, arch) in self.NAkeys(): 
-                if self.state(name, arch) in ('u','ud','iu'):
-                    log(4,'Updating: %s, %s' % (name, arch))
-                    rpmloc = self.rpmlocation(name, arch)
-                    pkghdr = self.getHeader(name, arch)
-                    if name == 'kernel' or name == 'kernel-bigmem' or name == 'kernel-enterprise' or name == 'kernel-smp' or name == 'kernel-debug':
-                        kernarchlist = archwork.availablearchs(self,name)
-                        bestarch = archwork.bestarch(kernarchlist)
-                        if arch == bestarch:
-                            log(3, 'Found best kernel arch: %s' %(arch))
-                            tsfordeps.addInstall(pkghdr,(pkghdr,rpmloc),'i')
-                            ((e, v, r, a, l, i), s)=self._get_data(name,arch)
-                            self.add((name,e,v,r,arch,l,i),'i')
-                        else:
-                            log(3, 'Removing dumb kernel with silly arch %s' %(arch))
-                            tsfordeps.addInstall(pkghdr,(pkghdr,rpmloc),'a')
-                            ((e,v,r,a,l,i),s)=self._get_data(name,arch)
-                            self.add((name,e,v,r,arch,l,i),'a')
-                    else:
-                        log(5, 'Not a kernel, adding to ts')
-                        tsfordeps.addInstall(pkghdr,(pkghdr,rpmloc),'u')
-                    
-                elif self.state(name,arch) == 'i':
-                    log(4, 'Installing: %s, %s' % (name, arch))
-                    rpmloc = self.rpmlocation(name, arch)
-                    pkghdr = self.getHeader(name, arch)
-                    tsfordeps.addInstall(pkghdr,(pkghdr,rpmloc),'i')
-                elif self.state(name,arch) == 'a':
-                    log(7, 'Adding %s into \'a\' state' % name)
-                    rpmloc = self.rpmlocation(name, arch)
-                    pkghdr = self.getHeader(name, arch)
-                    tsfordeps.addInstall(pkghdr,(pkghdr,rpmloc),'a')
-                elif self.state(name,arch) == 'e' or self.state(name,arch) == 'ed':
-                    log(4, 'Erasing: %s-%s' % (name,arch))
-                    tsfordeps.addErase(name)
-            deps = tsfordeps.check()
-            
+            _ts = self.populateTs(addavailable = 1)
+            deps = _ts.check()
             CheckDeps = 0
             if not deps:
                 return (0, 'Success - deps resolved')
@@ -258,8 +281,7 @@ class nevral:
                         archlist = archwork.availablearchs(self,name)
                         bestarch = archwork.bestarch(archlist)
                         log(3, 'bestarch = %s for %s' % (bestarch, name))
-                        ((e, v, r, a, l, i), s)=self._get_data(name,bestarch)
-                        self.add((name,e,v,r,bestarch,l,i),'ud')
+                        self.setPkgState(name, bestarch, 'ud')
                         log(4, 'Got dep: %s, %s' % (name,bestarch))
                         CheckDeps = 1
                     else:
@@ -275,8 +297,7 @@ class nevral:
                                 archlist = archwork.availablearchs(self,name)
                                 if len(archlist) > 0:
                                     arch = archwork.bestarch(archlist)
-                                    ((e, v, r, a, l, i), s)=self._get_data(name,arch)
-                                    self.add((name,e,v,r,arch,l,i),'ud')                                
+                                    self.setPkgState(name, arch, 'ud')
                                     log(4, 'Got Extra Dep: %s, %s' %(name,arch))
                                 else:
                                     unresolvable = 1
@@ -329,8 +350,7 @@ class nevral:
                         rc = rpmUtils.compareEVR((e1,v1,r1), (e2,v2,r2))
                         if rc<0:
                             log(4, 'conflict: setting %s to upgrade' % (reqname))
-                            ((e,v,r,a,l,i),s)=self._get_data(reqname,arch)
-                            self.add((name,e,v,r,a,l,i),'ud')
+                            self.setPkgState(reqname, arch, 'ud')
                             CheckDeps=1
                         else:
                             errors.append('conflict between %s and %s' % (name, reqname))
@@ -339,7 +359,6 @@ class nevral:
                         errors.append('conflict between %s and %s' % (name, reqname))
                         conflicts=1
             log(4, 'Restarting Dependency Loop')
-            tsfordeps.closeDB()
-            del tsfordeps
+            del _ts
             if len(errors) > 0:
                 return(1, errors)
