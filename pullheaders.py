@@ -101,8 +101,8 @@ def main():
             
     # depcheck if requested
     if cmds['checkdeps']:
-        (error,msgs) = serverStuff.depchecktree(rpms)
-        if error==1:
+        (error, msgs) = serverStuff.depchecktree(rpms)
+        if error == 1:
             print _("Errors within the dir(s):\n %s") % basedir
             for msg in msgs:
                 print _("   ") + msg
