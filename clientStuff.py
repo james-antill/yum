@@ -457,27 +457,27 @@ def printactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
         (name,arch) = pkg
         (e, v, r) = nevral.evr(name, arch)
         if e > '0':
-            pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+            pkgstring = '%s %s:%s-%s.%s' % (name, e, v, r, arch)
         else:
-            pkgstring = '%s-%s-%s.%s' % (name, v, r, arch)
+            pkgstring = '%s %s-%s.%s' % (name, v, r, arch)
         log(2, _('[install: %s]') % pkgstring)
         
     for pkg in u_list:
         (name,arch) = pkg
         (e, v, r) = nevral.evr(name, arch)
         if e > '0':
-            pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+            pkgstring = '%s %s:%s-%s.%s' % (name, e, v, r, arch)
         else:
-            pkgstring = '%s-%s-%s.%s' % (name, v, r, arch)
+            pkgstring = '%s %s-%s.%s' % (name, v, r, arch)
         log(2, _('[update: %s]') % pkgstring)
         
     for pkg in e_list:
         (name,arch) = pkg
         (e, v, r) = nevral.evr(name, arch)
         if e > '0':
-            pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+            pkgstring = '%s %s:%s-%s.%s' % (name, e, v, r, arch)
         else:
-            pkgstring = '%s-%s-%s.%s' % (name, v, r, arch)
+            pkgstring = '%s %s-%s.%s' % (name, v, r, arch)
         log(2, _('[erase: %s]') % pkgstring)
         
     if len(ud_list) > 0:
@@ -486,9 +486,9 @@ def printactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
             (name, arch) = pkg
             (e, v, r) = nevral.evr(name, arch)
             if e > '0':
-                pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+                pkgstring = '%s %s:%s-%s.%s' % (name, e, v, r, arch)
             else:
-                pkgstring = '%s-%s-%s.%s' % (name, v, r, arch)            
+                pkgstring = '%s %s-%s.%s' % (name, v, r, arch)            
             log(2, _('[deps: %s]') % pkgstring)
             
     if len(ed_list) > 0:
@@ -497,9 +497,9 @@ def printactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
             (name, arch) = pkg
             (e, v, r) = nevral.evr(name, arch)
             if e > '0':
-                pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+                pkgstring = '%s %s:%s-%s.%s' % (name, e, v, r, arch)
             else:
-                pkgstring = '%s-%s-%s.%s' % (name, v, r, arch)
+                pkgstring = '%s %s-%s.%s' % (name, v, r, arch)
             log(2, _('[deps: %s]') % pkgstring)
 
 def filelogactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
@@ -511,33 +511,33 @@ def filelogactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
     for (name, arch) in i_list:
         (e, v, r) = nevral.evr(name, arch)
         if e > '0':
-            pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+            pkgstring = '%s %s:%s-%s.%s' % (name, e, v, r, arch)
         else:
-            pkgstring = '%s-%s-%s.%s' % (name, v, r, arch)
+            pkgstring = '%s %s-%s.%s' % (name, v, r, arch)
         filelog(1, i_log + pkgstring)
 
     for (name, arch) in ud_list:
         (e, v, r) = nevral.evr(name, arch)
         if e > '0':
-            pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+            pkgstring = '%s %s:%s-%s.%s' % (name, e, v, r, arch)
         else:
-            pkgstring = '%s-%s-%s.%s' % (name, v, r, arch)
+            pkgstring = '%s %s-%s.%s' % (name, v, r, arch)
         filelog(1, ud_log + pkgstring)
         
     for (name, arch) in u_list:
         (e, v, r) = nevral.evr(name, arch)
         if e > '0':
-            pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+            pkgstring = '%s %s:%s-%s.%s' % (name, e, v, r, arch)
         else:
-            pkgstring = '%s-%s-%s.%s' % (name, v, r, arch)
+            pkgstring = '%s %s-%s.%s' % (name, v, r, arch)
         filelog(1, u_log + pkgstring)
         
     for (name, arch) in e_list+ed_list:
         (e, v, r) = nevral.evr(name, arch)
         if e > '0':
-            pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+            pkgstring = '%s %s:%s-%s.%s' % (name, e, v, r, arch)
         else:
-            pkgstring = '%s-%s-%s.%s' % (name, v, r, arch)
+            pkgstring = '%s %s-%s.%s' % (name, v, r, arch)
         filelog(1, e_log + pkgstring)
         
 
@@ -550,33 +550,33 @@ def shortlogactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
     for (name, arch) in i_list:
         (e, v, r) = nevral.evr(name, arch)
         if e > '0':
-            pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+            pkgstring = '%s %s:%s-%s.%s' % (name, e, v, r, arch)
         else:
-            pkgstring = '%s-%s-%s.%s' % (name, v, r, arch)
+            pkgstring = '%s %s-%s.%s' % (name, v, r, arch)
         i_log = i_log + ' ' + pkgstring
         
     for (name, arch) in ud_list:
         (e, v, r) = nevral.evr(name, arch)
         if e > '0':
-            pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+            pkgstring = '%s %s:%s-%s.%s' % (name, e, v, r, arch)
         else:
-            pkgstring = '%s-%s-%s.%s' % (name, v, r, arch)
+            pkgstring = '%s %s-%s.%s' % (name, v, r, arch)
         ud_log = ud_log + ' ' + pkgstring
         
     for (name, arch) in u_list:
         (e, v, r) = nevral.evr(name, arch)
         if e > '0':
-            pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+            pkgstring = '%s %s:%s-%s.%s' % (name, e, v, r, arch)
         else:
-            pkgstring = '%s-%s-%s.%s' % (name, v, r, arch)
+            pkgstring = '%s %s-%s.%s' % (name, v, r, arch)
         u_log = u_log + ' ' + pkgstring
         
     for (name, arch) in e_list+ed_list:
         (e, v, r) = nevral.evr(name, arch)
         if e > '0':
-            pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+            pkgstring = '%s %s:%s-%s.%s' % (name, e, v, r, arch)
         else:
-            pkgstring = '%s-%s-%s.%s' % (name, v, r, arch)
+            pkgstring = '%s %s-%s.%s' % (name, v, r, arch)
         e_log = e_log + ' ' + pkgstring
 
     if len(i_list) > 0:
