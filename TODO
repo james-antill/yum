@@ -10,8 +10,6 @@ Important:
 - Implement the comps parsing and group* functions
 - Implement a server-side config file or commandline option to let it 
   know where to get the comps/group list from
-- Implement some sort of silly lock file for making sure two yum's can't be run 
-  at the same time
 
 
 
@@ -32,7 +30,6 @@ Useful:
 Wishlist/Cool:
 - Make it possible to have an http-accesible global conf file for excludes and
   what not.
-- work on making file urls work (ick)
 - make an option for:
   yum mail notices
   so that it could be used to check for updates and mail root@ or 
