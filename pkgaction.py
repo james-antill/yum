@@ -311,9 +311,9 @@ def listgroups(userlist):
         if userlist[0] == "hidden":
             groups = GroupInfo.grouplist
             userlist.pop(0)
-        else:
-            groups = GroupInfo.visible_groups
-
+    else:
+        groups = GroupInfo.visible_groups
+    
     if len(userlist) == 0:
         userlist = ['_all_']
 
