@@ -52,7 +52,7 @@ def cleanHeader(header):
     return header
 
 
-def writeHeader(headerdir,header,compress):
+def writeHeader(headerdir, header, compress):
     # write the header out to a file with the format: name-epoch-ver-rel.arch.hdr
     # return the name of the file it just made - no real reason :)
     
@@ -121,13 +121,15 @@ def readHeader(rpmfn):
 
 def Usage():
     print "Usage:"
-    print "yum-arch [-v] [-z] [-l] [-c] [-n] [-d] (path of dir where headers/ should/does live)"
+    print "yum-arch [-v] [-z] [-l] [-c] [-n] [-d] [-q] [-L] (path of dir where headers/ should/does live)"
     print "   -d = check dependencies and conflicts in tree"
     print "   -v = print debugging information"
     print "   -n = don't generate headers"
     print "   -c = check pkgs with gpg and md5 checksums - cannot be used with -n"
     print "   -z = gzip compress the headers [default, will be deprecated as an option]"
     print "   -l = use symlinks as valid rpms when building headers"
+    print "   -L = make the display louder"
+    print "   -q = make the display more quiet"
     sys.exit(1)
 
 

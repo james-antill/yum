@@ -15,14 +15,7 @@
 # Copyright 2002 Duke University 
 
 
-try:
-    import rpm404
-    rpm = rpm404
-except ImportError, e:
-    import rpm
-    rpm404 = rpm
-    
-
+import rpm
 import os
 import sys
 
@@ -32,20 +25,29 @@ def install_callback(what, bytes, total, h, user):
         pass
     elif what == rpm.RPMCALLBACK_TRANS_STOP:
         pass
-
     elif what == rpm.RPMCALLBACK_TRANS_START:
         pass
     elif what == rpm.RPMCALLBACK_INST_OPEN_FILE:
+        hdr = None
         if h != None:
-            pkg, rpmloc = h
+            hdr, rpmloc = h
+            handle = '%s:%s.%s-%s-%s' % (hdr[rpm.RPMTAG_EPOCH],
+              hdr[rpm.RPMTAG_NAME], hdr[rpm.RPMTAG_VERSION],
+              hdr[rpm.RPMTAG_RELEASE], hdr[rpm.RPMTAG_ARCH])
             fd = os.open(rpmloc, os.O_RDONLY)
-            callbackfilehandles[h]=fd
+            callbackfilehandles[handle]=fd
             return fd
         else:
             print "No header - huh?"
   
     elif what == rpm.RPMCALLBACK_INST_CLOSE_FILE:
-        os.close(callbackfilehandles[h])
+        hdr = None
+        if h != None:
+            hdr, rpmloc = h
+            handle = '%s:%s.%s-%s-%s' % (hdr[rpm.RPMTAG_EPOCH],
+              hdr[rpm.RPMTAG_NAME], hdr[rpm.RPMTAG_VERSION],
+              hdr[rpm.RPMTAG_RELEASE], hdr[rpm.RPMTAG_ARCH])
+        os.close(callbackfilehandles[handle])
         fd = 0
 
     elif what == rpm.RPMCALLBACK_INST_PROGRESS:

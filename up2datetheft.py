@@ -35,7 +35,7 @@ def findDepLocal(db, dep):
     if dep[0] == '/':
         # Treat it as a file dependency
         try:
-            hdr_arry = db.findbyfile(dep)
+            hdr_arry = db.Match(dep)
         except:
             hdr_arry = []
             

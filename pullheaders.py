@@ -23,10 +23,109 @@ import rpm
 import serverStuff
 from logger import Logger
 
-log=Logger(threshold=0,default=2,prefix='',preprefix='')
+log=Logger(threshold=0, default=2, prefix='', preprefix='')
 serverStuff.log = log
 
-def genhdrs(rpms,headerdir,rpmcheck,compress):
+def main():
+    headerdir = 'headers'
+    headerinfo = headerdir + '/' + 'header.info'
+    if  len(sys.argv) < 2:
+        serverStuff.Usage()
+    cmds = {}
+    cmds['checkdeps'] = 0
+    cmds['writehdrs'] = 1
+    cmds['rpmcheck'] = 0
+    cmds['compress'] = 1
+    cmds['usesymlinks'] = 0
+    cmds['quiet'] = 0
+    cmds['loud'] = 0
+    args = sys.argv[1:]
+    basedir = args[-1]
+    del args[-1]
+    for arg in args:
+        if arg == "-v":
+            log.verbosity = 4
+        elif arg == "-d":
+            cmds['checkdeps'] = 1
+        elif arg == "-n":
+            cmds['writehdrs'] = 0
+        elif arg == "-c":
+            cmds['rpmcheck'] = 1
+        elif arg == "-z":
+            cmds['compress'] = 1
+        elif arg == "-l":
+            cmds['usesymlinks'] = 1
+        elif arg == "-q":
+            cmds['quiet'] = 1
+        elif arg == "-L":
+            cmds['loud'] = 1
+        if arg in ['-h','--help']:
+            serverStuff.Usage()
+    #save where we are right now
+    curdir = os.getcwd()
+    #start the sanity/stupidity checks
+    if not os.path.exists(basedir):
+        print "Directory of rpms must exist"
+        serverStuff.Usage()
+    if not os.path.isdir(basedir):
+        print "Directory of rpms must be a directory."
+        sys.exit(1)
+        
+    #change to the basedir to work from w/i the path - for relative url paths
+    os.chdir(basedir)
+
+    #get the list of rpms
+    rpms=serverStuff.getfilelist('./', '.rpm', [], cmds['usesymlinks'])
+    #and a few more sanity checks
+    if len(rpms) < 1:
+        print "No rpms to look at. Exiting."
+        sys.exit(1)
+
+    if cmds['checkdeps']:
+        (error,msgs) = serverStuff.depchecktree(rpms)
+        if error==1:
+            print "Errors within the dir(s):\n %s" % basedir
+            for msg in msgs:
+                print "   " + msg
+            sys.exit(1)
+        else:
+            print "All dependencies resolved and no conflicts detected"
+    
+    if cmds['writehdrs']:
+        #if the headerdir exists and its a file then we're in deep crap
+        if os.path.isfile(headerdir):
+            print "%s is a file" % (headerdir)
+            sys.exit(1)
+
+        #if it doesn't exist then make the dir
+        if not os.path.exists(headerdir):
+            os.mkdir(headerdir)
+        # done with the sanity checks, on to the cleanups
+        #looks for a list of .hdr files and the header.info file
+        hdrlist = serverStuff.getfilelist(headerdir, '.hdr', [], 0)
+
+        #removes both entirely 
+        for hdr in hdrlist:
+            os.unlink(hdr)
+        if os.path.exists(headerinfo):
+            os.unlink(headerinfo)
+        rpminfo = genhdrs(rpms, headerdir, cmds)
+
+        #Write header.info file
+        print "\nWriting header.info file"
+        headerfd = open(headerinfo, "w")
+        for item in rpminfo.keys():
+            (name,arch) = item
+            (epoch, ver, rel, rpmloc) = rpminfo[item]
+            info = "%s:%s-%s-%s.%s=%s\n" % (epoch, name, ver, rel, arch, rpmloc)
+            headerfd.write(info)
+        headerfd.close()
+
+
+    #take us home mr. data
+    os.chdir(curdir)
+
+def genhdrs(rpms,headerdir,cmds):
     rpmdelete = 0 # define this if you have the rpmheader stripping patch built into rpm
     rpminfo = {}
     numrpms = len(rpms)
@@ -36,10 +135,14 @@ def genhdrs(rpms,headerdir,rpmcheck,compress):
         rpmname = os.path.basename(rpmfn)
         currpm=currpm + 1
         percent = (currpm*100)/numrpms
-        sys.stdout.write('\r' + ' ' * 80)
-        sys.stdout.write("\rDigesting rpms %d %% complete: %s" % (percent,rpmname))
-        sys.stdout.flush()
-        if rpmcheck==1:
+        if not cmds['quiet']:
+            if cmds['loud']:
+                print 'Digesting rpm - %s - %d/%d' % (rpmname, currpm, numrpms)
+            else:
+                sys.stdout.write('\r' + ' ' * 80)
+                sys.stdout.write("\rDigesting rpms %d %% complete: %s" % (percent,rpmname))
+                sys.stdout.flush()
+        if cmds['rpmcheck']:
             log(2,"\nChecking sig on %s" % (rpmname))
             serverStuff.checkSig(rpmfn)
         header=serverStuff.readHeader(rpmfn)
@@ -72,7 +175,7 @@ def genhdrs(rpms,headerdir,rpmcheck,compress):
                         shortheader = serverStuff.cleanHeader(header)
                     else:
                         shortheader = header
-                    headerloc = serverStuff.writeHeader(headerdir,shortheader,compress)       
+                    headerloc = serverStuff.writeHeader(headerdir, shortheader, cmds['compress'])       
                     rpminfo[rpmtup]=(epoch,ver,rel,rpmloc)
                 elif rc == 0:
                     # hmm, they match complete - warn the user that they've got a dupe in the tree
@@ -85,107 +188,14 @@ def genhdrs(rpms,headerdir,rpmcheck,compress):
                     shortheader = serverStuff.cleanHeader(header)
                 else:
                     shortheader = header
-                headerloc = serverStuff.writeHeader(headerdir,shortheader,compress)
+                headerloc = serverStuff.writeHeader(headerdir, shortheader, cmds['compress'])
                 rpminfo[rpmtup]=(epoch,ver,rel,rpmloc)
                 goodrpm = goodrpm + 1
         else:
             log(2,"ignoring srpm: %s" % rpmfn)
-   
-    print "\n   Total: %d\n   Used: %d" %(numrpms, goodrpm)
+    if not cmds['quiet']:
+        print "\n   Total: %d\n   Used: %d" %(numrpms, goodrpm)
     return rpminfo
-    
-def main():
-    headerdir = 'headers'
-    headerinfo = headerdir + '/' + 'header.info'
-    checkdeps=0
-    writehdrs=1
-    rpmcheck=0
-    compress=1
-    usesymlinks=0
-    if  len(sys.argv) < 2:
-        serverStuff.Usage()
-    args = sys.argv[1:]
-    basedir = args[-1]
-    del args[-1]
-    for arg in args:
-        if arg == "-v":
-            log.verbosity=4
-        if arg == "-d":
-            checkdeps=1
-        if arg == "-n":
-            writehdrs=0
-        if arg == "-c":
-            rpmcheck=1
-        if arg == "-z":
-            compress=1
-        if arg == "-l":
-            usesymlinks=1
-        if arg in ['-h','--help']:
-            serverStuff.Usage()
-    #save where we are right now
-    curdir = os.getcwd()
-    #start the sanity/stupidity checks
-    if not os.path.exists(basedir):
-        print "Directory of rpms must exist"
-        serverStuff.Usage()
-    if not os.path.isdir(basedir):
-        print "Directory of rpms must be a directory."
-        sys.exit(1)
-        
-    #change to the basedir to work from w/i the path - for relative url paths
-    os.chdir(basedir)
-
-    #get the list of rpms
-    rpms=serverStuff.getfilelist('./', '.rpm', [], usesymlinks)
-    #and a few more sanity checks
-    if len(rpms) < 1:
-        print "No rpms to look at. Exiting."
-        sys.exit(1)
-
-    if checkdeps==1:
-        (error,msgs) = serverStuff.depchecktree(rpms)
-        if error==1:
-            print "Errors within the dir(s):\n %s" % basedir
-            for msg in msgs:
-                print "   " + msg
-            sys.exit(1)
-        else:
-            print "All dependencies resolved and no conflicts detected"
-    
-    if writehdrs==1:
-        #if the headerdir exists and its a file then we're in deep crap
-        if os.path.isfile(headerdir):
-            print "%s is a file" % (headerdir)
-            sys.exit(1)
-
-        #if it doesn't exist then make the dir
-        if not os.path.exists(headerdir):
-            os.mkdir(headerdir)
-        # done with the sanity checks, on to the cleanups
-        #looks for a list of .hdr files and the header.info file
-        hdrlist = serverStuff.getfilelist(headerdir, '.hdr', [], 0)
-
-        #removes both entirely 
-        for hdr in hdrlist:
-            os.unlink(hdr)
-        if os.path.exists(headerinfo):
-            os.unlink(headerinfo)
-        rpminfo = genhdrs(rpms, headerdir,rpmcheck,compress)
-
-        #Write header.info file
-        print "\nWriting header.info file"
-        headerfd = open(headerinfo, "w")
-        for item in rpminfo.keys():
-            (name,arch) = item
-            (epoch, ver, rel, rpmloc) = rpminfo[item]
-            info = "%s:%s-%s-%s.%s=%s\n" % (epoch, name, ver, rel, arch, rpmloc)
-            headerfd.write(info)
-        headerfd.close()
-
-
-    #take us home mr. data
-    os.chdir(curdir)
-
 
 if __name__ == "__main__":
     main()
