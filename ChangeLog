@@ -1,3 +1,171 @@
+2004-03-16 23:13  skvidal
+
+	* configure.in, yum-daily.spec, yum.spec, yummain.py: 
+	mark as 2.0.6
+
+2004-03-16 22:59  skvidal
+
+	* clientStuff.py: 
+	fix for failure to delete the cachedb lockfile.
+
+2004-03-10 23:30  skvidal
+
+	* po/Makefile.in: 
+	and to makefile
+
+2004-03-10 23:28  skvidal
+
+	* po/: es.po, ru.po, yum.pot: 
+	added spanish translation from: Juan R. G. Blanco
+
+2004-03-10 23:28  skvidal
+
+	* po/es.po: file es.po was initially added on branch yum-2_0_X.
+
+2004-03-10 21:50  mstenner
+
+	* keepalive.py: Updated keepalive.py again with still better
+	exception handling.
+
+2004-03-07 19:25  mstenner
+
+	* keepalive.py: fixed BadStatusLine issue with python 2.3
+
+2004-03-05 01:38  skvidal
+
+	* clientStuff.py: 
+	remove the cachedb locks before accessing cachedb
+
+2004-03-03 14:47  skvidal
+
+	* yummain.py: 
+	fix log create issue in:
+	https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=117410
+
+2004-03-02 11:05  skvidal
+
+	* clientStuff.py: 
+	fix a cachedb error when not using it but still have it enabled in
+	config
+
+2004-02-29 20:26  skvidal
+
+	* docs/yum.conf.5: 
+	documented usecomps, hdlist[2], cachedb and usecachedb config
+	options
+
+2004-02-29 17:06  skvidal
+
+	* clientStuff.py: 
+	make the rpmdb-$distro stuff work at a speed that is > a snail's
+	pace.
+
+2004-02-29 15:36  skvidal
+
+	* clientStuff.py: 
+	really fix rpmdb-$distro
+
+2004-02-29 14:41  skvidal
+
+	* clientStuff.py, rpmUtils.py, yummain.py: 
+	fix the rpmdb-$distro stuff
+
+2004-02-27 01:54  skvidal
+
+	* clientStuff.py, config.py, rpmUtils.py: 
+	first cut at rpmdb-$distro importing for cache priming
+
+2004-02-26 08:22  skvidal
+
+	* yummain.py: 
+	added F_SETFD to the logfile opening, apparently this makes selinux
+	happier.
+
+2004-02-25 00:15  skvidal
+
+	* docs/yum.conf.5: 
+	documented enable groups
+
+2004-02-24 01:46  skvidal
+
+	* clientStuff.py, config.py: 
+	added enablegroups= to config for disabling groups fixed dumbass
+	typo
+
+2004-02-24 00:57  skvidal
+
+	* clientStuff.py: 
+	fix typo and add hdr.fullFileList() to correct issue with segfaults
+	when using comps-based hdrs
+	
+	Thanks to Josko Plazonic for fixing it and for Jeff Sheltren for
+	noticing it
+
+2004-02-23 02:01  skvidal
+
+	* docs/yum.8: 
+	fix lack of 'search' in docs
+
+2004-02-23 01:58  skvidal
+
+	* config.py, yummain.py, docs/yum.8, docs/yum.conf.5: 
+	- add bootloader option to allow disabling of bootloader
+	modification on kernel update - update docs for:   - bootloader   -
+	installroot   - download-only
+
+2004-02-22 23:51  skvidal
+
+	* clientStuff.py, config.py: 
+	modification to comps importing to make default hdlist[2] path more
+	sane on non x86 archs
+
+2004-02-22 01:04  skvidal
+
+	* clientStuff.py, config.py, yummain.py: 
+	added --download-only separated out package downloading corrected
+	conf.usecomps setting
+
+2004-02-22 00:19  rtomayko
+
+	* urlgrabber.py: Fixed bug #219 - user:password in baseurl not
+	being unescaped.
+
+2004-02-21 17:37  skvidal
+
+	* yummain.py, docs/yum.8: 
+	
+	added --exclude option
+
+2004-02-21 17:27  skvidal
+
+	* clientStuff.py: misc fix
+
+2004-02-21 17:24  skvidal
+
+	* clientStuff.py: 
+	logging for comps db download
+
+2004-02-21 17:11  skvidal
+
+	* clientStuff.py, config.py, rpmUtils.py: 
+	preliminary dirty fix to make initial header download faster for
+	certain distros
+
+2004-02-12 16:12  skvidal
+
+	* yumlock.py: 
+	do it 'right'
+
+2004-02-12 15:02  skvidal
+
+	* yumlock.py: 
+	fix problem with exception checking and alternative locales.
+
+2004-01-31 22:12  skvidal
+
+	* ChangeLog: 
+	Changelog for 2.0.5
+
 2004-01-31 22:11  skvidal
 
 	* configure.in, yum-daily.spec, yum.spec, yummain.py: 
