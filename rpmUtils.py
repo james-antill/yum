@@ -62,7 +62,7 @@ def compareEVR((e1, v1, r1), (e2, v2, r2)):
     # 0: a and b are the same version 
     # -1: b is newer than a 
     def rpmOutToStr(arg):
-        if type(arg) != types.StringType and arg is not None:
+        if type(arg) != types.StringType and arg != None:
             arg = str(arg)
         return arg
     e1 = rpmOutToStr(e1)
