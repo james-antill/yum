@@ -16,6 +16,7 @@ def install_grub(kernelList):
     return ret
 
 
+#FIXME - db open should not suck - read from clientStuff
 def openrpmdb(option=0, dbpath=None):
     dbpath = "/var/lib/rpm/"
     rpm.addMacro("_dbpath", dbpath)
@@ -35,6 +36,7 @@ def findDepLocal(db, dep):
     if dep[0] == '/':
         # Treat it as a file dependency
         try:
+            # FIXME - file dep this needs to be fixed
             hdr_arry = db.Match(dep)
         except:
             hdr_arry = []
@@ -45,16 +47,15 @@ def findDepLocal(db, dep):
     else:
         # Try it first as a package name
         try:
-            hdr_arry = db.findbyname(dep)
+            hdr_arry = db.Match('name', 'dep')
         except:
             hdr_arry = []
         for n in hdr_arry:
             header = db[n]
             break
         else:
-            # else try it as a soname
             try:
-                hdr_arry = db.findbyprovides(dep)
+                hdr_arry = db.Match('provides',dep)
             except:
                 hdr_arry = []
             for n in hdr_arry:
