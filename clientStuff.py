@@ -451,58 +451,84 @@ def actionslists(nevral):
     
     return install_list, update_list, erase_list, updatedeps_list, erasedeps_list
     
-def printactions(i_list, u_list, e_list, ud_list, ed_list):
+def printactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
     log(2, _('I will do the following:'))
     for pkg in i_list:
         (name,arch) = pkg
-        log(2, _('[install: %s.%s]') % (name, arch))
+        (e, v, r) = nevral.evr(name, arch)
+        pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+        log(2, _('[install: %s]') % pkgstring)
     for pkg in u_list:
         (name,arch) = pkg
-        log(2, _('[update: %s.%s]') % (name, arch))
+        (e, v, r) = nevral.evr(name, arch)
+        pkgstring = '%s:%s-%s-%s.%s' (e, name, v, r, arch)
+        log(2, _('[update: %s]') % pkgstring)
     for pkg in e_list:
         (name,arch) = pkg
-        log(2, _('[erase: %s.%s]') % (name, arch))
+        (e, v, r) = nevral.evr(name, arch)
+        pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+        log(2, _('[erase: %s]') % pkgstring)
     if len(ud_list) > 0:
         log(2, _('I will install/upgrade these to satisfy the dependencies:'))
         for pkg in ud_list:
             (name, arch) = pkg
-            log(2, _('[deps: %s.%s]') %(name, arch))
+            (e, v, r) = nevral.evr(name, arch)
+            pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+            log(2, _('[deps: %s]') % pkgstring)
     if len(ed_list) > 0:
         log(2, 'I will erase these to satisfy the dependencies:')
         for pkg in ed_list:
             (name, arch) = pkg
-            log(2, '[deps: %s.%s]' %(name, arch))
+            (e, v, r) = nevral.evr(name, arch)
+            pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+            log(2, _('[deps: %s]') % pkgstring)
 
-def filelogactions(i_list, u_list, e_list, ud_list, ed_list):
+def filelogactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
     i_log = 'Installed: '
     ud_log = 'Dep Installed: '
     u_log = 'Updated: '
     e_log = 'Erased: '
         
     for (name, arch) in i_list:
-        filelog(1, i_log + name + '.' + arch)
+        (e, v, r) = nevral.evr(name, arch)
+        pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+        filelog(1, i_log + pkgstring)
     for (name, arch) in ud_list:
-        filelog(1, ud_log + name + '.' + arch)
+        (e, v, r) = nevral.evr(name, arch)
+        pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+        filelog(1, ud_log + pkgstring)
     for (name, arch) in u_list:
-        filelog(1, u_log + name + '.' + arch)
+        (e, v, r) = nevral.evr(name, arch)
+        pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+        filelog(1, u_log + pkgstring)
     for (name, arch) in e_list+ed_list:
-        filelog(1, e_log + name + '.' + arch)
+        (e, v, r) = nevral.evr(name, arch)
+        pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+        filelog(1, e_log + pkgstring)
         
 
-def shortlogactions(i_list, u_list, e_list, ud_list, ed_list):
+def shortlogactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
     i_log = 'Installed: '
     ud_log = 'Dep Installed: '
     u_log = 'Updated: '
     e_log = 'Erased: '
     
     for (name, arch) in i_list:
-        i_log = i_log + ' ' + name + '.' + arch
+        (e, v, r) = nevral.evr(name, arch)
+        pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+        i_log = i_log + ' ' + pkgstring
     for (name, arch) in ud_list:
-        ud_log = ud_log + ' ' + name + '.' + arch
+        (e, v, r) = nevral.evr(name, arch)
+        pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+        ud_log = ud_log + ' ' + pkgstring
     for (name, arch) in u_list:
-        u_log = u_log + ' ' + name + '.' + arch
+        (e, v, r) = nevral.evr(name, arch)
+        pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+        u_log = u_log + ' ' + pkgstring
     for (name, arch) in e_list+ed_list:
-        e_log = e_log + ' ' + name + '.' + arch
+        (e, v, r) = nevral.evr(name, arch)
+        pkgstring = '%s:%s-%s-%s.%s' % (e, name, v, r, arch)
+        e_log = e_log + ' ' + pkgstring
 
     if len(i_list) > 0:
         log(1, i_log)

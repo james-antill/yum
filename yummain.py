@@ -271,7 +271,7 @@ def main(args):
     
     (i_list, u_list, e_list, ud_list, ed_list)=clientStuff.actionslists(tsInfo)
     
-    clientStuff.printactions(i_list, u_list, e_list, ud_list, ed_list)
+    clientStuff.printactions(i_list, u_list, e_list, ud_list, ed_list, tsInfo)
     if conf.assumeyes==0:
         if clientStuff.userconfirm():
             errorlog(1, _('Exiting on user command.'))
@@ -314,8 +314,8 @@ def main(args):
         pkgaction.kernelupdate(tsInfo)
         
         # log what we did and also print it out
-        clientStuff.filelogactions(i_list, u_list, e_list, ud_list, ed_list)
-        clientStuff.shortlogactions(i_list, u_list, e_list, ud_list, ed_list)
+        clientStuff.filelogactions(i_list, u_list, e_list, ud_list, ed_list, tsInfo)
+        clientStuff.shortlogactions(i_list, u_list, e_list, ud_list, ed_list, tsInfo)
         
     else:
         errorlog(1, _('You\'re not root, we can\'t install things'))
