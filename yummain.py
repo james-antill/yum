@@ -291,6 +291,7 @@ def main(args):
     if conf.uid == 0:
         # sigh - the magical "order" command - nice of this not to really be 
         # documented anywhere.
+        tsfin.check()
         tsfin.order()
         errors = tsfin.run(callback.install_callback, '')
         if errors:
