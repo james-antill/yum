@@ -19,6 +19,8 @@ def checkheader(headerfile, name, arch):
     return 1
 
 def checkRpmMD5(package):
+    """take a package, check it out by trying to open it, return 1 if its good
+       return 0 if it's not"""
     ts.setVSFlags(~(rpm.RPMVSF_NOMD5|rpm.RPMVSF_NEEDPAYLOAD))
     fdno = os.open(package, os.O_RDONLY)
     try:
@@ -30,6 +32,9 @@ def checkRpmMD5(package):
     return 1
 
 def checkSig(package, serverid=None):
+    """ take a package, check it's sigs, return 0 if they are all fine, return 
+    1 if the gpg key can't be found, 3 if the key is not trusted, 2 if the 
+    header is in someway damaged"""
     ts.setVSFlags(0)
     fdno = os.open(package, os.O_RDONLY)
     try:

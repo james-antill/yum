@@ -181,7 +181,7 @@ def genhdrs(rpms,headerdir,cmds):
         if cmds['rpmcheck']:
             log(2,_("\nChecking sig on %s") % rpmname)
             if rpmUtils.checkSig(rpmfn) > 0:
-                log(0, _("\n\nProblem with gpg key on %s\n\n") % rpmfn)
+                log(0, _("\n\nProblem with gpg sig or md5sum on %s\n\n") % rpmfn)
                 sys.exit(1)
         hobj = rpmUtils.RPM_Work(rpmfn)
         #check to ignore src.rpms

@@ -866,9 +866,27 @@ def create_final_ts(tsInfo):
                 tsInfo.setlocalrpmpath(name, arch, localrpmpath)
             # we now actually have the rpm and we know where it is - so use it
             rpmloc = tsInfo.localRpmPath(name, arch)
-            pkgaction.checkRpmMD5(rpmloc)
             if conf.servergpgcheck[serverid]:
-                pkgaction.checkRpmSig(rpmloc, serverid)
+                rc = rpmUtils.checkSig(rpmloc, serverid)
+                if rc == 1:
+                    errorlog(0, _('Error: Could not find the GPG Key necessary to validate pkg %s') % rpmloc)
+                    errorlog(0, _('Error: You may want to run yum clean or remove the file: \n %s') % rpmloc)
+                    errorlog(0, _('Error: You may also check that you have the correct GPG keys installed'))
+                    sys.exit(1)
+                elif rc == 2:
+                    errorlog(0, _('Error Reading Header on %s') % rpmloc)
+                    errorlog(0, _('Error: You may want to run yum clean or remove the file: \n %s') % rpmloc)
+                    sys.exit(1)
+                elif rc == 3:
+                    errorlog(0, _('Error: Untrusted GPG key on %s') % rpmloc)
+                    errorlog(0, _('Error: You may want to run yum clean or remove the file: \n %s') % rpmloc)
+                    errorlog(0, _('Error: You may also check that you have the correct GPG keys installed'))
+                    sys.exit(1)
+            else:
+                if not rpmUtils.checkRpmMD5(rpmloc):
+                    errorlog(0, _('Error: MD5 Signature check failed for %s') % rpmloc)
+                    errorlog(0, _('Error: You may want to run yum clean or remove the file: \n %s') % rpmloc)
+                    sys.exit(1)
             if state == 'i':
                 tsfin.addInstall(pkghdr, (pkghdr, rpmloc), 'i')
             else:
