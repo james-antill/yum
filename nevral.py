@@ -144,7 +144,7 @@ class nevral:
         if l == 'in_rpm_db':
             return l
         hdrfn = self.hdrfn(name,arch)
-        base = conf.serverurl[i]
+        base = conf.baseURL(i)
         return base + '/headers/' + hdrfn
     
     def localHdrPath(self, name, arch=None):
@@ -175,7 +175,7 @@ class nevral:
             return None
         if l == 'in_rpm_db':
             return l
-        base = conf.serverurl[i]
+        base = conf.baseURL(i)
         return base +'/'+ l
     
     def localRpmPath(self, name, arch=None):

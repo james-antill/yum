@@ -26,6 +26,7 @@ import pkgaction
 import callback
 import rpmUtils
 import time
+import urlparse
 
 from urlgrabber import close_all, urlgrab, URLGrabError, retrygrab
 
@@ -599,7 +600,7 @@ def get_groups_from_servers(serveridlist):
         if not conf.cache:
             log(3, 'getting groups from server: %s' % serverid)
             try:
-                localgroupfile = retrygrab(remotegroupfile, localgroupfile, copy_local=1)
+                localgroupfile = grab(serverid, remotegroupfile, localgroupfile, copy_local=1)
             except URLGrabError, e:
                 log(3, 'Error getting file %s' % remotegroupfile)
                 log(3, '%s' % e)
@@ -634,7 +635,7 @@ def get_package_info_from_servers(serveridlist, HeaderInfo):
         if not conf.cache:
             log(3, 'Getting header.info from server')
             try:
-                headerinfofn = retrygrab(serverheader, localheaderinfo, copy_local=1)
+                headerinfofn = grab(serverid, serverheader, localheaderinfo, copy_local=1)
             except URLGrabError, e:
                 errorlog(0, 'Error getting file %s' % serverheader)
                 errorlog(0, '%s' % e)
@@ -659,6 +660,8 @@ def download_headers(HeaderInfo, nulist):
     for (name, arch) in nulist:
         LocalHeaderFile = HeaderInfo.localHdrPath(name, arch)
         RemoteHeaderFile = HeaderInfo.remoteHdrUrl(name, arch)
+        
+        serverid = HeaderInfo.serverid(name, arch)
         # if we have one cached, check it, if it fails, unlink it and continue
         # as if it never existed
         # else move along
@@ -682,7 +685,7 @@ def download_headers(HeaderInfo, nulist):
         if not conf.cache:
             log(2, 'getting %s' % (LocalHeaderFile))
             try:
-                hdrfn = retrygrab(RemoteHeaderFile, LocalHeaderFile, copy_local=1,
+                hdrfn = grab(serverird, RemoteHeaderFile, LocalHeaderFile, copy_local=1,
                                   checkfunc=(rpmUtils.checkheader, (name, arch), {}))
             except URLGrabError, e:
                 errorlog(0, 'Error getting file %s' % RemoteHeaderFile)
@@ -858,7 +861,7 @@ def create_final_ts(tsInfo):
             else:
                 log(2, 'Getting %s' % (os.path.basename(rpmloc)))
                 try:
-                    localrpmpath = retrygrab(tsInfo.remoteRpmUrl(name, arch), rpmloc, copy_local=0,
+                    localrpmpath = grab(serverid, tsInfo.remoteRpmUrl(name, arch), rpmloc, copy_local=0,
                                              checkfunc=(rpmUtils.checkRpmMD5, (), {'urlgraberror':1})) 
                 except URLGrabError, e:
                     errorlog(0, 'Error getting file %s' % tsInfo.remoteRpmUrl(name, arch))
@@ -935,3 +938,50 @@ def descfsize(size):
     else:
         size = size / 1000000000.0
         return "%.2f GB" % size
+
+def grab(serverID, url, filename=None, copy_local=0, close_connection=0,
+          progress_obj=None, throttle=None, bandwidth=None,
+          numtries=3, retrycodes=[-1,2,4,5,6,7], checkfunc=None):
+
+    """Wrap retry grab and add in failover stuff.  This needs access to
+    the conf class as well as the serverID.
+
+    We do look at retrycodes here to see if we should return or failover.
+    On fail we will raise the last exception that we got."""
+
+    fc = conf.get_failClass(serverID)
+    base = ''
+    for root in conf.serverurl[serverID]:
+        if string.find(url, root) == 0:
+            # We found the current base this url is made of
+            base = root
+            break
+    if base == '':
+        # We didn't find the base...something is wrong
+        raise Exception, "%s isn't made from a base URL I know about" % url
+    filepath = url[len(base):]
+    log(3, "failover: baseURL = " + base)
+    log(3, "failover: path = " + filepath)
+
+    # don't trust the base that the user supplied
+    base = fc.get_serverurl()
+    while base != None:
+        # Loop over baseURLs until one works or all are dead
+        try:
+            (scheme, host, path, parm, query, frag) = urlparse.urlparse(base)
+            path = os.path.normpath(path + '/' + filepath)
+            finalurl = urlparse.urlunparse((scheme, host, path, parm, query, frag))
+            return retrygrab(finalurl, filename, copy_local,
+                             close_connection, progress_obj, throttle,
+                             bandwidth, numtries, retrycodes, checkfunc)
+            # What?  We were successful?
+        except URLGrabError, e:
+            if e.errno in retrycodes:
+                errorlog(1, "retrygrab() failed for %s -- executing failover methodm" % base)
+                fc.server_failed()
+                base = fc.get_serverurl()
+                if base == None:
+                    errorlog(1, "failover: out of servers to try")
+                    raise
+            else:
+                raise

@@ -23,6 +23,7 @@ import string
 import urllib
 import rpm
 import re
+import failover
 import archwork
 import rpmUtils
 
@@ -53,8 +54,9 @@ class yumconf:
         self.serverpkgdir = {}
         self.serverhdrdir = {}
         self.servercache = {}
-        self.servergpgcheck= {}
-        self.excludes= []
+        self.servergpgcheck={}
+        self.failoverclass = {}
+        self.excludes=[]
         
         #defaults
         self.cachedir = '/var/cache/yum'
@@ -87,7 +89,7 @@ class yumconf:
         if self._getoption('main','pkgpolicy') != None:
             self.pkgpolicy = self._getoption('main','pkgpolicy')
         if self._getoption('main','exclude') != None:
-            self.excludes = string.split(self._getoption('main','exclude'), ' ')
+            self.excludes = self.parseList(self._getoption('main','exclude'))
         if self._getoption('main','assumeyes') != None:
             self.assumeyes = self.cfg.getboolean('main', 'assumeyes')
         if self._getoption('main','errorlevel') != None:
@@ -116,24 +118,35 @@ class yumconf:
         if len(self.cfg.sections()) > 1:
             for section in self.cfg.sections(): # loop through the list of sections
                 if section != 'main': # must be a serverid
-                    name = self._getoption(section,'name')
-                    url = self._getoption(section,'baseurl')
-                    if name != None and url != None:
+                    name = self._getoption(section, 'name')
+                    urls = self._getoption(section, 'baseurl')
+                    urls = self._doreplace(urls)
+                    urls = self.parseList(urls)
+                    if name != None and len(urls) > 0:
                         self.servers.append(section)
                         name = self._doreplace(name)
-                        url = self._doreplace(url)
                         self.servername[section] = name
-                        self.serverurl[section] = url
+                        self.serverurl[section] = urls
+                        failmeth = self._getoption(section,'failovermethod')
+                        if failmeth == 'roundrobin':
+                            failclass = failover.roundRobin(self, section)
+                        elif failmeth == 'priority':
+                            failclass = failover.priority(self, section)
+                        else:
+                            failclass = failover.roundRobin(self, section)
+                        self.failoverclass[section] = failclass
                         if self._getoption(section,'gpgcheck') != None:
                             self.servergpgcheck[section]=self.cfg.getboolean(section,'gpgcheck')
                         else:
                             self.servergpgcheck[section]=0
-                        
-                        (s,b,p,q,f,o) = urlparse.urlparse(self.serverurl[section])
-                        # currently only allowing http, ftp and file url types
-                        if s not in ['http', 'ftp', 'file']:
-                            print _('Not using ftp, http or file for servers, Aborting - %s') % (self.serverurl[section])
-                            sys.exit(1)
+
+                        for url in self.serverurl[section]:
+                            (s,b,p,q,f,o) = urlparse.urlparse(url)
+                            # currently only allowing http and ftp servers 
+                            if s not in ['http', 'ftp', 'file', 'https']:
+                                print _('using ftp, http[s], or file for servers, Aborting - %s') % (url)
+                                sys.exit(1)
+
                         cache = os.path.join(self.cachedir,section)
                         pkgdir = os.path.join(cache, 'packages')
                         hdrdir = os.path.join(cache, 'headers')
@@ -154,14 +167,29 @@ class yumconf:
         except ConfigParser.NoOptionError, e:
             return None
             
+    def parseList(self, value):
+        listvalue = []
+        # we need to allow for the '\n[whitespace]' continuation - easier
+        # to sub the \n with a space and then read the lines
+        listrepl = re.compile('\n')
+        (value, count) = listrepl.subn(' ', value)
+        listvalue = string.split(value)
+        return listvalue
+        
     def remoteGroups(self, serverid):
-        return os.path.join(self.serverurl[serverid], 'yumgroups.xml')
+        return os.path.join(self.baseURL(serverid), 'yumgroups.xml')
     
     def localGroups(self, serverid):
         return os.path.join(self.servercache[serverid], 'yumgroups.xml')
         
     def baseURL(self, serverid):
-        return self.serverurl[serverid]
+        return self.get_failClass(serverid).get_serverurl()
+        
+    def server_failed(self, serverid):
+        self.failoverclass[serverid].server_failed()
+    
+    def get_failClass(self, serverid):
+        return self.failoverclass[serverid]
         
     def remoteHeader(self, serverid):
         return os.path.join(self.baseURL(serverid), 'headers/header.info')
