@@ -640,8 +640,16 @@ def get_package_info_from_servers(serveridlist, HeaderInfo):
                 errorlog(0, '%s' % e)
                 sys.exit(1)
         else:
-            log(3, 'Using cached header.info file')
-            headerinfofn = localheaderinfo
+            if os.path.exists(localheaderinfo):
+                log(3, 'Using cached header.info file')
+                headerinfofn = localheaderinfo
+            else:
+                errorlog(0, 'Error - %s cannot be found' % localheaderinfo)
+                if conf.uid != 0:
+                    errorlog(1, 'Please ask your sysadmin to update the headers on this system.')
+                else:
+                    errorlog(1, 'Please run yum in non-caching mode to correct this header.')
+                sys.exit(1)
         log(4,'headerinfofn: ' + headerinfofn)
         HeaderInfoNevralLoad(headerinfofn, HeaderInfo, serverid)
 
@@ -659,7 +667,7 @@ def download_headers(HeaderInfo, nulist):
                 rpmUtils.checkheader(LocalHeaderFile, name, arch)
             except URLGrabError, e:
                 if conf.cache:
-                    errorlog(1, 'The file %s is damaged.' % LocalHeaderFile)
+                    errorlog(0, 'The file %s is damaged.' % LocalHeaderFile)
                     if conf.uid != 0:
                         errorlog(1, 'Please ask your sysadmin to update the headers on this system.')
                     else:

@@ -185,8 +185,10 @@ def main(args):
     ################################################################################
     log(2, _('Finding updated packages'))
     (uplist, newlist, nulist) = clientStuff.getupdatedhdrlist(HeaderInfo, rpmDBInfo)
-    log(2, _('Downloading needed headers'))
-    clientStuff.download_headers(HeaderInfo, nulist)
+    if process != 'clean':
+        log(2, _('Downloading needed headers'))
+        clientStuff.download_headers(HeaderInfo, nulist)
+        
     if process in ['upgrade', 'groupupgrade']:
         log(2, _('Finding obsoleted packages'))
         obsoleting, obsoleted = clientStuff.returnObsoletes(HeaderInfo, rpmDBInfo, nulist)
