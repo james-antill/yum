@@ -9,8 +9,9 @@ URL: http://www.dulug.duke.edu/yum/
 BuildRoot: %{_tmppath}/%{name}-%{version}root
 BuildArchitectures: noarch
 BuildRequires: python
+BuildRequires: gettext
 Obsoletes: yum-phoebe
-Requires: python, rpm-python, rpm >= 0:4.1.1
+Requires: python, rpm-python, rpm >= 0:4.1.1, libxml2-python
 Prereq: /sbin/chkconfig, /sbin/service
 
 %description
