@@ -25,6 +25,8 @@ import fnmatch
 import pkgaction
 import callback
 import rpmUtils
+import time
+
 from urlgrabber import close_all, urlgrab, URLGrabError, retrygrab
 
 from i18n import _
@@ -583,7 +585,6 @@ def clean_up_old_headers(rpmDBInfo, HeaderInfo):
             
 
 def printtime():
-    import time
     return time.strftime('%m/%d/%y %H:%M:%S ', time.localtime(time.time()))
 
 def get_groups_from_servers(serveridlist):
