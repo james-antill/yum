@@ -133,7 +133,7 @@ def formatRequire (name, version, flags):
             name = name + '>'
         if flags & rpm.RPMSENSE_EQUAL:
             name = name + '='
-            name = name + ' %s' % version
+        name = name + ' %s' % version
     return name
 
 
