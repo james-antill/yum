@@ -4,7 +4,7 @@
 #
 # Author:       Seth Vidal <skvidal@phy.duke.edu>
 #
-# chkconfig:	345 50 01
+# chkconfig:	- 50 01
 #
 # description:  Enable daily run of yum, a program updater
 #
