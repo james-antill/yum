@@ -100,8 +100,13 @@ def HeaderInfoNevralLoad(filename, nevral, serverid):
     in_file.close()
     archlist = archwork.compatArchList()
     for line in info:
-        (envraStr, rpmpath) = string.split(line, '=')
-        (epoch, name, ver, rel, arch) = stripENVRA(envraStr)
+        try:
+            (envraStr, rpmpath) = string.split(line, '=')
+            (epoch, name, ver, rel, arch) = stripENVRA(envraStr)
+        except ValueError, e:
+            errorlog(0, _('Damaged or Bad header.info from %s') % conf.servername[serverid])
+            errorlog(0, _('This is probably because of a downed server or an invalid header.info on a repository.'))
+            sys.exit(1)
         rpmpath = string.replace(rpmpath, '\n', '')
         if arch in archlist:
             if not nameInExcludes(name, serverid):
