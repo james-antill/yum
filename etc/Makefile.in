@@ -36,14 +36,14 @@ all: $(srcdir)/yum.conf
 
 
 install: all installdirs
-	mkdir -p $(DESTDIR)/etc/{cron.daily,init.d,logrotate.d}
-	$(INSTALL_DATA) $(srcdir)/yum.conf $(DESTDIR)/etc/yum.conf
-	$(INSTALL_SCRIPT) $(srcdir)/yum.cron $(DESTDIR)/etc/cron.daily/yum.cron
-	$(INSTALL_SCRIPT) $(srcdir)/yum.init $(DESTDIR)/etc/init.d/yum
-	$(INSTALL_DATA) $(srcdir)/yum.logrotate $(DESTDIR)/etc/logrotate.d/yum
+	$(top_srcdir)/mkinstalldirs $(DESTDIR)$(sysconfdir)/{cron.daily,init.d,logrotate.d}
+	$(INSTALL_DATA) $(srcdir)/yum.conf $(DESTDIR)$(sysconfdir)/yum.conf
+	$(INSTALL_SCRIPT) $(srcdir)/yum.cron $(DESTDIR)$(sysconfdir)/cron.daily/yum.cron
+	$(INSTALL_SCRIPT) $(srcdir)/yum.init $(DESTDIR)$(sysconfdir)/init.d/yum
+	$(INSTALL_DATA) $(srcdir)/yum.logrotate $(DESTDIR)$(sysconfdir)/logrotate.d/yum
 
 uninstall:
-	$(RM) /etc/yum.conf
+	$(RM) $(sysconfdir)/yum.conf
 
 
 clean:

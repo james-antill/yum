@@ -188,7 +188,7 @@ distfiles:
 	done
 
 installdirs:
-	$(srcdir)/mkinstalldirs $(DESTDIR)$(bindir) $(DESTDIR)/etc $(DESTDIR)$(pkgdatadir) $(DESTDIR)$(mandir)/man8 $(DESTDIR)$(mandir)/man5 $(DESTDIR)/var/cache/@PACKAGE@/
+	$(srcdir)/mkinstalldirs $(DESTDIR)$(bindir) $(DESTDIR)/etc $(DESTDIR)$(pkgdatadir) $(DESTDIR)$(mandir)/man8 $(DESTDIR)$(mandir)/man5 $(DESTDIR)$(localstatedir)/cache/@PACKAGE@/
 
 archive: dist
 
