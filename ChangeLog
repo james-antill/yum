@@ -1,3 +1,15 @@
+2003-09-08 22:05  skvidal
+
+	* configure.in, yum.spec, yummain.py: 
+	2.0.3 Brown paper bag release for leaving yum-arch -c completely
+	broken.
+
+2003-09-08 21:18  skvidal
+
+	* ChangeLog, pullheaders.py, rpmUtils.py: 
+	clean up pullheaders and sections of rpmUtils to correct for
+	yum-arch -c dying
+
 2003-09-07 23:51  skvidal
 
 	* configure.in, yum.spec, yummain.py: 
@@ -143,14 +155,14 @@
 
 2003-08-09 01:56  skvidal
 
-	* Makefile.in, yum-daily.spec: 
-	added yum-daily.spec and made makefile do the right thing for
-	dailies
+	* yum-daily.spec: file yum-daily.spec was initially added on branch
+	yum-rpm_4_2_branch.
 
 2003-08-09 01:56  skvidal
 
-	* yum-daily.spec: file yum-daily.spec was initially added on branch
-	yum-rpm_4_2_branch.
+	* Makefile.in, yum-daily.spec: 
+	added yum-daily.spec and made makefile do the right thing for
+	dailies
 
 2003-08-08 20:08  skvidal
 
@@ -399,13 +411,13 @@
 
 2003-05-27 13:32  skvidal
 
-	* failover.py: 
-	adding failover.py
+	* failover.py: file failover.py was initially added on branch
+	yum-rpm_4_2_branch.
 
 2003-05-27 13:32  skvidal
 
-	* failover.py: file failover.py was initially added on branch
-	yum-rpm_4_2_branch.
+	* failover.py: 
+	adding failover.py
 
 2003-05-27 13:25  skvidal
 
@@ -1077,12 +1089,17 @@
 
 2003-02-19 13:57  skvidal
 
-	* po/: Makefile.in, pygettext.py, ru.po, yum.pot: 
-	Added all the needed po files
+	* po/pygettext.py: file pygettext.py was initially added on branch
+	yum-rpm_4_2_branch.
 
 2003-02-19 13:57  skvidal
 
-	* po/pygettext.py: file pygettext.py was initially added on branch
+	* po/: Makefile.in, pygettext.py, ru.po, yum.pot: 
+	Added all the needed po files
+
+2003-02-18 00:55  skvidal
+
+	* rpmUtils.py: file rpmUtils.py was initially added on branch
 	yum-rpm_4_2_branch.
 
 2003-02-18 00:55  skvidal
@@ -1091,11 +1108,6 @@
 	Started the changes to class-ify all or most of the rpm functions. 
 	Trying to strip out functions from clientStuff also - found a bug
 	in nevral where an error message wouldn't be expanded
-
-2003-02-18 00:55  skvidal
-
-	* rpmUtils.py: file rpmUtils.py was initially added on branch
-	yum-rpm_4_2_branch.
 
 2003-02-17 10:34  skvidal
 
