@@ -866,7 +866,7 @@ def returnCompsHeaders():
         if fd:
             hdrlist = rpm.readHeaderListFromFD(fd)
         if fd2:
-            rpm.mergeHeaderListFromFd(hdrlist, fd, 1000004)
+            rpm.mergeHeaderListFromFD(hdrlist, fd, 1000004)
 
         del fd
         del fd2
@@ -875,7 +875,7 @@ def returnCompsHeaders():
             hdrobj = rpmUtils.Header_Work(hdr)
             (n,e,v,r,a) = hdrobj.nevra()
             e = hdrobj.fixedEpoch()
-            returndict[(n, a, e, v, r, a)] = hdrobj
+            returndict[(n, a, e, v, r)] = hdrobj
 
         del hdrlist
 
@@ -919,6 +919,7 @@ def download_headers(HeaderInfo, nulist):
             log(3, _('getting %s') % (LocalHeaderFile))
             (e, v, r) = HeaderInfo.evr(name, arch)
             if compsdict.has_key((name, arch, e, v, r)):
+                log(4, _('getting %s from comps db') % (LocalHeaderFile))
                 hdrobj = compsdict[(name, arch, e, v, r)]
                 serverid = HeaderInfo.serverid(name, arch)
                 basepath = conf.serverhdrdir[i]
