@@ -167,25 +167,20 @@ def readHeader(rpmfn):
             fd = gzip.open(rpmfn, 'r')
             try: 
                 h = rpm.headerLoad(fd.read())
-            except rpm404.error,e:
-                errorlog(0,'Damaged Header %s' % rpmfn)
-                sys.exit(1)
             except rpm.error, e:
                 errorlog(0,'Damaged Header %s' % rpmfn)
-                sys.exit(1)
+                return None
         except IOError,e:
             fd = open(rpmfn, 'r')
             try:
                 h = rpm.headerLoad(fd.read())
-            except rpm404.error,e:
-                errorlog(0,'Damaged Header %s' % rpmfn)
-                sys.exit(1)
             except rpm.error, e:
                 errorlog(0,'Damaged Header %s' % rpmfn)
-                sys.exit(1)
+                return None
+        except ValueError, e:
+            return None
     fd.close()
     return h
-
 
 def returnObsoletes(headerNevral, rpmNevral, uninstNAlist):
     obsdict = {} # obsdict[obseletinglist]=packageitobsoletes
@@ -555,18 +550,41 @@ def get_package_info_from_servers(conf, HeaderInfo):
         log(4,'headerinfofn: ' + headerinfofn)
         HeaderInfoNevralLoad(headerinfofn, HeaderInfo, serverid)
 
+def checkheader(headerfile, name, arch):
+    #return true(1) if the header is good
+    #return  false(0) if the header is bad
+    # test is fairly rudimentary - read in header - read two portions of the header
+    h = readHeader(headerfile)
+    if h == None:
+        return 0
+    else:
+        if name != h[rpm.RPMTAG_NAME] or arch != h[rpm.RPMTAG_ARCH]:
+            return 0
+    return 1
 
 def download_headers(HeaderInfo, nulist):
     for (name, arch) in nulist:
-        # this should do something real, like, oh I dunno, check the header 
-        # but I'll be damned if I know how
-        if os.path.exists(HeaderInfo.localHdrPath(name, arch)):
-            log(4, 'cached %s' % (HeaderInfo.hdrfn(name, arch)))
-            pass
-        else:
-            log(2, 'getting %s' % (HeaderInfo.hdrfn(name, arch)))
-            urlgrab(HeaderInfo.remoteHdrUrl(name, arch), HeaderInfo.localHdrPath(name, arch), 'nohook')
-
+        # if header exists - it gets checked
+        # if header does not exist it gets downloaded then checked
+        # this should happen in a loop - up to 3 times
+        # if we can't get a good header after 3 tries we bail.
+        checkpass = 1
+        LocalHeaderFile = HeaderInfo.localHdrPath(name, arch)
+        RemoteHeaderFile = HeaderInfo.remoteHdrUrl(name, arch)
+        while checkpass <= 3:
+            if os.path.exists(LocalHeaderFile):
+                log(4, 'cached %s' % LocalHeaderFile)
+            else:
+                log(2, 'getting %s' % LocalHeaderFile)
+                urlgrab(RemoteHeaderFile, LocalHeaderFile, 'nohook')
+            if checkheader(LocalHeaderFile, name, arch):
+                    break
+            else:
+                log(3, 'damaged header %s try - %d' % (LocalHeaderFile, checkpass))
+                checkpass = checkpass + 1
+                os.unlink(LocalHeaderFile)
+                good = 0
+                
 def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmDBInfo, obsdict):
     from yummain import usage
     if conf.uid != 0:
