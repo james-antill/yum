@@ -722,13 +722,13 @@ def get_package_info_from_servers(serveridlist, HeaderInfo):
         localpkgs = conf.serverpkgdir[serverid]
         localhdrs = conf.serverhdrdir[serverid]
         localheaderinfo = conf.localHeader(serverid)
-        if not os.path.exists(servercache):
-            os.mkdir(servercache)
-        if not os.path.exists(localpkgs):
-            os.mkdir(localpkgs)
-        if not os.path.exists(localhdrs):
-            os.mkdir(localhdrs)
         if not conf.cache:
+            if not os.path.exists(servercache):
+                os.mkdir(servercache)
+            if not os.path.exists(localpkgs):
+                os.mkdir(localpkgs)
+            if not os.path.exists(localhdrs):
+                os.mkdir(localhdrs)
             log(3, 'Getting header.info from server')
             try:
                 headerinfofn = grab(serverid, serverheader, localheaderinfo, copy_local=1)
