@@ -106,7 +106,21 @@ def HeaderInfoNevralLoad(filename, nevral, serverid):
         if arch in archlist:
             if not nameInExcludes(name, serverid):
                 if conf.pkgpolicy == 'last':
-                    nevral.add((name, epoch, ver, rel, arch, rpmpath, serverid), 'a')
+                    # just add in the last one don't compare
+                    if nevral.exists(name, arch):
+                        # but if one already exists in the nevral replace it
+                        if serverid == nevral.serverid(name, arch):
+                            # unless we're in the same serverid then we need to take the newest
+                            (e1, v1, r1) = nevral.evr(name, arch)
+                            (e2, v2, r2) = (epoch, ver, rel)    
+                            rc = rpmUtils.compareEVR((e1, v1, r1), (e2, v2, r2))
+                            if (rc < 0):
+                                # ooo  the second one is newer - push it in.
+                                nevral.add((name, epoch, ver, rel, arch, rpmpath, serverid), 'a')
+                        else:
+                            nevral.add((name, epoch, ver, rel, arch, rpmpath, serverid), 'a')
+                    else:
+                        nevral.add((name, epoch, ver, rel, arch, rpmpath, serverid), 'a')
                 else:
                     if nevral.exists(name, arch):
                         (e1, v1, r1) = nevral.evr(name, arch)
