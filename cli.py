@@ -25,10 +25,9 @@ import random
 import fcntl
 import fnmatch
 import re
-
 import output
+
 from urlgrabber.progress import TextMeter
-import shell
 import yum
 import yum.Errors
 import yum.misc
@@ -45,10 +44,6 @@ import urlgrabber.grabber
 
 __version__ = '2.1.13'
 
-class CliError(yum.Errors.YumBaseError):
-   def __init__(self, args=None):
-        yum.Errors.YumBaseError.__init__(self)
-        self.args = args
 
 class YumBaseCli(yum.YumBase, output.YumOutput):
     """This is the base class for yum cli.
@@ -115,8 +110,7 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
         except getopt.error, e:
             self.errorlog(0, _('Options Error: %s') % e)
             self.usage()
-            sys.exit(1)
-            
+    
         # get the early options out of the way
         # these are ones that:
         #  - we need to know about and do NOW
@@ -204,7 +198,6 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
                     self.conf.setConfigOption('assumeyes',1)
                 elif o in ['-h', '--help']:
                     self.usage()
-                    sys.exit(0)
                 elif o == '-C':
                     self.conf.setConfigOption('cache', 1)
                 elif o == '-R':
@@ -221,14 +214,12 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
                     except yum.Errors.ConfigError, e:
                         self.errorlog(0, _(e))
                         self.usage()
-                        sys.exit(1)
                 elif o == '--disablerepo':
                     try:
                         self.conf.repos.disableRepo(a)
                     except yum.Errors.ConfigError, e:
                         self.errorlog(0, _(e))
                         self.usage()
-                        sys.exit(1)
                         
                 elif o == '--exclude':
                     try:
@@ -238,14 +229,12 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
                     except yum.Errors.ConfigError, e:
                         self.errorlog(0, _(e))
                         self.usage()
-                        sys.exit(1)
                 
                             
         except ValueError, e:
             self.errorlog(0, _('Options Error: %s') % e)
             self.usage()
-            sys.exit(1)
-            
+        
         # if we're below 2 on the debug level we don't need to be outputting
         # progress bars - this is hacky - I'm open to other options
         # One of these is a download
@@ -274,11 +263,8 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
         for arg in self.args:
             self.cmdstring += '%s ' % arg
 
-        try:
-            self.parseCommands() # before we exit check over the base command + args
-                             # make sure they match/make sense
-        except CliError:
-            sys.exit(1)
+        self.parseCommands() # before we exit check over the base command + args
+                             # make sure they match
     
         # set our caching mode correctly
         
@@ -288,7 +274,7 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
         time.sleep(sleeptime)
 
 
-    def parseCommands(self, mycommands=[]):
+    def parseCommands(self):
         """reads self.cmds and parses them out to make sure that the requested 
         base command + argument makes any sense at all""" 
 
@@ -302,8 +288,7 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
         if len(self.cmds) < 1:
             self.errorlog(0, _('You need to give some command'))
             self.usage()
-            raise CliError
-            
+
         self.basecmd = self.cmds[0] # our base command
         self.extcmds = self.cmds[1:] # out extended arguments/commands
         
@@ -318,9 +303,9 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
                                 'clean', 'remove', 'provides', 'check-update',
                                 'search', 'generate-rss', 'upgrade', 
                                 'whatprovides', 'localinstall', 'localupdate',
-                                'resolvedep', 'shell']:
+                                'resolvedep']:
             self.usage()
-            raise CliError
+            
     
         if self.conf.getConfigOption('uid') != 0:
             if self.basecmd in ['install', 'update', 'clean', 'upgrade','erase', 
@@ -328,7 +313,7 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
                                 'groupremove', 'importkey', 'makecache', 
                                 'localinstall', 'localupdate']:
                 self.errorlog(0, _('You need to be root to perform this command.'))
-                raise CliError
+                sys.exit(1)
 
         if self.basecmd in ['install', 'update', 'upgrade', 'groupinstall',
                             'groupupdate', 'localinstall', 'localupdate']:
@@ -351,27 +336,24 @@ will install it for you.
 For more information contact your distribution or package provider.
 """)
                         self.errorlog(0, msg)
-                        raise CliError
+                        sys.exit(1)
 
                 
         if self.basecmd in ['install', 'erase', 'remove', 'localinstall', 'localupdate']:
             if len(self.extcmds) == 0:
                 self.errorlog(0, _('Error: Need to pass a list of pkgs to %s') % self.basecmd)
                 self.usage()
-                raise CliError
     
         elif self.basecmd in ['provides', 'search', 'whatprovides']:
             if len(self.extcmds) == 0:
                 self.errorlog(0, _('Error: Need an item to match'))
                 self.usage()
-                raise CliError
-                
+            
         elif self.basecmd in ['groupupdate', 'groupinstall', 'groupremove', 'groupinfo']:
             if len(self.extcmds) == 0:
                 self.errorlog(0, _('Error: Need a group or list of groups'))
                 self.usage()
-                raise CliError
-                
+    
         elif self.basecmd == 'clean':
             if len(self.extcmds) == 0:
                 self.errorlog(0,
@@ -379,8 +361,6 @@ For more information contact your distribution or package provider.
             for cmd in self.extcmds:
                 if cmd not in ['headers', 'packages', 'metadata', 'cache', 'all']:
                     self.usage()
-                    raise CliError
-                    
         elif self.basecmd == 'generate-rss':
             if len(self.extcmds) == 0:
                 self.extcmds.insert(0, 'recent')
@@ -388,24 +368,7 @@ For more information contact your distribution or package provider.
             if self.extcmds[0] not in ['updates', 'recent']:
                 self.errorlog(0, _("Error: generate-rss takes no argument, 'updates' or 'recent'."))
                 self.usage()
-                raise CliError
             
-        elif self.basecmd == 'shell':
-            if len(self.extcmds) == 0:
-                self.log(3, "No argument to shell")
-                pass
-            elif len(self.extcmds) == 1:
-                self.log(3, "Filename passed to shell: %s" % self.extcmds[0])              
-                if not os.path.isfile(self.extcmds[0]):
-                    self.errorlog(
-                        0, _("File: %s given has argument to shell does not exists." % self.extcmds))
-                    self.usage()
-                    raise CliError
-            else:
-                self.errorlog(0,_("Error: more than one file given as argument to shell."))
-                self.usage()
-                raise CliError
-              
         elif self.basecmd in ['list', 'check-update', 'info', 'update', 'upgrade',
                               'generate-rss', 'grouplist', 'makecache',
                               'resolvedep']:
@@ -413,21 +376,6 @@ For more information contact your distribution or package provider.
     
         else:
             self.usage()
-            raise CliError
-
-    def doShell(self):
-        """do a shell-like interface for yum commands"""
-
-        self.log(2, 'Setting up Yum Shell')
-        self.doTsSetup()
-        self.doRpmDBSetup()
-        if len(self.extcmds) == 0:
-            yumshell = shell.YumShell(base=self)
-            yumshell.cmdloop()
-        else:
-            yumshell = shell.YumShell(base=self)
-            yumshell.script()
-        return yumshell.result, yumshell.resultmsgs
 
     def doCommands(self):
         """calls the base command passes the extended commands/args out to be
@@ -445,7 +393,8 @@ For more information contact your distribution or package provider.
             self.doTsSetup()
         except yum.Errors.YumBaseError, e:
             return 1, [str(e)]
-        
+
+
         if self.basecmd == 'install':
             self.log(2, "Setting up Install Process")
             try:
@@ -1441,7 +1390,7 @@ For more information contact your distribution or package provider.
 
         -h, --help  - this screen
     """)
-
+        sys.exit(1)
 
            
 
