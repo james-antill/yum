@@ -1,6 +1,7 @@
 #!/usr/bin/python -tt
 
 import rpm
+import types
 import os
 import gzip
 import sys
@@ -88,6 +89,7 @@ class RPM_Base_Work:
     def _getTag(self, tag):
         if self.hdr is None:
             errorlog(0, _('Got an empty Header, something has gone wrong'))
+            #should raise a yum error here
             sys.exit(1)
         return self.hdr[tag]
     
@@ -142,25 +144,30 @@ class RPM_Base_Work:
         return(headerfn)
 
 class Header_Work(RPM_Base_Work):
-
-    def __init__(self, hdrfn):
-        try:
-            fd = gzip.open(hdrfn, 'r')
-            try: 
-                h = rpm.headerLoad(fd.read())
-            except rpm.error, e:
-                errorlog(0,_('Damaged Header %s') % rpmfn)
-                h = None
-        except IOError,e:
-            fd = open(hdrfn, 'r')
+    """for operating on hdrs in and out of the rpmdb
+       if the first arg is a string then it's a filename
+       otherwise it's an rpm hdr"""
+    def __init__(self, header):
+        if header is types.StringType:
             try:
-                self.hdr = rpm.headerLoad(fd.read())
-            except rpm.error, e:
-                errorlog(0,_('Damaged Header %s') % hdrfn)
+                fd = gzip.open(header, 'r')
+                try: 
+                    h = rpm.headerLoad(fd.read())
+                except rpm.error, e:
+                    errorlog(0,_('Damaged Header %s') % header)
+                    h = None
+            except IOError,e:
+                fd = open(header, 'r')
+                try:
+                    self.hdr = rpm.headerLoad(fd.read())
+                except rpm.error, e:
+                    errorlog(0,_('Damaged Header %s') % header)
+                    h = None
+            except ValueError, e:
                 h = None
-        except ValueError, e:
-            h = None
-        fd.close()
+            fd.close()
+        else:
+            h = header
         self.hdr = h
 
 
@@ -175,21 +182,42 @@ class RPM_Work(RPM_Base_Work):
             self.hdr = None
         os.close(fd)
     
-
 class RPM_DB_Work:
-    """ This should operate on groups of headers/matches/etc in the rpmdb - ideally it will 
+    """This should operate on groups of headers/matches/etc in the rpmdb - ideally it will 
     operate with a list of the Base objects above, so I can refer to any one object there
     not sure the best way to do this yet, more thinking involved"""
-    def __init__(self, ts):
-        self.ts = ts
+    def __init__(self, dbPath):
+        self.ts = rpm.TransactionSet(dbPath)
         
-    # pass in ts to use - have a match function to abstract the concept
-    # this should really just be used for matches and grabbing info from the rpmdb
-    # put exclusions for gpg keys here, etc.
-    
-    def match(tag, search):
+        self.methods = ['addInstall', 'addErase', 'run', 'check', 'order', 'hdrFromFdno',
+                   'closeDB']
+                   
+    def __getattr__(self, attribute):
+        if attribute in self.methods:
+            return getattr(self.ts, attribute)
+        else:
+            raise AttributeError, attribute
+            
+    def match(self, tag, search):
         """hands back a list of Header_Work objects"""
-        _hwlist = []
-        mi = self.ts.dbMatch(tag, search)
-        
-        
+        hwlist = []
+        hdrlist = self.ts.dbMatch(tag, search)
+        for hdr in hdrlist:
+            hdrobj = Header_Work(hdr)
+            _hwlist.appened(hdrobj)
+        return hwlist
+    
+    
+    def sigChecking(self, sig):
+        """pass type of check you want to occur, default is to have them off"""
+        if sig == 'md5':
+            #turn off everything bug md5 - and we need the check the payload
+            self.ts.setVSFlags(~(rpm.RPMVSF_NOMD5|rpm.RPMVSF_NEEDPAYLOAD))
+        elif sig == 'none':
+            # turn off everything - period
+            self.ts.setVSFlags(rpm.RPMVSF_NOSIGNATURES)
+        elif sig == 'default':
+            # set it back to the default
+            self.ts.setVSFlags(rpm.RPMVSF_DEFAULT)
+        else:
+            raise AttributeError, sig
