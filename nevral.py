@@ -40,7 +40,19 @@ class nevral:
 #                    self.rpmbyname[name]=((epoch,ver,rel,arch,rpmloc,serverid), state)
         self.rpmbyname[name]=((epoch,ver,rel,arch,rpmloc,serverid), state)
         self.rpmbynamearch[(name,arch)]=((epoch,ver,rel,arch,rpmloc,serverid), state)
-        
+    
+    def delete(self, name, arch=None):
+        if self.exists(name, arch):
+            del self.rpmbyname[name]
+            del self.rpmbynamearch[(name, arch)]
+        else:
+            if arch is None:
+                errolog(2, 'No Package %s' % (name))
+            else:
+                errorlog(2, 'No Package %s, %s' %(name, arch))
+                
+            
+            
     def _get_data(self, name, arch=None):
         if arch != None: # search by name and arch
             if self.rpmbynamearch and self.rpmbynamearch.has_key((name, arch)):

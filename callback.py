@@ -24,6 +24,8 @@ from i18n import _
 callbackfilehandles = {}
 def install_callback(what, bytes, total, h, user):
     if what == rpm.RPMCALLBACK_TRANS_PROGRESS:
+        current=bytes+1
+#        sys.stdout.write('[%s/%s]' % (current, total))
         pass
         
     elif what == rpm.RPMCALLBACK_TRANS_STOP:

@@ -479,9 +479,9 @@ def filelogactions(i_list, u_list, e_list, ud_list, ed_list):
     for (name, arch) in i_list:
         filelog(1, i_log + name + '.' + arch)
     for (name, arch) in ud_list:
-        filelog(1, u_log + name + '.' + arch)
-    for (name, arch) in u_list:
         filelog(1, ud_log + name + '.' + arch)
+    for (name, arch) in u_list:
+        filelog(1, u_log + name + '.' + arch)
     for (name, arch) in e_list+ed_list:
         filelog(1, e_log + name + '.' + arch)
         
@@ -503,8 +503,10 @@ def shortlogactions(i_list, u_list, e_list, ud_list, ed_list):
 
     if len(i_list) > 0:
         log(1, i_log)
-    if len(u_list+ud_list) > 0:
+    if len(u_list) > 0:
         log(1, u_log)
+    if len(ud_list) > 0:
+        log(1, ud_log)
     if len(e_list+ed_list) > 0:
         log(1, e_log)
         
