@@ -1,10 +1,11 @@
+%define date #DATE#
 Summary: RPM installer/updater
 Name: yum
 Version: 2.0
-Release: #DATE#
+Release: %{date}
 License: GPL
 Group: System Environment/Base
-Source: %{name}-#DATE#.tar.gz
+Source: %{name}-%{date}.tar.gz
 #Source1: yum.conf
 #Source2: yum.cron
 URL: http://www.dulug.duke.edu/yum/

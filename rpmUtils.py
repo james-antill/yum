@@ -183,7 +183,7 @@ class RPM_Base_Work:
         if epoch is None:
             epoch = '0'
         if self.isSource():
-            headerfn = "%s/%s-%s-%s-%s.%s.src.hdr" % (headerdir, name, epoch, ver, rel, arch)
+            headerfn = "%s/%s-%s-%s-%s.src.hdr" % (headerdir, name, epoch, ver, rel)
         else:
             headerfn = "%s/%s-%s-%s-%s.%s.hdr" % (headerdir, name, epoch, ver, rel, arch)
 

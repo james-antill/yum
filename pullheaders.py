@@ -103,7 +103,7 @@ def main():
         if os.path.exists(headerdir):
             hdrlist = serverStuff.getfilelist(headerdir, '.hdr', [], 0)
             removeCurrentHeaders(hdrlist)
-            if cmds['dorpms']:
+            if cmds['dosrpms']:
                 removeHeaderInfo(srcheaderinfo)
                 srcheaderfd = open(srcheaderinfo, "w")
                 srcheaderfd.close()
