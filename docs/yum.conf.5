@@ -97,6 +97,27 @@ bootloader (lilo, grub) when installing new kernels.
 boolean - defaults to 0. This tells yum whether or not to only download the
 needed packages, not install them.
 
+.IP \fBusecomps \fR
+boolean - defaults to 1. This tells yum to use, if present, the hdlist and hdlist2 files 
+typically found in the comps package on rhl, rhel and fedora core based
+distributions to prime the headers cache. It uses the hdlist and hdlist2 options to locate those files
+
+.IP \fBhdlist \fR
+path to hdlist file - defaults to /usr/share/comps/$basearch/hdlist
+
+.IP \fBhdlist2 \fR
+path to hdlist2 file - defaults to /usr/share/comps/$basearch/hdlist2
+
+.IP \fBusecachedb \fR
+boolean - defaults to 1. This tells yum to use, if present, the
+rpmdb present in the path specfied in the cachedb option to prime the header
+cache.
+
+.IP \fBcachedb \fR
+path to complete rpmdb for your distro - typically contained in the
+rpmdb-yourdistro package. defaults to /usr/lib/rpmdb/$basearch-redhat-linux/redhat/
+
+
 .SH "[server] options"
 .LP 
 The server section(s) take the following form:
