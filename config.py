@@ -88,7 +88,7 @@ class yumconf:
         self.installroot = '/'
         self.installonlypkgs = ['kernel', 'kernel-bigmem', 'kernel-enterprise',
                            'kernel-smp', 'kernel-debug', 'kernel-unsupported', 
-                           'kernel-source']
+                           'kernel-source', 'kernel-modules-unsupported']
         self.kernelpkgnames = ['kernel','kernel-smp','kernel-enterprise',
                            'kernel-bigmem','kernel-BOOT']
       

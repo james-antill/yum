@@ -21,6 +21,7 @@ import re
 
 def getArch():
     arch = os.uname()[4]
+    newarch = None
     if re.search('86', arch):
         newarch = 'i386'
     if re.search('sparc', arch) or re.search('sun', arch):
@@ -31,6 +32,8 @@ def getArch():
         newarch = 'ppc'
     if re.search('x86_64', arch):
         newarch = 'x86_64'
+    if not newarch:
+        newarch = arch
     return newarch
 
 def betterarch(arch1, arch2):
