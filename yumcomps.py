@@ -24,7 +24,12 @@ import rpmUtils
 # erase - only pkgs in group - not subgroups nor metapkgs
 # 
 
-# FIXME - tricksy - depending on the order of the comps.xml adds we won't know
+# gist of operation of this class:
+# create the class
+# add  comps.xml type files
+# compile the groups
+# then you can perform the functions on the groups
+
 # which groups are around.
 # maybe parse the files, populate the fields as much as possible then sweep
 # through and calculate things after all the .xml files have been added
