@@ -551,7 +551,16 @@ def actionslists(nevral):
     return install_list, update_list, erase_list, updatedeps_list, erasedeps_list
     
 def printactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
-    log(2, _('I will do the following:'))
+
+    #Output yum's actions on all log levels IF stdin is a TTY
+    #In that case the user is going to be expected to confirm these
+    #actions
+    if(conf.assumeyes == 0 and sys.stdin.isatty()):
+      log_level = 1
+    else:
+      log_level = 2
+	
+    log(log_level, _('I will do the following:'))
     
     for pkg in i_list:
         (name,arch) = pkg
@@ -560,7 +569,7 @@ def printactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
             pkgstring = '%s %s:%s-%s.%s' % (name, e, v, r, arch)
         else:
             pkgstring = '%s %s-%s.%s' % (name, v, r, arch)
-        log(2, _('[install: %s]') % pkgstring)
+        log(log_level, _('[install: %s]') % pkgstring)
         
     for pkg in u_list:
         (name,arch) = pkg
@@ -569,7 +578,7 @@ def printactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
             pkgstring = '%s %s:%s-%s.%s' % (name, e, v, r, arch)
         else:
             pkgstring = '%s %s-%s.%s' % (name, v, r, arch)
-        log(2, _('[update: %s]') % pkgstring)
+        log(log_level, _('[update: %s]') % pkgstring)
         
     for pkg in e_list:
         (name,arch) = pkg
@@ -578,10 +587,10 @@ def printactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
             pkgstring = '%s %s:%s-%s.%s' % (name, e, v, r, arch)
         else:
             pkgstring = '%s %s-%s.%s' % (name, v, r, arch)
-        log(2, _('[erase: %s]') % pkgstring)
+        log(log_level, _('[erase: %s]') % pkgstring)
         
     if len(ud_list) > 0:
-        log(2, _('I will install/upgrade these to satisfy the dependencies:'))
+        log(log_level, _('I will install/upgrade these to satisfy the dependencies:'))
         for pkg in ud_list:
             (name, arch) = pkg
             (e, v, r) = nevral.evr(name, arch)
@@ -589,10 +598,10 @@ def printactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
                 pkgstring = '%s %s:%s-%s.%s' % (name, e, v, r, arch)
             else:
                 pkgstring = '%s %s-%s.%s' % (name, v, r, arch)            
-            log(2, _('[deps: %s]') % pkgstring)
+            log(log_level, _('[deps: %s]') % pkgstring)
             
     if len(ed_list) > 0:
-        log(2, _('I will erase these to satisfy the dependencies:'))
+        log(log_level, _('I will erase these to satisfy the dependencies:'))
         for pkg in ed_list:
             (name, arch) = pkg
             (e, v, r) = nevral.evr(name, arch)
@@ -600,7 +609,7 @@ def printactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
                 pkgstring = '%s %s:%s-%s.%s' % (name, e, v, r, arch)
             else:
                 pkgstring = '%s %s-%s.%s' % (name, v, r, arch)
-            log(2, _('[deps: %s]') % pkgstring)
+            log(log_level, _('[deps: %s]') % pkgstring)
 
 def filelogactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
     i_log = _('Installed: ')

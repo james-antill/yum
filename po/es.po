@@ -31,7 +31,7 @@ msgstr "Error·accediendo·a·la·dirección:·%s"
 msgid "Finding updated packages"
 msgstr "Encontrando·paquetes·actualizados"
 
-#: ../clientStuff.py:1101
+#: ../clientStuff.py:1106
 #, c-format
 msgid "No Packages installed not included in a repository"
 msgstr "No·se·instalaron·paquetes·no·incluídos·en·el·repositorio"
@@ -71,7 +71,7 @@ msgstr ""
 msgid "bestarch %s does not provide resetting to arch %s"
 msgstr ""
 
-#: ../clientStuff.py:1024 ../clientStuff.py:1036
+#: ../clientStuff.py:1029 ../clientStuff.py:1041
 #, c-format
 msgid "Looking in available packages for a providing package"
 msgstr "Mirando·los·paquetes·disponibles·para·proveer·uno"
@@ -91,7 +91,7 @@ msgstr "%s·no·es·escribible"
 msgid "Downloading Packages"
 msgstr "Limpiando·paquetes"
 
-#: ../clientStuff.py:1336
+#: ../clientStuff.py:1341
 #, c-format
 msgid ""
 "retrygrab() failed for:\n"
@@ -112,12 +112,12 @@ msgstr "Instalaré/actualizaré·esto·para·satisfacer·las·dependencias:"
 msgid "Cannot delete %s - check perms"
 msgstr "No·se·puede·borrar·%s·-·chequea·tus·permisos"
 
-#: ../clientStuff.py:1063
+#: ../clientStuff.py:1068
 #, c-format
 msgid "Need to pass a list of pkgs to erase"
 msgstr "Necesitas·pasar·una·lista·de·paquetes·para·eliminar"
 
-#: ../clientStuff.py:1021
+#: ../clientStuff.py:1026
 #, c-format
 msgid "Need a provides to match"
 msgstr "Necesitas·proporcionar·algo·para·corresponder"
@@ -137,8 +137,8 @@ msgstr ""
 msgid "Installed: "
 msgstr "Instalado(s):·"
 
-#: ../clientStuff.py:803 ../clientStuff.py:839 ../clientStuff.py:981
-#: ../clientStuff.py:1200
+#: ../clientStuff.py:803 ../clientStuff.py:839 ../clientStuff.py:986
+#: ../clientStuff.py:1205
 #, c-format
 msgid "Error getting file %s"
 msgstr "Error·obteniendo·el·archivo·%s"
@@ -185,7 +185,7 @@ msgstr "Cabecera·para·el·paquete·%s·no·encontrada"
 msgid "Erased: "
 msgstr "Eliminado(s):·"
 
-#: ../clientStuff.py:964
+#: ../clientStuff.py:969
 #, fuzzy, c-format
 msgid "getting %s from cachedb"
 msgstr "obteniendo·%s"
@@ -195,12 +195,12 @@ msgstr "obteniendo·%s"
 msgid "Unable to determine boot loader."
 msgstr "Imposible·de·determinar·un·cargador·de·arranque."
 
-#: ../clientStuff.py:953
+#: ../clientStuff.py:958
 #, c-format
 msgid "getting %s"
 msgstr "obteniendo·%s"
 
-#: ../clientStuff.py:1217
+#: ../clientStuff.py:1222
 #, c-format
 msgid "Error Reading Header on %s"
 msgstr "Error·leyendo·la·cabecera·en·%s"
@@ -249,7 +249,7 @@ msgstr "Encontrado(s)·%s"
 msgid "excluded: %s"
 msgstr "Liberar:·%s"
 
-#: ../clientStuff.py:851 ../clientStuff.py:943
+#: ../clientStuff.py:851 ../clientStuff.py:948
 #, c-format
 msgid "Please run yum in non-caching mode to correct this header."
 msgstr ""
@@ -271,12 +271,12 @@ msgstr "Error·de·entrada/salida:·%s"
 msgid "Post-Trim Len: %d"
 msgstr ""
 
-#: ../clientStuff.py:1140
+#: ../clientStuff.py:1145
 #, c-format
 msgid "Cleaning packages and old headers"
 msgstr "Limpiando·paquetes·y·antiguas·cabeceras"
 
-#: ../clientStuff.py:987
+#: ../clientStuff.py:992
 #, c-format
 msgid ""
 "Cannot download %s in caching only mode or when running as non-root user."
@@ -284,8 +284,8 @@ msgstr ""
 "No·se·puede·descargar·%"
 "s·sólo·en·modo·caché·o·cuando·lo·ejecuta·un·usuario·que·no·es·administrador"
 
-#: ../clientStuff.py:1213 ../clientStuff.py:1218 ../clientStuff.py:1222
-#: ../clientStuff.py:1227
+#: ../clientStuff.py:1218 ../clientStuff.py:1223 ../clientStuff.py:1227
+#: ../clientStuff.py:1232
 #, c-format
 msgid ""
 "Error: You may want to run yum clean or remove the file: \n"
@@ -311,7 +311,7 @@ msgstr "·Error·leyendo·el·archivo·lilo.conf:·Los·mensajes·han·sido:\n"
 msgid "No groups provided or accessible on any server."
 msgstr "Grupos·no·provistos·o·accesibles·en·ningún·servidor."
 
-#: ../pkgaction.py:468
+#: ../pkgaction.py:522
 #, c-format
 msgid "%s results returned"
 msgstr "%s·resultados·devueltos"
@@ -360,12 +360,12 @@ msgstr "Mejor·versión·para·%s·es·%s:%s-%s"
 msgid "[deps: %s]"
 msgstr "[dependencias:·%s]"
 
-#: ../pkgaction.py:267
+#: ../pkgaction.py:321
 #, c-format
 msgid "Version"
 msgstr "Versión"
 
-#: ../clientStuff.py:1103
+#: ../clientStuff.py:1108
 #, c-format
 msgid "Looking in Available Packages:"
 msgstr "Mirando·en·los·paquetes·disponibles:"
@@ -384,7 +384,7 @@ msgstr ""
 msgid "Checking deps %d/%d complete"
 msgstr "Chequeando·dependencias·%d/%d·completo"
 
-#: ../pkgaction.py:461
+#: ../pkgaction.py:515
 #, c-format
 msgid ""
 "Installed package: %s.%s %s:%s-%s matches with\n"
@@ -402,7 +402,7 @@ msgstr ""
 "·Errores·dentro·del(los)·directorio(s):\n"
 "··%s"
 
-#: ../pkgaction.py:319
+#: ../pkgaction.py:373
 #, c-format
 msgid "Summary: %s"
 msgstr "Resumen:·%s"
@@ -427,7 +427,7 @@ msgstr "No·se·puede·eliminar·el·archivo·%s"
 msgid "Bad URL: %s"
 msgstr "Dirección·incorrecta:·%s"
 
-#: ../clientStuff.py:1221
+#: ../clientStuff.py:1226
 #, c-format
 msgid "Error: Untrusted GPG key on %s"
 msgstr "Error:·La·llave·GPG·no·es·fiable·en·%s"
@@ -437,12 +437,12 @@ msgstr "Error:·La·llave·GPG·no·es·fiable·en·%s"
 msgid "Creating Transaction Set"
 msgstr ""
 
-#: ../clientStuff.py:1105
+#: ../clientStuff.py:1110
 #, c-format
 msgid "Looking in Installed Packages:"
 msgstr "Mirando·en·los·paquetes·instalados:"
 
-#: ../clientStuff.py:1153
+#: ../clientStuff.py:1158
 #, c-format
 msgid "Invalid clean option %s"
 msgstr "Opción·invalida·para·limpiar·%s"
@@ -460,17 +460,17 @@ msgstr ""
 "Problema·con·la·firma·GPG·o·con·md5sum·en·%s\n"
 "\n"
 
-#: ../pkgaction.py:315
+#: ../pkgaction.py:369
 #, c-format
 msgid "Release: %s"
 msgstr "Liberar:·%s"
 
-#: ../pkgaction.py:76
+#: ../pkgaction.py:90
 #, c-format
 msgid "No Packages Available for Update or Install"
 msgstr "Ningún·paquete·disponible·para·actualizar·o·instalar"
 
-#: ../pkgaction.py:56 ../pkgaction.py:67
+#: ../pkgaction.py:70 ../pkgaction.py:81
 #, c-format
 msgid "%s is installed and is the latest version."
 msgstr "%s·está·instalado·y·en·su·última·versión."
@@ -481,7 +481,7 @@ msgid "Found best arch for install only pkg %s"
 msgstr ""
 "Encontrada·una·mejor·arquitectura·para·instalar·sólo·el·paquete·%s"
 
-#: ../clientStuff.py:1026 ../clientStuff.py:1038
+#: ../clientStuff.py:1031 ../clientStuff.py:1043
 #, c-format
 msgid "Looking in installed packages for a providing package"
 msgstr "Mirando·en·los·paquetes·instalados·para·proveer·uno"
@@ -491,7 +491,7 @@ msgstr "Mirando·en·los·paquetes·instalados·para·proveer·uno"
 msgid "I will do the following:"
 msgstr "Haré·lo·siguiente:"
 
-#: ../clientStuff.py:971
+#: ../clientStuff.py:976
 #, fuzzy, c-format
 msgid "getting %s from comps db"
 msgstr "obteniendo·grupos·del·servidor:·%s"
@@ -512,7 +512,7 @@ msgstr "Cabecera·dañada·%s"
 msgid "Completed Download and test, Exiting."
 msgstr ""
 
-#: ../clientStuff.py:1186
+#: ../clientStuff.py:1191
 #, c-format
 msgid "NonMatching RPM version, %s, removing."
 msgstr "No·encontrada·la·versión·del·RPM·%s,·borrando."
@@ -577,19 +577,19 @@ msgstr ""
 msgid "Using cached header.info file"
 msgstr "Usando·el·archivo·header.info·de·la·caché"
 
-#: ../clientStuff.py:849 ../clientStuff.py:941
+#: ../clientStuff.py:849 ../clientStuff.py:946
 #, c-format
 msgid "Please ask your sysadmin to update the headers on this system."
 msgstr ""
 "Por·favor,"
 "·pregunta·al·administrador·de·tu·sistema·para·actualizar·las·cabeceras."
 
-#: ../clientStuff.py:1033
+#: ../clientStuff.py:1038
 #, c-format
 msgid "Need an item to search"
 msgstr "Necesitas·un·ítem·para·buscar"
 
-#: ../pkgaction.py:318
+#: ../pkgaction.py:372
 #, c-format
 msgid "Repo   : %s"
 msgstr "Repositorio···:·%s"
@@ -604,7 +604,7 @@ msgstr "Directorio·de·caché:·%s"
 msgid "Exiting on user command."
 msgstr "Saliendo·mediante·un·comando·de·usuario."
 
-#: ../clientStuff.py:1228
+#: ../clientStuff.py:1233
 #, c-format
 msgid "Error: You may need to disable gpg checking to install this package\n"
 msgstr ""
@@ -637,13 +637,13 @@ msgstr "Archivo·anormal:·%s"
 msgid "IOError - # %s - %s"
 msgstr "Error·de·entrada/salida·-·#·%s·-·%s"
 
-#: ../pkgaction.py:514
+#: ../pkgaction.py:568
 #, c-format
 msgid "Kernel Updated/Installed, checking for bootloader"
 msgstr ""
 "Núcleo·actualizado/instalado,·chequeando·el·cargador·de·arranque"
 
-#: ../clientStuff.py:1010
+#: ../clientStuff.py:1015
 #, c-format
 msgid "Need to pass a list of pkgs to install"
 msgstr "Necesitas·pasar·una·lista·de·paquetes·para·instalar"
@@ -683,17 +683,17 @@ msgstr ""
 msgid "Resolving dependencies"
 msgstr "Resolviendo·dependencias"
 
-#: ../pkgaction.py:314
+#: ../pkgaction.py:368
 #, c-format
 msgid "Version: %s"
 msgstr "Versión:·%s"
 
-#: ../pkgaction.py:259
+#: ../pkgaction.py:313
 #, c-format
 msgid "From %s installing %s"
 msgstr "Desde·%s·instalando·%s"
 
-#: ../pkgaction.py:542
+#: ../pkgaction.py:596
 #, c-format
 msgid "No bootloader found, Cannot configure kernel, continuing."
 msgstr ""
@@ -720,7 +720,7 @@ msgstr "Saliendo·por·cancelación·del·usuario"
 msgid "HTTP Error (%s): %s"
 msgstr "Error·en·el·protocolo·HTTP·(%s):·%s"
 
-#: ../clientStuff.py:1194
+#: ../clientStuff.py:1199
 #, c-format
 msgid "Getting %s"
 msgstr "Obteniendo·%s"
@@ -739,7 +739,7 @@ msgstr ""
 msgid "Error creating dir %s: %s"
 msgstr "Error·creando·directorio·%s:·%s"
 
-#: ../pkgaction.py:267
+#: ../pkgaction.py:321
 #, c-format
 msgid "Arch"
 msgstr "Arquitectura"
@@ -757,12 +757,12 @@ msgid "depcheck: package %s conflicts with %s"
 msgstr ""
 "chequeo·de·dependencias:·el·paquete·%s·entra·en·conflicto·con·%s"
 
-#: ../pkgaction.py:302
+#: ../pkgaction.py:356
 #, c-format
 msgid "No Packages Available to List"
 msgstr "Paquetes·no·disponibles·para·listar"
 
-#: ../pkgaction.py:465
+#: ../pkgaction.py:519
 #, c-format
 msgid "localrpmdb not defined"
 msgstr "localrpmdb·no·definida"
@@ -772,7 +772,7 @@ msgstr "localrpmdb·no·definida"
 msgid "Error installing the new bootloader: \n"
 msgstr "·Error·instalando·el·nuevo·cargador·de·arranque:·\n"
 
-#: ../clientStuff.py:1212
+#: ../clientStuff.py:1217
 #, c-format
 msgid "Error: Could not find the GPG Key necessary to validate pkg %s"
 msgstr ""
@@ -785,7 +785,7 @@ msgstr ""
 msgid "No actions to take"
 msgstr "Ninguna·acción·que·ejecutar"
 
-#: ../pkgaction.py:435
+#: ../pkgaction.py:489
 #, c-format
 msgid ""
 "Available package: %s.%s %s:%s-%s from %s matches with\n"
@@ -826,12 +826,12 @@ msgstr "Todas·las·dependencias·resueltas·y·ningún·conflicto·detectado"
 msgid "Unable to check if PID %s is active"
 msgstr "Imposible·de·chequear·si·el·PID·%s·está·activo"
 
-#: ../clientStuff.py:1150
+#: ../clientStuff.py:1155
 #, c-format
 msgid "Cleaning old headers"
 msgstr "Limpiando·las·cabeceras·antiguas"
 
-#: ../pkgaction.py:320
+#: ../pkgaction.py:374
 #, c-format
 msgid ""
 "Description:\n"
@@ -840,7 +840,7 @@ msgstr ""
 "·Descripción:\n"
 "··%s"
 
-#: ../clientStuff.py:1115 ../clientStuff.py:1131
+#: ../clientStuff.py:1120 ../clientStuff.py:1136
 #, c-format
 msgid "Need a list of groups to update"
 msgstr "Necesito·una·lista·de·grupos·para·actualizar"
@@ -860,12 +860,12 @@ msgstr "Devolviendo·a·su·sitio·las·antiguas·cabeceras"
 msgid "getting groups from server: %s"
 msgstr "obteniendo·grupos·del·servidor:·%s"
 
-#: ../clientStuff.py:1005
+#: ../clientStuff.py:1010
 #, c-format
 msgid "You need to be root to perform these commands"
 msgstr "Necesitas·ser·superusuario·para·llevar·a·cabo·estos·comandos"
 
-#: ../pkgaction.py:470
+#: ../pkgaction.py:524
 #, c-format
 msgid "No packages found"
 msgstr "Paquetes·no·encontrados"
@@ -926,12 +926,12 @@ msgstr ""
 "          -h, --help esta·pantalla\n"
 "    "
 
-#: ../clientStuff.py:944 ../clientStuff.py:988
+#: ../clientStuff.py:949 ../clientStuff.py:993
 #, c-format
 msgid "Deleting entry from Available packages"
 msgstr "Borrando·la·entrada·en·paquetes·disponibles"
 
-#: ../clientStuff.py:1261
+#: ../clientStuff.py:1266
 #, c-format
 msgid "Errors reported doing trial run"
 msgstr "Errores·reportados·haciendo·la·prueba"
@@ -941,14 +941,14 @@ msgstr "Errores·reportados·haciendo·la·prueba"
 msgid "Digesting rpm - %s - %d/%d"
 msgstr "Asimilando·el·paquete·RPM·-·%s·-·%d/%d"
 
-#: ../pkgaction.py:522
+#: ../pkgaction.py:576
 #, c-format
 msgid "Lilo found - adding kernel to lilo and making it the default"
 msgstr ""
 "Lilo·encontrado·-·a�"
 "�adiendo·el·núcleo·a·lilo·y·poniéndolo·por·defecto"
 
-#: ../pkgaction.py:312
+#: ../pkgaction.py:366
 #, c-format
 msgid "Name   : %s"
 msgstr "Nombre···:·%s"
@@ -965,7 +965,7 @@ msgstr ""
 msgid "[update: %s]"
 msgstr "[actualizar:·%s]"
 
-#: ../clientStuff.py:939
+#: ../clientStuff.py:944
 #, c-format
 msgid "The file %s is damaged."
 msgstr "El·archivo·%s·está·dañado."
@@ -982,7 +982,7 @@ msgstr ""
 msgid "Got a file - yay"
 msgstr "Obtenido·el·archivo·-·yay"
 
-#: ../pkgaction.py:257
+#: ../pkgaction.py:311
 #, c-format
 msgid "From %s updating %s"
 msgstr "Desde·%s·actualizando·%s"
@@ -992,12 +992,12 @@ msgstr "Desde·%s·actualizando·%s"
 msgid "Test transaction complete, Success!"
 msgstr "Test·de·transacción·completo,·¡éxito!"
 
-#: ../pkgaction.py:71
+#: ../pkgaction.py:85
 #, c-format
 msgid "Cannot find a package matching %s"
 msgstr "No·se·puede·encontrar·el·paquete·competente·%s"
 
-#: ../pkgaction.py:267
+#: ../pkgaction.py:321
 #, c-format
 msgid "Repo"
 msgstr "Repositorio"
@@ -1018,12 +1018,12 @@ msgstr ""
 msgid "Damaged Header %s"
 msgstr "Cabecera·dañada·%s"
 
-#: ../clientStuff.py:1144
+#: ../clientStuff.py:1149
 #, c-format
 msgid "Cleaning packages"
 msgstr "Limpiando·paquetes"
 
-#: ../pkgaction.py:317
+#: ../pkgaction.py:371
 #, c-format
 msgid "Group  : %s"
 msgstr "Grupo··:·%s"
@@ -1033,14 +1033,14 @@ msgstr "Grupo··:·%s"
 msgid "Server: %s"
 msgstr "Servidor:·%s"
 
-#: ../pkgaction.py:543
+#: ../pkgaction.py:597
 #, c-format
 msgid "No bootloader found, Cannot configure kernel."
 msgstr ""
 "Ningún·cargador·de·arranque·encontrado,"
 "·no·se·puede·configurar·el·núcleo."
 
-#: ../pkgaction.py:267
+#: ../pkgaction.py:321
 #, c-format
 msgid "Name"
 msgstr "Nombre"
@@ -1050,12 +1050,12 @@ msgstr "Nombre"
 msgid "[install: %s]"
 msgstr "[instalar:·%s]"
 
-#: ../pkgaction.py:201
+#: ../pkgaction.py:255
 #, c-format
 msgid "Erase: No matches for %s"
 msgstr "Eliminar:·Ningún·resultado·para·%s"
 
-#: ../pkgaction.py:316
+#: ../pkgaction.py:370
 #, c-format
 msgid "Size   : %s"
 msgstr "Tamaño···:·%s"
@@ -1065,7 +1065,7 @@ msgstr "Tamaño···:·%s"
 msgid "No header - huh?"
 msgstr "Ninguna·cabecera·-·huh?"
 
-#: ../clientStuff.py:1147
+#: ../clientStuff.py:1152
 #, c-format
 msgid "Cleaning all headers"
 msgstr "Limpiando·todas·las·cabeceras"
@@ -1090,12 +1090,12 @@ msgstr "Falla·el·chequeo·md5·para·el·paquete·RPM·%s"
 msgid "Erasing: %s %d/%d"
 msgstr "Eliminando:·%s·%d/%d"
 
-#: ../pkgaction.py:261
+#: ../pkgaction.py:315
 #, c-format
 msgid "Nothing in any group to update or install"
 msgstr "Nada·en·ningún·grupo·para·actualizar·o·instalar"
 
-#: ../pkgaction.py:313
+#: ../pkgaction.py:367
 #, c-format
 msgid "Arch   : %s"
 msgstr "Arquitectura···:·%s"
@@ -1105,22 +1105,22 @@ msgstr "Arquitectura···:·%s"
 msgid "No Package %s, %s"
 msgstr "Ningún·paquete·%s,·%s"
 
-#: ../pkgaction.py:84
+#: ../pkgaction.py:98
 #, c-format
 msgid "No Packages Available for Update"
 msgstr "Ningún·paquete·disponible·para·actualizar"
 
-#: ../pkgaction.py:539
+#: ../pkgaction.py:593
 #, c-format
 msgid "Grub found - making this kernel the default"
 msgstr "Grub·encontrado·-·poniendo·por·defecto·este·núcleo"
 
-#: ../clientStuff.py:1226
+#: ../clientStuff.py:1231
 #, c-format
 msgid "Error: Unsigned Package %s"
 msgstr "Error:·Paquete·no·firmado·%s"
 
-#: ../clientStuff.py:1177
+#: ../clientStuff.py:1182
 #, c-format
 msgid "Damaged RPM %s, removing."
 msgstr "Paquete·RPM·dañado·%s,·borrando."
@@ -1132,14 +1132,14 @@ msgstr ""
 "Cabecera·defectuosa·para·el·paquete·%s.%"
 "s·intentando·obtener·cabeceras·para·el·nevral·-·saliendo"
 
-#: ../clientStuff.py:1214 ../clientStuff.py:1223
+#: ../clientStuff.py:1219 ../clientStuff.py:1228
 #, c-format
 msgid "Error: You may also check that you have the correct GPG keys installed"
 msgstr ""
 "Error:"
 "·Tienes·que·chequear·también·que·tienes·las·llaves·GPG·correctas·instaladas"
 
-#: ../pkgaction.py:215
+#: ../pkgaction.py:269
 #, c-format
 msgid "Group %s does not exist"
 msgstr "El·grupo·%s·no·existe"
@@ -1159,7 +1159,7 @@ msgstr "ignorando·el·paquete·RPM·defectuoso:·%s"
 msgid "Directory of rpms must be a directory."
 msgstr "El·directorio·de·paquetes·RPM·debe·ser·un·directorio."
 
-#: ../clientStuff.py:1345
+#: ../clientStuff.py:1350
 #, c-format
 msgid "failover: out of servers to try"
 msgstr "failover:·ningún·servidor·para·intentar"
