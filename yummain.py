@@ -231,7 +231,7 @@ def main(args):
     
     # Test run for disk space checks
     tstest = clientStuff.create_final_ts(tsInfo)
-    log(2, 'Calculating available disk space - this could take a bit')
+    log(2, _('Calculating available disk space - this could take a bit'))
     tstest.setFlags(rpm.RPMTRANS_FLAG_TEST)
     tstest.setProbFilter(rpm.RPMPROB_FILTER_DISKSPACE)
     tserrors = tstest.run(callback.install_callback, '')
