@@ -38,7 +38,7 @@ make DESTDIR=$RPM_BUILD_ROOT install
 
 
 %post
-#/sbin/chkconfig --add yum
+/sbin/chkconfig --add yum
 #/sbin/chkconfig yum on
 #/sbin/service yum condrestart >> /dev/null
 #exit 0
