@@ -301,11 +301,11 @@ class nevral:
                                     log(4, 'Got Extra Dep: %s, %s' %(name,arch))
                                 else:
                                     unresolvable = 1
-                                    log(4, 'unresolvable - %s needs %s' % (name, clientStuff.formatRequire(reqname, reqversion, flags)))
+                                    log(4, 'unresolvable - %s needs %s' % (name, rpmUtils.formatRequire(reqname, reqversion, flags)))
                                     if clientStuff.nameInExcludes(reqname):
                                         errors.append('package %s needs %s that has been excluded' % (name, reqname))
                                     else:
-                                        errors.append('package %s needs %s (not provided)' % (name, clientStuff.formatRequire(reqname, reqversion, flags)))
+                                        errors.append('package %s needs %s (not provided)' % (name, rpmUtils.formatRequire(reqname, reqversion, flags)))
                             CheckDeps=1
                         else:
                             # this is horribly ugly but I have to find some way to see if what it needed is provided
@@ -328,13 +328,13 @@ class nevral:
                                         if clientStuff.nameInExcludes(reqname):
                                             errors.append('package %s needs %s that has been excluded' % (name, reqname))
                                         else:
-                                            errors.append('package %s needs %s (not provided)' % (name, clientStuff.formatRequire(reqname, reqversion, flags)))
+                                            errors.append('package %s needs %s (not provided)' % (name, rpmUtils.formatRequire(reqname, reqversion, flags)))
                             else:
                                 unresolvable = 1
                                 if clientStuff.nameInExcludes(reqname):
                                     errors.append('package %s needs %s that has been excluded' % (name, reqname))
                                 else:
-                                    errors.append('package %s needs %s (not provided)' % (name, clientStuff.formatRequire(reqname, reqversion, flags)))
+                                    errors.append('package %s needs %s (not provided)' % (name, rpmUtils.formatRequire(reqname, reqversion, flags)))
                 elif sense == rpm.RPMDEP_SENSE_CONFLICTS:
                     # much more shit should happen here. specifically:
                     # if you have a conflict b/t two pkgs, try to upgrade the reqname pkg. - see if that solves the problem
