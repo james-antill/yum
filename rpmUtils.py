@@ -71,7 +71,7 @@ def formatRequire (name, version, flags):
         if flags & rpm.RPMSENSE_EQUAL:
             name = name + '='
             name = name + ' %s' % version
-    return string
+    return name
 
 
 def openrpmdb():

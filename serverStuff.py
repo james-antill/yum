@@ -63,7 +63,7 @@ yum-arch [-v] [-z] [-l] [-c] [-n] [-d] [-q] [-vv] (path of dir where headers/ sh
 
 
 def depchecktree(rpmlist):
-    _ts = rpm.TransactionSet('')
+    _ts = rpm.TransactionSet('./')
     error=0
     msgs=[]
     currpm=0
