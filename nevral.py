@@ -20,13 +20,14 @@ import rpm
 import string
 import sys
 import archwork
-import urlparse
 
 class nevral:
     def __init__(self):
         self.rpmbyname = {}
         self.rpmbynamearch = {}
-            
+        self.localrpmpath = {}
+        self.localhdrpath = {}
+        
     def add(self,(name,epoch,ver,rel,arch,rpmloc,serverid),state):
 #        if self.rpmbyname.haskey(name):
 #            ((e,v,r,a,l,i),state) = self._get_data(name)
@@ -120,7 +121,7 @@ class nevral:
             return None
         else:
             return i
-            
+    
     def nafromloc(self, loc):
         keys = self.rpmbynamearch.keys()
         for (name, arch) in keys:
@@ -147,11 +148,18 @@ class nevral:
             return None
         if l == 'in_rpm_db':
             return l
-        hdrfn = self.hdrfn(name,arch)
-        base = conf.serverhdrdir[i]
-        log(7, 'localhdrpath= %s for %s %s' % (base + '/' + hdrfn, name, arch))
-        return base + '/' + hdrfn
+        if self.localhdrpath.has_key((name, arch)):
+            return self.localhdrpath[(name, arch)]
+        else:
+            hdrfn = self.hdrfn(name,arch)
+            base = conf.serverhdrdir[i]
+            log(7, 'localhdrpath= %s for %s %s' % (base + '/' + hdrfn, name, arch))
+            return base + '/' + hdrfn
         
+    def setlocalhdrpath(self, name, arch, path):
+        ((e,v,r,a,l,i),state) = self._get_data(name, arch)
+        self.localhdrpath[(name, arch)] = path
+
     def remoteRpmUrl(self, name, arch=None):
         ((e,v,r,a,l,i),state) = self._get_data(name, arch)
         if state == None:
@@ -167,17 +175,17 @@ class nevral:
             return None
         if l == 'in_rpm_db':
             return l
-        rpmfn = os.path.basename(l)
-        #checking to see if this is a file url for the rpm - if so use the original location
-        (scheme, host, path, parm, query, frag) = urlparse.urlparse(conf.serverurl[i])
-        if scheme == 'file':
-            #oo - a file url - use that path
-            path = os.path.normpath((path + '/' + l))
-            return path
+        if self.localrpmpath.has_key((name, arch)):
+            return self.localrpmpath[(name, arch)]
         else:
+            rpmfn = os.path.basename(l)
             base = conf.serverpkgdir[i]
             return base + '/' + rpmfn
-                
+    
+    def setlocalrpmpath(self, name, arch, path):
+        ((e,v,r,a,l,i),state) = self._get_data(name, arch)
+        self.localrpmpath[(name, arch)] = path
+
     def resolvedeps(self,rpmDBInfo):
         #self == tsnevral
         #create db

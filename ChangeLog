@@ -1,3 +1,121 @@
+2003-02-09 16:27  skvidal
+
+	* checkbootloader.py, yum.conf: 
+	new checkbootloader.py - doesn't solve the grub problems entirely
+	but I'm not sure I know what to do with  those anyway
+
+2003-02-09 16:13  skvidal
+
+	* Makefile.in, clientStuff.py, config.py, keepalive.py, nevral.py,
+	yum.conf: 
+	Added Michael Stenner's http keepalive patch and urlgrab rewrite
+	implemented most of file:// support  - need to clean it up some
+	more.
+
+2003-02-09 16:13  skvidal
+
+	* keepalive.py: file keepalive.py was initially added on branch
+	yum-rpm_4_2_branch.
+
+2003-02-07 00:53  skvidal
+
+	* clientStuff.py, grubcfg.py, lilocfg.py, nevral.py,
+	up2datetheft.py, yummain.py: 
+	lots of clean ups - made disk space check work again fixed a
+	depresolve on remove problem in nevral cleaned up pkgaction and the
+	bootloader files to deal with new rpm.
+
+2003-02-06 07:41  skvidal
+
+	* up2datetheft.py: 
+	fixed up some of the dbMatch routines - need to figure out how to
+	do filename matching with dbMatch
+
+2003-02-06 00:07  skvidal
+
+	* archwork.py, bootloadercfg.py, callback.py, pullheaders.py,
+	serverStuff.py, up2datetheft.py: 
+	
+	edits to archwork - remove rpm404 stuff callback - fix stupidity
+	with what I'm keying off of in the callbackfilehandles dict add -q
+	and -L option to yum-arch started work on bootloader fixes.
+
+2003-02-03 01:34  skvidal
+
+	* Makefile.in: 
+	merge last of changes from HEAD
+
+2003-02-03 01:23  skvidal
+
+	* clientStuff.py, nevral.py, yumlock.py, bin/yum: 
+	merging changes from HEAD into 4_2 branch
+
+2003-02-03 00:59  skvidal
+
+	* clientStuff.py, nevral.py, pkgaction.py, yummain.py: 
+	provides work global ts now - for most of the simple db checks need
+	to clean up the bootloader stuff and the disk size check ts should
+	be a nice class most likely.
+
+2003-01-30 00:48  skvidal
+
+	* clientStuff.py, depchecktree.py, nevral.py, pkgaction.py,
+	pullheaders.py, serverStuff.py, up2datetheft.py, yum.conf,
+	yummain.py: 
+	changes to make it yum work with rpm 4.2 in the short run - stuff
+	disabled/broken: - sig checking - disk size checking before install
+	- probably most of the lilo/grub updating code
+
+2003-01-18 18:17  skvidal
+
+	* Makefile.in, clientStuff.py, yum.conf: 
+	Fix makefile.in to include yumlock.py, clientstuff.py typos,
+	yum.conf and yum.spec trash
+
+2003-01-18 17:46  skvidal
+
+	* Makefile.in, clientStuff.py, nevral.py: 
+	made changes that _should_ make header checking do _something_ and
+	retry if one is damaged more testing needed
+
+2003-01-17 17:02  skvidal
+
+	* bin/yum: [no log message]
+
+2003-01-17 16:58  skvidal
+
+	* bin/yum: 
+	hehe that's yum.pid not yum/pid
+
+2003-01-17 16:58  skvidal
+
+	* yumlock.py, bin/yum: 
+	added yumlock from michael stenner for locking functionality made
+	yum support lockfiles for root uses
+
+2003-01-15 23:47  skvidal
+
+	* clientStuff.py: 
+	unfinished changes to readHeader and get header to make it more
+	robust for bad headers
+	
+	it should: check for headers, and if, when reading it, it
+	encounters an error return none. this means edits in other
+	locations to deal with the possibility of getting a none instead of
+	a hdr - but only in a few spots.
+	
+	finish this tomorrow?
+
+2003-01-15 19:58  skvidal
+
+	* clientStuff.py: 
+	fix for clean_old_headers to deal with double deletion silliness
+
+2002-12-22 12:52  skvidal
+
+	* ChangeLog, Makefile.in, configure.in, yum-7.x.spec, yum.spec: 
+	Update to 0.9.4 - split into two spec files for 7.x and 8.0
+
 2002-12-19 23:12  skvidal
 
 	* bin/: yum, yum-arch: 

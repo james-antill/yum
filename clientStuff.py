@@ -631,7 +631,8 @@ def download_headers(HeaderInfo, nulist):
                 log(4, 'cached %s' % LocalHeaderFile)
             else:
                 log(2, 'getting %s' % LocalHeaderFile)
-                urlgrab(RemoteHeaderFile, LocalHeaderFile, copy_local=1)
+                hdrfn = urlgrab(RemoteHeaderFile, LocalHeaderFile, copy_local=1)
+                HeaderInfo.setlocalhdrpath(name, arch, hdrfn)
             if checkheader(LocalHeaderFile, name, arch):
                     break
             else:
@@ -778,7 +779,10 @@ def create_final_ts(tsInfo):
                 log(4, 'Using cached %s' % (os.path.basename(rpmloc)))
             else:
                 log(2, 'Getting %s' % (os.path.basename(rpmloc)))
-                urlgrab(tsInfo.remoteRpmUrl(name, arch), rpmloc, copy_local=0)
+                localrpmpath = urlgrab(tsInfo.remoteRpmUrl(name, arch), rpmloc, copy_local=0)
+                tsInfo.setlocalrpmpath(name, arch, localrpmpath)
+            # we now actually have the rpm and we know where it is - so use it
+            rpmloc = tsInfo.localRpmPath(name, arch)
             if conf.servergpgcheck[serverid]:
                 pkgaction.checkRpmSig(rpmloc, serverid)
             if state == 'i':
