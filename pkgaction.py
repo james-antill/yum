@@ -191,6 +191,25 @@ def erasepkgs(tsnevral,rpmnevral,userlist):
             errorlog(0, _("Erase: No matches for %s") % n)
             sys.exit(1)
 
+def installgroups(rpmnevral, nulist, uplist, grouplist):
+    """for each group requested attempt to install all pkgs/metapkgs of default
+       or mandatory. Also recurse lists of groups to provide for them too."""
+    returnlist = []
+    
+    for group in grouplist:
+        if group not in GroupInfo.grouplist:
+            errorlog(0, 'Group %s does not exist' % group)
+            return returnlist
+        pkglist = GroupInfo.pkgTree(group)
+        for pkg in pkglist:
+            if pkg in nulist:
+                returnlist.append(pkg)
+        
+    return returnlist
+        
+        
+        
+        
 def updategroups(rpmnevral, nulist, uplist, userlist):
     """get list of any pkg in group that is installed, check to update it
        get list of any mandatory or default pkg attempt to update it if it is installed

@@ -55,6 +55,7 @@ class Groups_Info:
         self.mandatory_metapkgs = {}
         self.installed_pkgs = {}
         self.pkgs_per_group = {}
+        self.compscount = 0
         # get our list of installed stuff real quickly
         self._get_installed()
         
@@ -65,6 +66,7 @@ class Groups_Info:
         except comps.CompsException, e:
             print 'Damaged comps.xml file error:\n %s' % e
             return
+        self.compscount = self.compscount + 1
         groupsobj = compsobj.groups
         groups = groupsobj.keys()
         
@@ -246,7 +248,9 @@ class Groups_Info:
         return pkglist
                 
     def requiredPkgs(self, groupname):
-        """return a list of all required pkgs and pkgs _ONLY_ to install this group"""
+        """return a list of all required pkgs and pkgs _ONLY_ to install this group
+           this is not the same as pkgTree b/c it only lists packages for the group,
+           it does not recurse through other groupreqs"""
         pkglist = []
         for pkg in self.default_pkgs[groupname] + self.mandatory_pkgs[groupname]:
             if pkg not in pkglist:

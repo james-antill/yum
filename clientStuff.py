@@ -600,7 +600,7 @@ def get_groups_from_servers(serveridlist):
             try:
                 localgroupfile = urlgrab(remotegroupfile, localgroupfile, copy_local=1)
             except URLGrabError, e:
-                log(3, 'Error getting file %s' remotegroupfile)
+                log(3, 'Error getting file %s' % remotegroupfile)
         else:
             if os.path.exists(localgroupfile):
                 log(3, 'using cached groups from server: %s' % serverid)
@@ -780,6 +780,13 @@ def take_action(cmds, nulist, uplist, newlist, obsoleting, tsInfo, HeaderInfo, r
             for (group, pkg) in installs:
                 pkglist.append(pkg)
             pkgaction.installpkgs(tsInfo, nulist, pkglist, HeaderInfo, rpmDBInfo, 0)
+            
+    elif basecmd == 'groupinstall':
+        if len(cmds) == 0:
+            errorlog(0, _('Need a list of groups to update'))
+            sys.exit(1)
+        instpkglist = pkgaction.installgroups(rpmDBInfo, nulist, uplist, cmds)
+        pkgaction.installpkgs(tsInfo, nulist, instpkglist, HeaderInfo, rpmDBInfo, 0)
         
             
     elif basecmd == 'clean':

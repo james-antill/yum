@@ -68,6 +68,7 @@ class yumconf:
         self.commands = None
         self.exactarch = 0
         self.overwrite_groups = 0
+        self.groups_enabled = 0
         self.yumvar = self._getEnvVar()
         self.distroverpkg = 'redhat-release'
         self.yumvar['basearch'] = archwork.getArch()

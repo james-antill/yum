@@ -198,7 +198,9 @@ def main(args):
         if len(servers_with_groups) > 0:
             GroupInfo = yumcomps.Groups_Info(conf.overwrite_groups)
             for serverid in servers_with_groups:
+                log(4, 'Adding Group from %s' % serverid)
                 GroupInfo.add(conf.localGroups(serverid))
+        if GroupInfo.compscount > 1:
             GroupInfo.compileGroups()
             clientStuff.GroupInfo = GroupInfo
             pkgaction.GroupInfo = GroupInfo
@@ -206,9 +208,6 @@ def main(args):
             errorlog(1, 'No groups provided or accessible on any server.')
             errorlog(1, 'Exiting.')
             sys.exit(1)
-            
-    
-    
     
     log(3, 'nulist = %s' % len(nulist))
     log(3, 'uplist = %s' % len(uplist))
