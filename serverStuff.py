@@ -50,16 +50,19 @@ def getfilelist(path, ext, list, usesymlinks):
 
 def Usage():
     print _("""Usage:
-yum-arch [-v] [-z] [-l] [-c] [-n] [-d] [-q] [-vv] (path of dir where headers/ should/does live)
-   -d  = check dependencies and conflicts in tree
-   -v  = more verbose output
-   -vv = even more verbose output
-   -n  = don't generate headers
-   -c  = check pkgs with gpg and md5 checksums - cannot be used with -n
-   -z  = gzip compress the headers (default, deprecated as an option)
-   -s  = generate headers for source packages too
-   -l  = use symlinks as valid rpms when building headers
-   -q  = make the display more quiet""")
+    yum-arch [options] (path of dir where headers/ should/does live)
+    options are:
+     -d  = check dependencies and conflicts in tree
+     -v  = more verbose output
+     -vv = even more verbose output
+     -n  = don't generate headers
+     -c  = check pkgs with gpg and md5 checksums - cannot be used with -n
+     -z  = gzip compress the headers (default, deprecated as an option)
+     -s  = generate headers for source packages too
+     -l  = use symlinks as valid rpms when building headers
+     -x, --exclude = wildcards to exclude from processing
+     -q  = make the display more quiet
+     -h, --help = this screen""")
     sys.exit(1)
 
 
