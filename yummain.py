@@ -289,16 +289,13 @@ def main(args):
             sys.exit(1)
 
     
-    # Test run for disk space checks
-    # only run it if diskspacecheck = 1 and if there is anything being installed
-    # or updated - erasures shouldn't need more disk space
-    if conf.diskspacecheck:
-        if len(i_list+u_list+ud_list) > 0:
-            tstest = clientStuff.create_final_ts(tsInfo)
-            log(2, _('Calculating available disk space - this could take a bit'))
-            clientStuff.diskspacetest(tstest)
-            tstest.closeDB()
-            del tstest
+    # Test run for file conflicts and diskspace check, etc.
+    tstest = clientStuff.create_final_ts(tsInfo)
+    log(2, _('Running test transaction:'))
+    clientStuff.tsTest(tstest)
+    tstest.closeDB()
+    del tstest
+    log(2, _('Test transaction complete, Success!'))
     
     # FIXME the actual run should probably be elsewhere and this should be
     # inside a try, except set

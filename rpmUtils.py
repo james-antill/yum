@@ -48,7 +48,7 @@ def checkRpmMD5(package, urlgraberror=0):
     else:
         return good
 
-def checkSig(package, serverid=None):
+def checkSig(package):
     """ take a package, check it's sigs, return 0 if they are all fine, return 
     1 if the gpg key can't be found,  2 if the header is in someway damaged,
     3 if the key is not trusted, 4 if the pkg is not gpg or pgp signed"""
