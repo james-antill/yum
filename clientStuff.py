@@ -27,6 +27,7 @@ import callback
 import rpmUtils
 import time
 import urlparse
+import types
 
 import urlgrabber
 from urlgrabber import close_all, urlgrab, URLGrabError, retrygrab
@@ -204,46 +205,86 @@ def readHeader(rpmfn):
     fd.close()
     return h
 
+
+def correctFlags(flags):
+    returnflags=[]
+    if flags is None:
+        return returnflags
+                                                                               
+    if type(flags) is not types.ListType:
+        newflag = flags & 0xf
+        returnflags.append(newflag)
+    else:
+        for flag in flags:
+            newflag = flag
+            if flag is not None:
+                newflag = flag & 0xf
+            returnflags.append(newflag)
+    return returnflags
+
+
+def correctVersion(vers):
+     returnvers = []
+     vertuple = (None, None, None)
+     if vers is None:
+         returnvers.append(vertuple)
+         return returnvers
+         
+     if type(vers) is not types.ListType:
+         if vers is not None:
+             vertuple = str_to_version(vers)
+         else:
+             vertuple = (None, None, None)
+         returnvers.append(vertuple)
+     else:
+         for ver in vers:
+             if ver is not None:
+                 vertuple = str_to_version(ver)
+             else:
+                 vertuple = (None, None, None)
+             returnvers.append(vertuple)
+     return returnvers
+
 def returnObsoletes(headerNevral, rpmNevral, uninstNAlist):
     obsoleting = {} # obsoleting[pkgobsoleting]=[list of pkgs it obsoletes]
     obsoleted = {} # obsoleted[pkgobsoleted]=[list of pkgs obsoleting it]
     for (name, arch) in uninstNAlist:
-        # DEBUG print '%s, %s' % (name, arch)
         header = headerNevral.getHeader(name, arch)
-        obs = header[rpm.RPMTAG_OBSOLETES]
+        obs = []
+        names = header[rpm.RPMTAG_OBSOLETENAME]
+        tmpflags = header[rpm.RPMTAG_OBSOLETEFLAGS]
+        flags = correctFlags(tmpflags)
+        ver = correctVersion(header[rpm.RPMTAG_OBSOLETEVERSION])
+        if names is not None:
+            obs = zip(names, flags, ver)
         del header
 
-        # if there is one its a nonversioned obsolete
-        # if there are 3 its a versioned obsolete
         # nonversioned are obvious - check the rpmdb if it exists
         # then the pkg obsoletes something in the rpmdb
         # versioned obsolete - obvalue[0] is the name of the pkg
         #                      obvalue[1] is >,>=,<,<=,=
-        #                      obvalue[2] is an e:v-r string
+        #                      obvalue[2] is an (e,v,r) tuple
         # get the two version strings - labelcompare them
         # get the return value - then run through
         # an if/elif statement regarding obvalue[1] and determine
         # if the pkg obsoletes something in the rpmdb
         if obs:
-            for ob in obs:
-                obvalue = string.split(ob)
-                obspkg = obvalue[0]
+            for (obspkg, obscomp, (obe, obv, obr)) in obs:
                 if rpmNevral.exists(obspkg):
-                    if len(obvalue) == 1: #unversioned obsolete
+                    if obscomp == 0: #unversioned obsolete
                         if not obsoleting.has_key((name, arch)):
                             obsoleting[(name, arch)] = []
                         obsoleting[(name, arch)].append(obspkg)
                         if not obsoleted.has_key(obspkg):
                             obsoleted[obspkg] = []
                         obsoleted[obspkg].append((name, arch))
-                        log(4, '%s obsoleting %s' % (name, obspkg))
-                    elif len(obvalue) == 3:
-                        obscomp = obvalue[1]
-                        obsver = obsvalue[2]
+                        log(4,'%s obsoleting %s' % (name, obspkg))
+                    else:
+                        log(4,'versioned obsolete')
+                        log(5, '%s, %s, %s, %s, %s' % (obspkg, obscomp, obe, obv, obr))
                         (e1, v1, r1) = rpmNevral.evr(name, arch)
-                        (e2, v2, r2) = str_to_version(obsver)
-                        rc = rpmUtils.compareEVR((e1, v1, r1), (e2, v2, r2))
-                        if obscomp == '>':
+                        rc = rpmUtils.compareEVR((e1, v1, r1), (obe, obv, obr))
+                        if obscomp == 4:
                             if rc >= 1:
                                 if not obsoleting.has_key((name, arch)):
                                     obsoleting[(name, arch)] = []
@@ -251,7 +292,8 @@ def returnObsoletes(headerNevral, rpmNevral, uninstNAlist):
                                 if not obsoleted.has_key(obspkg):
                                     obsoleted[obspkg] = []
                                 obsoleted[obspkg].append((name, arch))
-                        elif obscomp == '>=':
+                                log(4,'%s obsoleting %s' % (name, obspkg))
+                        elif obscomp == 12:
                             if rc >= 1:
                                 if not obsoleting.has_key((name, arch)):
                                     obsoleting[(name, arch)] = []
@@ -259,6 +301,7 @@ def returnObsoletes(headerNevral, rpmNevral, uninstNAlist):
                                 if not obsoleted.has_key(obspkg):
                                     obsoleted[obspkg] = []
                                 obsoleted[obspkg].append((name, arch))
+                                log(4,'%s obsoleting %s' % (name, obspkg))
                             elif rc == 0:
                                 if not obsoleting.has_key((name, arch)):
                                     obsoleting[(name, arch)] = []
@@ -266,7 +309,8 @@ def returnObsoletes(headerNevral, rpmNevral, uninstNAlist):
                                 if not obsoleted.has_key(obspkg):
                                     obsoleted[obspkg] = []
                                 obsoleted[obspkg].append((name, arch))
-                        elif obscomp == '=':
+                                log(4,'%s obsoleting %s' % (name, obspkg))
+                        elif obscomp == 8:
                             if rc == 0:
                                 if not obsoleting.has_key((name, arch)):
                                     obsoleting[(name, arch)] = []
@@ -274,7 +318,8 @@ def returnObsoletes(headerNevral, rpmNevral, uninstNAlist):
                                 if not obsoleted.has_key(obspkg):
                                     obsoleted[obspkg] = []
                                 obsoleted[obspkg].append((name, arch))
-                        elif obscomp == '<=':
+                                log(4,'%s obsoleting %s' % (name, obspkg))
+                        elif obscomp == 10:
                             if rc == 0:
                                 if not obsoleting.has_key((name, arch)):
                                     obsoleting[(name, arch)] = []
@@ -282,6 +327,7 @@ def returnObsoletes(headerNevral, rpmNevral, uninstNAlist):
                                 if not obsoleted.has_key(obspkg):
                                     obsoleted[obspkg] = []
                                 obsoleted[obspkg].append((name, arch))
+                                log(4,'%s obsoleting %s' % (name, obspkg))
                             elif rc <= -1:
                                 if not obsoleting.has_key((name, arch)):
                                     obsoleting[(name, arch)] = []
@@ -289,7 +335,8 @@ def returnObsoletes(headerNevral, rpmNevral, uninstNAlist):
                                 if not obsoleted.has_key(obspkg):
                                     obsoleted[obspkg] = []
                                 obsoleted[obspkg].append((name, arch))
-                        elif obscomp == '<':
+                                log(4,'%s obsoleting %s' % (name, obspkg))
+                        elif obscomp == 2:
                             if rc <= -1:
                                 if not obsoleting.has_key((name, arch)):
                                     obsoleting[(name, arch)] = []
@@ -297,6 +344,7 @@ def returnObsoletes(headerNevral, rpmNevral, uninstNAlist):
                                 if not obsoleted.has_key(obspkg):
                                     obsoleted[obspkg] = []
                                 obsoleted[obspkg].append((name, arch))
+                                log(4,'%s obsoleting %s' % (name, obspkg))
     return obsoleting, obsoleted
 
 def getupdatedhdrlist(headernevral, rpmnevral):

@@ -51,7 +51,7 @@ def parseCmdArgs(args):
     except getopt.error, e:
         errorlog(0, _('Options Error: %s') % e)
         usage()
-   
+
     try: 
         for o,a in gopts:
             if o == '--version':
