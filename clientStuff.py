@@ -685,7 +685,7 @@ def download_headers(HeaderInfo, nulist):
         if not conf.cache:
             log(2, 'getting %s' % (LocalHeaderFile))
             try:
-                hdrfn = grab(serverird, RemoteHeaderFile, LocalHeaderFile, copy_local=1,
+                hdrfn = grab(serverid, RemoteHeaderFile, LocalHeaderFile, copy_local=1,
                                   checkfunc=(rpmUtils.checkheader, (name, arch), {}))
             except URLGrabError, e:
                 errorlog(0, 'Error getting file %s' % RemoteHeaderFile)
