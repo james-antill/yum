@@ -73,9 +73,10 @@ def main():
             cmds['dosrpms'] = 1
         elif arg == "-q":
             cmds['quiet'] = 1
+            log.threshold = 1
         elif arg == "-vv":
             cmds['loud'] = 1
-            log.verbosity = 4
+            log.threshold = 4
         if arg in ['-h','--help']:
             serverStuff.Usage()
     # save where we are right now
@@ -257,7 +258,7 @@ def genhdrs(rpms,headerdir,cmds):
                 sys.exit(1)
         hobj = rpmUtils.RPM_Work(rpmfn)
         if hobj.hdr is None:
-            log(2, "\nignoring bad rpm: %s" % rpmfn)
+            log(1, "\nignoring bad rpm: %s" % rpmfn)
         else:
             (name, epoch, ver, rel, arch) = hobj.nevra()
             if hobj.isSource():

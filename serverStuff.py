@@ -78,7 +78,7 @@ def depchecktree(rpmlist):
         sys.stdout.flush()
         hobj = rpmUtils.RPM_Work(rpmfn)
         if hobj.hdr == None:
-            log(2, "\nignoring bad rpm: %s" % rpmfn)
+            log(1, "\nignoring bad rpm: %s" % rpmfn)
         elif hobj.isSource():
             log(2, "\nignoring srpm: %s" % rpmfn)
         else:
