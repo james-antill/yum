@@ -1,3 +1,154 @@
+2004-01-31 22:11  skvidal
+
+	* configure.in, yum-daily.spec, yum.spec, yummain.py: 
+	edits for 2.0.5
+
+2004-01-03 15:35  skvidal
+
+	* nevral.py: 
+	nevral.delete checks
+
+2004-01-03 15:21  skvidal
+
+	* pullheaders.py: 
+	fix a bunch of things pychecker found
+
+2003-12-26 12:15  skvidal
+
+	* clientStuff.py, nevral.py, rpmUtils.py: 
+	I think this helps solve dep resolutions issues on x86_64 machines
+	using ix86 repositories.
+	
+	Not a complete fix, but a significant way there.
+
+2003-12-22 23:48  skvidal
+
+	* archwork.py, config.py: 
+	more arch.getArch() fixes add kernel-modules-unsupported to
+	installonlypkgs
+
+2003-12-07 02:25  skvidal
+
+	* clientStuff.py, config.py, urlgrabber.py: 
+	make the keepalive disabling actually do _something_ :)
+
+2003-12-07 02:14  skvidal
+
+	* clientStuff.py: 
+	add debug to disabling keepalive
+
+2003-12-05 03:30  skvidal
+
+	* Makefile.in: 
+	.py files installed instead of .pyc - I blame jeremy for the .pyc's
+	in the first place! :-P
+
+2003-12-05 03:08  skvidal
+
+	* nevral.py: 
+	edit error messages for failed dep resolution loops
+
+2003-12-05 02:54  skvidal
+
+	* pullheaders.py: 
+	if yum-arch on an empty repository make the dir anyway. Emit
+	warning in that case.
+
+2003-12-05 02:45  skvidal
+
+	* clientStuff.py, config.py, urlgrabber.py, docs/yum.conf.5: 
+	make keepalive an option - helps people using weird http proxies.
+
+2003-12-05 02:26  skvidal
+
+	* yummain.py: 
+	fix race condition in locking - thanks to Behdad Esfahbod
+
+2003-12-05 00:11  skvidal
+
+	* docs/yum.conf.5: 
+	doc typo
+
+2003-11-22 19:13  skvidal
+
+	* pkgaction.py: 
+	make yum list, info, search and provides case insensitive searches
+	close bug 171
+
+2003-11-21 01:43  skvidal
+
+	* pullheaders.py, serverStuff.py: 
+	catch a couple of tracebacks on file perms in yum-arch
+
+2003-11-21 01:27  skvidal
+
+	* nevral.py: 
+	remove duplicate and identical function
+
+2003-11-21 01:24  skvidal
+
+	* nevral.py: 
+	make packages providing 'kernel-modules' installonly.
+
+2003-11-20 18:48  skvidal
+
+	* clientStuff.py, yummain.py: 
+	fix versioned obsoletes.
+
+2003-11-19 01:45  skvidal
+
+	* bin/yum-arch: 
+	patch from rtomayko - fixes change in call for pullheaders.main()
+
+2003-11-15 12:29  skvidal
+
+	* keepalive.py: python 2.3 patch to keepalive.py
+
+2003-11-14 23:07  skvidal
+
+	* archwork.py, clientStuff.py: 
+	some help for amd64 machines and fix a traceback when the
+	header.info is damaged.
+
+2003-10-30 02:04  skvidal
+
+	* config.py: 
+	make lists be comma or space separated add kernel-source to
+	installonlypkgs default
+
+2003-10-24 01:53  skvidal
+
+	* nevral.py: 
+	comment for things to do soon
+
+2003-10-24 01:49  skvidal
+
+	* clientStuff.py: 
+	make the 'getting filefoo bar baz' for headers a higher-level log
+	output only
+
+2003-10-24 01:27  skvidal
+
+	* pullheaders.py, serverStuff.py: 
+	implement yum-arch --exclude/-x - lets you do wildcard excludes to
+	yum-arch RFE #124 completed
+
+2003-10-21 17:37  skvidal
+
+	* bin/yum: 
+	need to make sure we're talking to the right directory - whoops
+
+2003-10-21 17:34  skvidal
+
+	* yumlock.py, yummain.py, bin/yum: 
+	moved locking until after the command parsing is done - to allow
+	the -R wait time to run w/o a lock
+
+2003-10-19 17:36  skvidal
+
+	* ChangeLog: 
+	check in changelog
+
 2003-10-19 17:34  skvidal
 
 	* configure.in, yum-daily.spec, yum.spec, yummain.py: 
