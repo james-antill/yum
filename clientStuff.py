@@ -600,8 +600,8 @@ def get_groups_from_servers(serveridlist):
             try:
                 localgroupfile = retrygrab(remotegroupfile, localgroupfile, copy_local=1)
             except URLGrabError, e:
-                errorlog(3, 'Error getting file %s' % remotegroupfile)
-                errorlog(3, '%s' % e)
+                log(3, 'Error getting file %s' % remotegroupfile)
+                log(3, '%s' % e)
         else:
             if os.path.exists(localgroupfile):
                 log(2, 'using cached groups from server: %s' % serverid)

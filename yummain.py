@@ -36,7 +36,7 @@ from i18n import _
 def parseCmdArgs(args):
     
     # setup our errorlog object 
-    errorlog=Logger(threshold=10, file_object=sys.stderr)
+    errorlog=Logger(threshold=2, file_object=sys.stderr)
 
     # our default config file location
     yumconffile=None
