@@ -119,7 +119,7 @@ class yumconf:
         if self._getoption('main', 'throttle') != None:
             self.throttle = self._getoption('main','throttle')
         if self._getoption('main', 'keepalive') != None:
-            self.keepalive = self._getoption('main','keepalive')
+            self.keepalive = self.cfg.getboolean('main','keepalive')
         if self._getoption('main', 'retries') != None:
             self.retries = self.cfg.getint('main','retries')
         if self._getoption('main', 'installroot') != None:

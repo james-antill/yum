@@ -1157,7 +1157,7 @@ def grab(serverID, url, filename=None, nofail=0, copy_local=0,
     if not conf.keepalive:
         log(5, 'Disabling Keepalive support by user configuration')
         urlgrabber.disable_keepalive()
-    
+
     if progress_obj == 'normal':
         progress_obj = conf.progress_obj
         
