@@ -326,7 +326,11 @@ def main(args):
     # in case)) confirm w/the user
     
     (i_list, u_list, e_list, ud_list, ed_list)=clientStuff.actionslists(tsInfo)
-    
+    if len(i_list + u_list + e_list + ud_list + ed_list) < 1:
+        log(2, _('Dependency check removed actions'))
+        log(2, _('No actions to take'))
+        sys.exit(0)
+        
     clientStuff.printactions(i_list, u_list, e_list, ud_list, ed_list, tsInfo)
     if conf.assumeyes==0:
         if clientStuff.userconfirm():
