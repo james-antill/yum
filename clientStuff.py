@@ -456,12 +456,12 @@ def printactions(i_list, u_list, e_list, ud_list, ed_list):
         (name,arch) = pkg
         log(2, _('[erase: %s.%s]') % (name, arch))
     if len(ud_list) > 0:
-        log(2, _('I will install/upgrade these to satisfy the depedencies:'))
+        log(2, _('I will install/upgrade these to satisfy the dependencies:'))
         for pkg in ud_list:
             (name, arch) = pkg
             log(2, _('[deps: %s.%s]') %(name, arch))
     if len(ed_list) > 0:
-        log(2, 'I will erase these to satisfy the depedencies:')
+        log(2, 'I will erase these to satisfy the dependencies:')
         for pkg in ed_list:
             (name, arch) = pkg
             log(2, '[deps: %s.%s]' %(name, arch))
