@@ -157,7 +157,11 @@ class nevral:
             return self.localhdrpath[(name, arch)]
         else:
             hdrfn = self.hdrfn(name,arch)
-            base = conf.serverhdrdir[i]
+            if conf.serverhdrdir.has_key(i):
+                base = conf.serverhdrdir[i]
+            else:
+                errorlog(0, 'asking for package %s.%s - does not exist in nevral - bailing out - check rpmdb for errors' % (name, arch))
+                sys.exit(1)
             log(7, 'localhdrpath= %s for %s %s' % (base + '/' + hdrfn, name, arch))
             return base + '/' + hdrfn
         
@@ -292,10 +296,23 @@ class nevral:
         del deps
         del _ts
         log(5, 'Long Check')
-        while CheckDeps==1 or (conflicts != 1 and unresolvable != 1 ):
+    	depscopy = []
+        unresolveableloop = 0
+        while CheckDeps==1 or conflicts != 1 or unresolvable != 1:
             errors=[]
             _ts = self.populateTs(addavailable = 1)
             deps = _ts.check()
+            if deps == depscopy:
+                unresolveableloop = unresolveableloop + 1
+                log(5, 'looping count = %d' % unresolveableloop)
+                if unresolveableloop >= 3:
+                    errors.append('identical dependency loop exceeded')
+                    for ((name, version, release), (reqnam, reqversion), flags, suggest, sense) in deps:
+                        errors.append('package %s needs %s (not provided)' % (name, rpmUtils.formatRequire(reqname, reqversion, flags)))
+            else:
+                unresolveableloop = 0
+                           
+            depscopy = deps
             
             CheckDeps = 0
             if not deps:
@@ -303,7 +320,7 @@ class nevral:
             log (3, '# of Deps = %d' % len(deps))
             for ((name, version, release), (reqname, reqversion),
                                 flags, suggest, sense) in deps:
-                log (4, 'dep: %s req %s - %s - %s' % (name, reqname, reqversion, sense))
+                log (4, 'debug dep: %s req %s - %s - %s' % (name, reqname, reqversion, sense))
                 if sense == rpm.RPMDEP_SENSE_REQUIRES:
                     if suggest:
                         (header, sugname) = suggest
@@ -323,13 +340,13 @@ class nevral:
                                 archlist = archwork.availablearchs(rpmDBInfo,name)
                                 arch = archwork.bestarch(archlist)
                                 ((e, v, r, a, l, i), s)=rpmDBInfo._get_data(name,arch)
-                                self.add((name,e,v,r,arch,l,i),'ed')
-                                log(4, 'Got Erase Dep: %s, %s' %(name,arch))
+                                self.add((name,e,v,r,a,l,i),'ed')
+                                log(4, 'Got Erase Dep: %s, %s' %(name,a))
                             else:
                                 archlist = self.bestArchsByVersion(reqname)
                                 if len(archlist) > 0:
                                     arch = archwork.bestarch(archlist)
-                                    self.setPkgState(name, arch, 'ud')
+                                    self.setPkgState(reqname, arch, 'ud')
                                     log(4, 'Got Extra Dep: %s, %s' %(reqname,arch))
                                 else:
                                     unresolvable = 1
@@ -350,8 +367,8 @@ class nevral:
                             if whatprovides and whatprovides.count() != 0:
                                 for provhdr in whatprovides:
                                     if self.state(provhdr[rpm.RPMTAG_NAME],provhdr[rpm.RPMTAG_ARCH]) in ('e','ed'):
-                                        ((e,v,r,arch,l,i),s)=rpmDBInfo._get_data(name)
-                                        self.add((name,e,v,r,arch,l,i),'ed')
+                                        ((e,v,r,a,l,i),s)=rpmDBInfo._get_data(name)
+                                        self.add((name,e,v,r,a,l,i),'ed')
                                         log(4, 'Got Erase Dep: %s, %s' %(name, a))
                                         CheckDeps=1
                                     else:
@@ -391,6 +408,8 @@ class nevral:
                         errors.append('conflict between %s and %s' % (name, reqname))
                         conflicts=1
             log(4, 'Restarting Dependency Loop')
+            log.write(2, '.')
+            sys.stdout.flush()
             del _ts
             del deps
             if len(errors) > 0:
