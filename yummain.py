@@ -27,6 +27,7 @@ import random
 import locale
 import rpm
 import rpmUtils
+import yumcomps
 
 from logger import Logger
 from config import yumconf
@@ -113,7 +114,7 @@ def main(args):
                        'grouplist','groupupdate','groupinstall','clean', \
                        'remove', 'provides', 'check-update'):
         usage()
-    process=cmds[0]
+    process = cmds[0]
     
     # some misc speedups/sanity checks
     if conf.uid != 0:
@@ -151,12 +152,22 @@ def main(args):
     pkgaction.ts = ts
     nevral.ts = ts
     rpmUtils.ts = ts
+    yumcomps.ts = ts
     
     # make remote nevral class
     HeaderInfo = nevral.nevral()
     
+    # sorting the servers so that sort() will order them consistently
+    # If you wanted to add scoring or somesuch thing for server preferences
+    # or even getting rid of servers b/c of some criteria you could
+    # replace serverlist.sort() with a function - all it has to do
+    # is return an ordered list of serverids and have it stored in
+    # serverlist
+    serverlist = conf.servers
+    serverlist.sort()
+
     # get the package info file
-    clientStuff.get_package_info_from_servers(conf, HeaderInfo)
+    clientStuff.get_package_info_from_servers(serverlist, HeaderInfo)
     
     # make local nevral class
     rpmDBInfo = nevral.nevral()
@@ -175,15 +186,31 @@ def main(args):
     (uplist, newlist, nulist) = clientStuff.getupdatedhdrlist(HeaderInfo, rpmDBInfo)
     log(2, _('Downloading needed headers'))
     clientStuff.download_headers(HeaderInfo, nulist)
-    if cmds[0] == 'upgrade':
+    if process in ['upgrade', 'groupupgrade']:
         log(2, _('Finding obsoleted packages'))
-        obsdict=clientStuff.returnObsoletes(HeaderInfo, rpmDBInfo, nulist)
-        obslist=obsdict.keys()
+        obsdict = clientStuff.returnObsoletes(HeaderInfo, rpmDBInfo, nulist)
+        obslist = obsdict.keys()
     else:
-        obsdict={}
-        obslist=[]
-        
+        obsdict = {}
+        obslist = []
 
+    if process in ['groupupdate', 'groupinstall', 'grouplist', 'groupupgrade']:
+        servers_with_groups = clientStuff.get_groups_from_servers(serverlist)
+        if len(servers_with_groups) > 0:
+            GroupInfo = yumcomps.Groups_Info(conf.overwrite_groups)
+            for serverid in servers_with_groups:
+                GroupInfo.add(conf.localGroups(serverid))
+            GroupInfo.compileGroups()
+            clientStuff.GroupInfo = GroupInfo
+            pkgaction.GroupInfo = GroupInfo
+        else:
+            errorlog(1, 'No groups provided or accessible on any server.')
+            errorlog(1, 'Exiting.')
+            sys.exit(1)
+            
+    
+    
+    
     log(3, 'nulist = %s' % len(nulist))
     log(3, 'uplist = %s' % len(uplist))
     log(3, 'newlist = %s' % len(newlist))
@@ -301,4 +328,3 @@ def usage():
     
 if __name__ == "__main__":
     main()
-

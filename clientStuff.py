@@ -646,24 +646,40 @@ def printtime():
     import time
     return time.strftime('%m/%d/%y %H:%M:%S ', time.localtime(time.time()))
 
-def get_package_info_from_servers(conf, HeaderInfo):
-    # this function should be split into - server paths etc and getting the 
-    # header info/populating the 
-    # the HeaderInfo nevral class so we can do non-root runs of yum
+def get_groups_from_servers(serveridlist):
+    """takes a list of serverids - returns a list of servers that either:
+       gave us yumcomps.xml or for whom we had a cached one"""
+       
+    log(2, 'Getting groups from servers')
+    validservers = []
+    for serverid in serveridlist:
+        remotegroupfile = conf.remoteGroups(serverid)
+        localgroupfile = conf.localGroups(serverid)
+        if not conf.cache:
+            log(3, 'getting groups from server: %s' % serverid)
+            localgroupfile = urlgrab(remotegroupfile, localgroupfile, copy_local=1)
+        else:
+            if os.path.exists(localgroupfile):
+                log(3, 'using cached groups from server: %s' % serverid)
+        if os.path.exists(localgroupfile):
+            validservers.append(serverid)
+            
+    return validservers
+        
+def get_package_info_from_servers(serveridlist, HeaderInfo):
+    # this should hand back a list of servers that we could contact
+    # that HeaderInfoNevralLoad then deals with - it would speed up the 
+    # operation, even
     log(2, 'Gathering package information from servers')
-    # sorting the servers so that sort() will order them consistently
-    serverlist = conf.servers
-    serverlist.sort()
-    for serverid in serverlist:
-        baseurl = conf.serverurl[serverid]
+    for serverid in serveridlist:
         servername = conf.servername[serverid]
-        serverheader = os.path.join(baseurl, 'headers/header.info')
+        serverheader = conf.remoteHeader(serverid)
         servercache = conf.servercache[serverid]
-        log(6,'server name/cachedir:' + servername + '-' + servercache)
-        log(2,'Getting headers from: %s' % (servername))
+        log(2, 'Getting headers from: %s' % (servername))
+        log(4, 'Putting them into: %s' % (servercache))
         localpkgs = conf.serverpkgdir[serverid]
         localhdrs = conf.serverhdrdir[serverid]
-        localheaderinfo = os.path.join(servercache, 'header.info')
+        localheaderinfo = conf.localHeader(serverid)
         if not os.path.exists(servercache):
             os.mkdir(servercache)
         if not os.path.exists(localpkgs):
@@ -675,7 +691,7 @@ def get_package_info_from_servers(conf, HeaderInfo):
             headerinfofn = urlgrab(serverheader, localheaderinfo, copy_local=1)
         else:
             log(3, 'using cached header.info file')
-            headerinfofn=localheaderinfo
+            headerinfofn = localheaderinfo
         log(4,'headerinfofn: ' + headerinfofn)
         HeaderInfoNevralLoad(headerinfofn, HeaderInfo, serverid)
 
@@ -722,7 +738,7 @@ def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmD
     basecmd = cmds.pop(0)
     
     if conf.uid != 0:
-        if basecmd in ['install','update','clean','upgrade','erase']:
+        if basecmd in ['install','update','clean','upgrade','erase', 'groupupdate', 'groupupgrade', 'groupinstall']:
             errorlog(0, _('You need to be root to perform these commands'))
             sys.exit(1)
     
@@ -768,64 +784,41 @@ def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmD
         else:
             sys.exit(0)
             
-    elif basecmd == 'list':
+    elif basecmd in ['list', 'info']:
+        if basecmd == 'list':
+            short = 1
+        else:
+            short = 0
         if len(cmds) == 0:
-            pkgaction.listpkginfo(nulist, 'all', HeaderInfo, 1)
+            pkgaction.listpkginfo(nulist, 'all', HeaderInfo, short)
             sys.exit(0)
         else:
             if cmds[0] == 'updates':
-                pkgaction.listpkginfo(uplist, 'updates', HeaderInfo, 1)
+                pkgaction.listpkginfo(uplist, 'updates', HeaderInfo, short)
             elif cmds[0] == 'available':
-                pkgaction.listpkginfo(newlist, 'all', HeaderInfo, 1)
+                pkgaction.listpkginfo(newlist, 'all', HeaderInfo, short)
             elif cmds[0] == 'installed':
                 pkglist = rpmDBInfo.NAkeys()
-                pkgaction.listpkginfo(pkglist, 'all', rpmDBInfo, 1)
+                pkgaction.listpkginfo(pkglist, 'all', rpmDBInfo, short)
             elif cmds[0] == 'extras':
                 pkglist=[]
                 for (name, arch) in rpmDBInfo.NAkeys():
                     if not HeaderInfo.exists(name, arch):
                         pkglist.append((name,arch))
                 if len(pkglist) > 0:
-                    pkgaction.listpkginfo(pkglist, 'all', rpmDBInfo, 1)
+                    pkgaction.listpkginfo(pkglist, 'all', rpmDBInfo, short)
                 else:
                     log(2, _('No Packages installed not included in a repository'))
             else:    
                 log(2, _('Looking in Available Packages:'))
-                pkgaction.listpkginfo(nulist, cmds, HeaderInfo, 1)
+                pkgaction.listpkginfo(nulist, cmds, HeaderInfo, short)
                 log(2, _('Looking in Installed Packages:'))
                 pkglist = rpmDBInfo.NAkeys()
-                pkgaction.listpkginfo(pkglist, cmds, rpmDBInfo, 1)
+                pkgaction.listpkginfo(pkglist, cmds, rpmDBInfo, short)
         sys.exit(0)
-    
-    elif basecmd == 'info':
-        if len(cmds) == 0:
-            pkgaction.listpkginfo(nulist, 'all', HeaderInfo, 0)
-            sys.exit(0)
-        else:
-            if cmds[0] == 'updates':
-                pkgaction.listpkginfo(uplist, 'updates', HeaderInfo, 0)
-            elif cmds[0] == 'available':
-                pkgaction.listpkginfo(newlist, 'all', HeaderInfo, 0)
-            elif cmds[0] == 'installed':
-                pkglist=rpmDBInfo.NAkeys()
-                pkgaction.listpkginfo(pkglist,'all', rpmDBInfo, 0)
-            elif cmds[0] == 'extras':
-                pkglist=[]
-                for (name, arch) in rpmDBInfo.NAkeys():
-                    if not HeaderInfo.exists(name, arch):
-                        pkglist.append((name,arch))
-                if len(pkglist) > 0:
-                    pkgaction.listpkginfo(pkglist, 'all', rpmDBInfo, 0)
-                else:
-                    log(2, _('No Packages installed not included in a repository'))
-            else:    
-                log(2, _('Looking in Available Packages:'))
-                pkgaction.listpkginfo(nulist, cmds, HeaderInfo, 0)
-                log(2, _('Looking in Installed Packages:'))
-                pkglist=rpmDBInfo.NAkeys()
-                pkgaction.listpkginfo(pkglist, cmds, rpmDBInfo, 0)
+    elif basecmd == 'grouplist':
+        pkgaction.listgroups(cmds)
         sys.exit(0)
-
     elif basecmd == 'clean':
         if len(cmds) == 0 or cmds[0] == 'all':
             log(2, _('Cleaning packages and old headers'))
@@ -911,4 +904,3 @@ def descfsize(size):
     else:
         size = size / 1000000000.0
         return "%.2f GB" % size
-        

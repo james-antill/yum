@@ -69,51 +69,6 @@ def installpkgs(tsnevral,nulist,userlist,hinevral,rpmnevral):
     else:
         errorlog(1, _("No Packages Available for Update or Install"))
     
-
-def listpkginfo(pkglist, userlist, nevral, short):
-    if len(pkglist) > 0:
-        if short:
-            log(2, "%-40s %-10s %s" %(_('Name'),_('Arch'),_('Version')))
-            log(2, "-" * 80)
-        pkglist.sort(clientStuff.nasort)
-        if type(userlist) is types.StringType:
-            if userlist=='all' or userlist =='updates':
-                for (name, arch) in pkglist:
-                    if short:
-                        (e,v,r)=nevral.evr(name,arch)
-                        print "%-40s %-10s %s-%s" %(name, arch, v, r)
-                    else:
-                        hdr=nevral.getHeader(name,arch)
-                        displayinfo(hdr)
-                        del hdr
-                print ' '
-        else:    
-            for (name,arch) in pkglist:
-                for n in userlist:
-                    if n == name or fnmatch.fnmatch(name, n):
-                        if short:
-                            (e,v,r)=nevral.evr(name,arch)
-                            print "%-40s %-10s %s-%s" %(name, arch, v, r)
-                        else:
-                            hdr=nevral.getHeader(name,arch)
-                            displayinfo(hdr)
-                            del hdr
-            print ' '
-    else:
-        print _("No Packages Available to List")
-
-def displayinfo(hdr):
-    print _("Name   : %s") % hdr[rpm.RPMTAG_NAME]
-    print _("Arch   : %s") % hdr[rpm.RPMTAG_ARCH]
-    print _("Version: %s") % hdr[rpm.RPMTAG_VERSION]
-    print _("Release: %s") % hdr[rpm.RPMTAG_RELEASE]
-    print _("Size   : %s") % clientStuff.descfsize(hdr[rpm.RPMTAG_SIZE])
-    print _("Group  : %s") % hdr[rpm.RPMTAG_GROUP]
-    print _("Summary: %s") % hdr[rpm.RPMTAG_SUMMARY]
-    print _("Description:\n %s") % hdr[rpm.RPMTAG_DESCRIPTION]
-    print ""
-    
-
 def updatepkgs(tsnevral,hinevral,rpmnevral,nulist,uplist,obslist,userlist):
     #get the list of what people want updated, match like in install.
     #add as 'u' to the tsnevral if its already there, if its not then add as 'i' and warn
@@ -197,6 +152,69 @@ def erasepkgs(tsnevral,rpmnevral,userlist):
             errorlog(0, _("Erase: No matches for %s") % n)
             sys.exit(1)
 
+def listpkginfo(pkglist, userlist, nevral, short):
+    if len(pkglist) > 0:
+        if short:
+            log(2, "%-40s %-10s %s" %(_('Name'),_('Arch'),_('Version')))
+            log(2, "-" * 80)
+        pkglist.sort(clientStuff.nasort)
+        if type(userlist) is types.StringType:
+            if userlist=='all' or userlist =='updates':
+                for (name, arch) in pkglist:
+                    if short:
+                        (e,v,r)=nevral.evr(name,arch)
+                        print "%-40s %-10s %s-%s" %(name, arch, v, r)
+                    else:
+                        hdr=nevral.getHeader(name,arch)
+                        displayinfo(hdr)
+                        del hdr
+                print ' '
+        else:    
+            for (name,arch) in pkglist:
+                for n in userlist:
+                    if n == name or fnmatch.fnmatch(name, n):
+                        if short:
+                            (e,v,r)=nevral.evr(name,arch)
+                            print "%-40s %-10s %s-%s" %(name, arch, v, r)
+                        else:
+                            hdr=nevral.getHeader(name,arch)
+                            displayinfo(hdr)
+                            del hdr
+            print ' '
+    else:
+        print _("No Packages Available to List")
+
+def displayinfo(hdr):
+    print _("Name   : %s") % hdr[rpm.RPMTAG_NAME]
+    print _("Arch   : %s") % hdr[rpm.RPMTAG_ARCH]
+    print _("Version: %s") % hdr[rpm.RPMTAG_VERSION]
+    print _("Release: %s") % hdr[rpm.RPMTAG_RELEASE]
+    print _("Size   : %s") % clientStuff.descfsize(hdr[rpm.RPMTAG_SIZE])
+    print _("Group  : %s") % hdr[rpm.RPMTAG_GROUP]
+    print _("Summary: %s") % hdr[rpm.RPMTAG_SUMMARY]
+    print _("Description:\n %s") % hdr[rpm.RPMTAG_DESCRIPTION]
+    print ""
+    
+
+def listgroups(userlist):
+    """lists groups - should handle 'installed', 'all', glob, empty,
+       maybe visible and invisible too"""
+    # this needs tidying and needs to handle empty statements and globs
+    # it also needs to handle a userlist - duh
+    # take list - if it's zero then it's '_all_' - push that into list
+    # otherwise iterate over list producing output
+    groups = GroupInfo.visible_groups
+    groups.sort()
+    if len(userlist) == 0:
+        userlist == ['_all_']
+    for item in userlist:
+        if item == 'installed':
+            if GroupInfo.isGroupInstalled(group):
+                print '%s - %s' % (grpid, group)
+        elif item == 'available':
+            if not GroupInfo.isGroupInstalled(group):
+                print '%s - %s' % (grpid, group)
+                
 def whatprovides(usereq, nulist, nevral, localrpmdb):
     # figure out what the user wants, traverse all the provides and file lists 
     # in every file in the header, return the fnmatch()es for the usereq
@@ -314,6 +332,3 @@ def kernelupdate(tsnevral):
         else:
             errorlog(1, _('No bootloader found, Cannot configure kernel, continuing.'))
             filelog(1, 'No bootloader found, Cannot configure kernel.')
-
-
-

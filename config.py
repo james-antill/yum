@@ -17,6 +17,7 @@
 import ConfigParser
 import sys
 import os
+import os.path
 import urlparse
 import string
 import urllib
@@ -56,37 +57,35 @@ class yumconf:
         self.debuglevel = 2
         self.logfile = '/var/log/yum.log'
         self.pkgpolicy = 'newest'
-        #self.gpghome = '/root/.gnupg'
-        #self.gpgkeyring = None
         self.assumeyes = 0
         self.errorlevel = 2
         self.cache = 0
         self.uid = 0
         self.commands = None
         self.exactarch = 0
+        self.overwrite_groups = 0
         
         if self._getoption('main','cachedir') != None:
-            self.cachedir=self._getoption('main','cachedir')
+            self.cachedir = self._getoption('main','cachedir')
         if self._getoption('main','debuglevel') != None:
-            self.debuglevel=self._getoption('main','debuglevel')
+            self.debuglevel = self._getoption('main','debuglevel')
         if self._getoption('main','logfile') != None:
-            self.logfile=self._getoption('main','logfile')
+            self.logfile = self._getoption('main','logfile')
         if self._getoption('main','pkgpolicy') != None:
-            self.pkgpolicy=self._getoption('main','pkgpolicy')
+            self.pkgpolicy = self._getoption('main','pkgpolicy')
         if self._getoption('main','exclude') != None:
-            self.excludes=string.split(self._getoption('main','exclude'), ' ')
+            self.excludes = string.split(self._getoption('main','exclude'), ' ')
         if self._getoption('main','assumeyes') != None:
-            self.assumeyes=self.cfg.getboolean('main', 'assumeyes')
+            self.assumeyes = self.cfg.getboolean('main', 'assumeyes')
         if self._getoption('main','errorlevel') != None:
-            self.errorlevel=self._getoption('main', 'errorlevel')
-        #if self._getoption('main','gpghome') != None:
-        #    self.gpghome=self._getoption('main', 'gpghome')
-        #if self._getoption('main','gpgkeyring') != None:
-        #    self.gpgkeyring=self._getoption('main', 'gpgkeyring')
+            self.errorlevel = self._getoption('main', 'errorlevel')
         if self._getoption('main','commands') != None:
-            self.commands=string.split(self._getoption('main', 'commands'),' ')
+            self.commands = string.split(self._getoption('main', 'commands'),' ')
         if self._getoption('main','exactarch') != None:
-            self.exactarch=self.cfg.getboolean('main', 'exactarch')
+            self.exactarch = self.cfg.getboolean('main', 'exactarch')
+        if self._getoption('main','overwrite_groups') != None:
+            self.overwrite_groups = self.cfg.getboolean('main', 'overwrite_groups')
+
 
         if len(self.cfg.sections()) > 1:
             for section in self.cfg.sections(): # loop through the list of sections
@@ -126,5 +125,18 @@ class yumconf:
             print _('Failed to find section: %s') % section
         except ConfigParser.NoOptionError, e:
             return None
+            
+    def remoteGroups(self, serverid):
+        return os.path.join(self.serverurl[serverid], 'yumgroups.xml')
+    
+    def localGroups(self, serverid):
+        return os.path.join(self.servercache[serverid], 'yumgroups.xml')
         
-   
+    def baseURL(self, serverid):
+        return self.serverurl[serverid]
+        
+    def remoteHeader(self, serverid):
+        return os.path.join(self.baseURL(serverid), 'headers/header.info')
+        
+    def localHeader(self, serverid):
+        return os.path.join(self.servercache[serverid], 'header.info')

@@ -5,7 +5,6 @@ import comps
 import sys
 import rpmUtils
 
-
 # goals
 # be able to list which groups a user has installed based on whether or
 # not mandatory pkgs are installed and whether all the metapkgs are installed
@@ -36,7 +35,8 @@ import rpmUtils
 # need to deal with groupname vs groupid
 
 class Groups_Info:
-    def __init__(self, overwrite_groups=0):
+    def __init__(self, overwrite_groups = 0):
+        self.overwrite_groups = overwrite_groups
         self.group_installed = {}
         self.sub_groups = {}
         self.visible_groups = []
@@ -96,7 +96,7 @@ class Groups_Info:
                 self.optional_metapkgs[groupname] = []
                 
             # if we're overwriting groups - kill all the originals
-            if overwrite_groups:
+            if self.overwrite_groups:
                 self.group_installed[groupname] = 0
                 self.mandatory_pkgs[groupname] = []
                 self.sub_groups[groupname] = []
@@ -287,9 +287,9 @@ class Groups_Info:
 
 
 def main():
-    compsgrpfun = Groups_Info()
-    compsgrpfun.add('./othercomps.xml')
+    compsgrpfun = Groups_Info(overwrite_groups)
     compsgrpfun.add('./comps.xml')
+    compsgrpfun.add('./othercomps.xml')
     compsgrpfun.compileGroups()
     #compsgrpfun._dumppkgs('all_installed')
     try:
@@ -302,6 +302,6 @@ def main():
 
 
 if __name__ == '__main__':
-    overwrite_groups = 0
+    overwrite_groups = 1
     ts = rpm.TransactionSet()
     main()
