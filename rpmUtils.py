@@ -4,6 +4,7 @@ import rpm
 import os
 import gzip
 import sys
+from i18n import _
 
 def checkheader(headerfile, name, arch):
     #return true(1) if the header is good
@@ -72,7 +73,7 @@ def openrpmdb():
     try:
         db = rpm.TransactionSet('/')
     except rpm.error, e:
-        raise RpmError(_("Could not open RPM database for reading. Perhaps it is already in use?"))
+        errorlog(0_("Could not open RPM database for reading. Perhaps it is already in use?"))
     return db
 
 
@@ -81,7 +82,7 @@ class RPM_Base_Work:
 
     def _getTag(self, tag):
         if self.hdr is None:
-            errorlog(0, 'Got an empty Header, something has gone wrong')
+            errorlog(0, _('Got an empty Header, something has gone wrong'))
             sys.exit(1)
         return self.hdr[tag]
     
@@ -165,7 +166,7 @@ class RPM_Work(RPM_Base_Work):
         try:
             self.hdr = ts.hdrFromFdno(fd)
         except rpm.error, e:
-            errorlog(0, 'Error opening rpm %s - error %s' % (rpmfn, e))
+            errorlog(0, _('Error opening rpm %s - error %s') % (rpmfn, e))
             self.hdr = None
         os.close(fd)
     

@@ -81,9 +81,10 @@ def main():
         
     #change to the basedir to work from w/i the path - for relative url paths
     os.chdir(basedir)
-
+    
     #get the list of rpms
     rpms=serverStuff.getfilelist('./', '.rpm', [], cmds['usesymlinks'])
+    
     #and a few more sanity checks
     if len(rpms) < 1:
         print _("No rpms to look at. Exiting.")
@@ -109,7 +110,7 @@ def main():
         if not os.path.exists(headerdir):
             os.mkdir(headerdir)
         # done with the sanity checks, on to the cleanups
-        #looks for a list of .hdr files and the header.info file
+        # looks for a list of .hdr files and the header.info file
         hdrlist = serverStuff.getfilelist(headerdir, '.hdr', [], 0)
 
         #removes both entirely 
@@ -117,6 +118,8 @@ def main():
             os.unlink(hdr)
         if os.path.exists(headerinfo):
             os.unlink(headerinfo)
+
+        # generate the new headers
         rpminfo = genhdrs(rpms, headerdir, cmds)
 
         #Write header.info file
@@ -128,7 +131,6 @@ def main():
             info = "%s:%s-%s-%s.%s=%s\n" % (epoch, name, ver, rel, arch, rpmloc)
             headerfd.write(info)
         headerfd.close()
-
 
     #take us home mr. data
     os.chdir(curdir)
@@ -147,12 +149,12 @@ def genhdrs(rpms,headerdir,cmds):
                 print _('Digesting rpm - %s - %d/%d') % (rpmname, currpm, numrpms)
             else:
                 sys.stdout.write('\r' + ' ' * 80)
-                sys.stdout.write("\rDigesting rpms %d %% complete: %s" % (percent,rpmname))
+                sys.stdout.write("\rDigesting rpms %d %% complete: %s" % (percent, rpmname))
                 sys.stdout.flush()
         if cmds['rpmcheck']:
-            log(2,_("\nChecking sig on %s") % (rpmname))
+            log(2,_("\nChecking sig on %s") % rpmname)
             if rpmUtils.checkSig(rpmfn) > 0:
-                log(0, '\n\nProblem with gpg key on %s\n\n' % rpmfn)
+                log(0, _("\n\nProblem with gpg key on %s\n\n") % rpmfn)
                 sys.exit(1)
         hobj = rpmUtils.RPM_Work(rpmfn)
         #check to ignore src.rpms
