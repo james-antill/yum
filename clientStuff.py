@@ -41,16 +41,16 @@ except ImportError, msg:
 
 from i18n import _
 
-def stripENVRA(foo):
-    archIndex = string.rfind(foo, '.')
-    arch = foo[archIndex+1:]
-    relIndex = string.rfind(foo[:archIndex], '-')
-    rel = foo[relIndex+1:archIndex]
-    verIndex = string.rfind(foo[:relIndex], '-')
-    ver = foo[verIndex+1:relIndex]
-    epochIndex = string.find(foo, ':')
-    epoch = foo[:epochIndex]
-    name = foo[epochIndex + 1:verIndex]
+def stripENVRA(str):
+    archIndex = string.rfind(str, '.')
+    arch = str[archIndex+1:]
+    relIndex = string.rfind(str[:archIndex], '-')
+    rel = str[relIndex+1:archIndex]
+    verIndex = string.rfind(str[:relIndex], '-')
+    ver = str[verIndex+1:relIndex]
+    epochIndex = string.find(str, ':')
+    epoch = str[:epochIndex]
+    name = str[epochIndex + 1:verIndex]
     return (epoch, name, ver, rel, arch)
 
 def stripEVR(str):
@@ -341,13 +341,16 @@ def getupdatedhdrlist(headernevral, rpmnevral):
         # check to see if we have that specific arch
         # if so compare that name,arch vs the bestarch in the rpmdb 
         # this deals with us having 2.4.9-31.i686 kernels installed AND 2.4.18-4.athlon kernels installed
-        # b/c a 2.4.18-4.i686 would constantly showed up on an athlon
+        # b/c a 2.4.18-4.i686 would constantly show up on an athlon
         # if its newer then mark it as updateable
         # if we don't have that specific arch, then if its the best arch in the headernevral, compare
         # it to what we have, if its newer then mark it as updateable
         if rpmnevral.exists(name):
             if rpmnevral.exists(name, arch):
                 archlist = archwork.availablearchs(rpmnevral, name)
+                #comparison needs to be done here to find out
+                # 1.which of the name+arch combos is the newest (independent of arch)
+                # 2.if any two are the same version then what arch is the best)
                 bestarch = archwork.bestarch(archlist)
                 rc = rpmUtils.compareEVR(headernevral.evr(name, arch), rpmnevral.evr(name, bestarch))
                 if (rc > 0):
