@@ -333,11 +333,6 @@ class yumconf(object):
                 except Errors.RepoError, e:
                     print e
                     
-        # if we don't have any enabled repositories then this is going to suck
-        # bail out with an exception raised so yummain can catch it
-        if len(self.repos.listEnabled()) < 1:
-            raise Errors.ConfigError, \
-                    'Insufficient repository configuration. No repositories Found/Enabled. Aborting.'
 
     def listConfigOptions(self):
         """return list of options available for global config"""
