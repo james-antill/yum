@@ -45,8 +45,10 @@ class nevral:
     
     def delete(self, name, arch=None):
         if self.exists(name, arch):
-            del self.rpmbyname[name]
-            del self.rpmbynamearch[(name, arch)]
+            if self.rpmbyname.has_key(name):
+                del self.rpmbyname[name]
+            if self.rpmbynamearch.has_key((name, arch)):
+                del self.rpmbynamearch[(name, arch)]
         else:
             if arch is None:
                 errolog(2, _('No Package %s') % (name))
