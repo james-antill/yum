@@ -6,6 +6,8 @@ import types
 import os
 import gzip
 import sys
+import locale
+
 from i18n import _
 from urlgrabber import URLGrabError
 from zlib import error as zlibError
@@ -79,6 +81,7 @@ def checkSig(package):
 
 def getSigInfo(hdr):
     """checks if a computerhand back signature information and an error code"""
+    locale.setlocale(locale.LC_ALL, 'C')
     string = '%|DSAHEADER?{%{DSAHEADER:pgpsig}}:{%|RSAHEADER?{%{RSAHEADER:pgpsig}}:{%|SIGGPG?{%{SIGGPG:pgpsig}}:{%|SIGPGP?{%{SIGPGP:pgpsig}}:{(none)}|}|}|}|'
     siginfo = hdr.sprintf(string)
     if siginfo != '(none)':
