@@ -1,3 +1,88 @@
+2003-09-07 23:51  skvidal
+
+	* configure.in, yum.spec, yummain.py: 
+	version number edits - 2.0.2
+
+2003-09-03 08:15  skvidal
+
+	* clientStuff.py: 
+	typo fixed - thanks to grigory bakunov for noticing it
+
+2003-08-31 14:00  skvidal
+
+	* urlgrabber.py: 
+	typo in urlgrabber edits
+
+2003-08-31 13:56  skvidal
+
+	* clientStuff.py: 
+	unmuddy an error code having to do with the gpg check
+
+2003-08-31 13:40  skvidal
+
+	* clientStuff.py, rpmUtils.py: 
+	fix for potential security problem in gpg checking.
+	
+	If you had an unsigned pkg in an repository requiring gpg checking
+	yum would not error about the pkg being unsigned. It would see that
+	it didn't FAIL the gpg check and therefore was ok.
+	
+	Corrected.
+
+2003-08-30 01:42  skvidal
+
+	* docs/yum.8: 
+	minor manpage update - thanks to grigory bakunov
+
+2003-08-29 15:40  skvidal
+
+	* config.py: 
+	make exclude= in [main] handle the $variables
+
+2003-08-26 23:35  skvidal
+
+	* yum-daily.spec, yum.spec: fix spec file so cron jobs put in by
+	the builder will run :) thanks to jack neely
+
+2003-08-26 23:31  skvidal
+
+	* pullheaders.py, serverStuff.py, docs/yum-arch.8: 
+	fix header.src.info data - removing arbitrary arch update docs -
+	thanks to Ville Skytta for those.
+
+2003-08-25 23:13  skvidal
+
+	* pullheaders.py: 
+	make yum-arch -q still more quiet :) Thanks to Dave Shield
+
+2003-08-17 04:00  skvidal
+
+	* pullheaders.py, rpmUtils.py, yum-daily.spec: 
+	update daily spec file with suggestion from Tom Diehl make src rpms
+	ignore the arch in the filename
+
+2003-08-17 03:41  skvidal
+
+	* config.py: 
+	whoops kernel-unsupported isn't a kernel - it's just modules -
+	don't list it in the default kernelpkgnames
+
+2003-08-17 03:25  skvidal
+
+	* config.py, nevral.py, pkgaction.py, docs/yum.conf.5: 
+	create and document kernelpkgnames and installonlypkgs setting in
+	config to handle the ever-changing list of kernel pkg names and
+	what not.
+	
+	needed to happen anyway - kernelpkgnames will be ripped out once
+	the kernel updating stuff is abstracted
+
+2003-08-15 00:30  skvidal
+
+	* ChangeLog: 
+	at some point in my life I'll remember what to do to update the
+	changelog correctly.
+
 2003-08-15 00:25  skvidal
 
 	* ChangeLog: 
@@ -314,13 +399,13 @@
 
 2003-05-27 13:32  skvidal
 
-	* failover.py: file failover.py was initially added on branch
-	yum-rpm_4_2_branch.
+	* failover.py: 
+	adding failover.py
 
 2003-05-27 13:32  skvidal
 
-	* failover.py: 
-	adding failover.py
+	* failover.py: file failover.py was initially added on branch
+	yum-rpm_4_2_branch.
 
 2003-05-27 13:25  skvidal
 
@@ -648,9 +733,8 @@
 
 2003-04-05 18:08  skvidal
 
-	* progress_meter.py, urlgrabber.py: 
-	new urlgrabber functions - much more robust and option-ridden ;)
-	progress_meter fun - both of these from michael stenner
+	* progress_meter.py: file progress_meter.py was initially added on
+	branch yum-rpm_4_2_branch.
 
 2003-04-05 18:08  skvidal
 
@@ -659,8 +743,9 @@
 
 2003-04-05 18:08  skvidal
 
-	* progress_meter.py: file progress_meter.py was initially added on
-	branch yum-rpm_4_2_branch.
+	* progress_meter.py, urlgrabber.py: 
+	new urlgrabber functions - much more robust and option-ridden ;)
+	progress_meter fun - both of these from michael stenner
 
 2003-04-05 18:08  skvidal
 
@@ -753,13 +838,13 @@
 
 2003-03-25 01:51  skvidal
 
-	* yumcomps.py: 
-	added yumcomps.py for the comps.xml support merge
+	* yumcomps.py: file yumcomps.py was initially added on branch
+	yum-rpm_4_2_branch.
 
 2003-03-25 01:51  skvidal
 
-	* yumcomps.py: file yumcomps.py was initially added on branch
-	yum-rpm_4_2_branch.
+	* yumcomps.py: 
+	added yumcomps.py for the comps.xml support merge
 
 2003-03-24 14:09  skvidal
 
@@ -977,17 +1062,17 @@
 
 2003-02-19 13:57  skvidal
 
-	* po/yum.pot: file yum.pot was initially added on branch
-	yum-rpm_4_2_branch.
-
-2003-02-19 13:57  skvidal
-
 	* po/ru.po: file ru.po was initially added on branch
 	yum-rpm_4_2_branch.
 
 2003-02-19 13:57  skvidal
 
-	* po/pygettext.py: file pygettext.py was initially added on branch
+	* po/yum.pot: file yum.pot was initially added on branch
+	yum-rpm_4_2_branch.
+
+2003-02-19 13:57  skvidal
+
+	* po/Makefile.in: file Makefile.in was initially added on branch
 	yum-rpm_4_2_branch.
 
 2003-02-19 13:57  skvidal
@@ -997,12 +1082,7 @@
 
 2003-02-19 13:57  skvidal
 
-	* po/Makefile.in: file Makefile.in was initially added on branch
-	yum-rpm_4_2_branch.
-
-2003-02-18 00:55  skvidal
-
-	* rpmUtils.py: file rpmUtils.py was initially added on branch
+	* po/pygettext.py: file pygettext.py was initially added on branch
 	yum-rpm_4_2_branch.
 
 2003-02-18 00:55  skvidal
@@ -1011,6 +1091,11 @@
 	Started the changes to class-ify all or most of the rpm functions. 
 	Trying to strip out functions from clientStuff also - found a bug
 	in nevral where an error message wouldn't be expanded
+
+2003-02-18 00:55  skvidal
+
+	* rpmUtils.py: file rpmUtils.py was initially added on branch
+	yum-rpm_4_2_branch.
 
 2003-02-17 10:34  skvidal
 
@@ -1096,16 +1181,16 @@
 
 2003-02-09 16:13  skvidal
 
-	* keepalive.py: file keepalive.py was initially added on branch
-	yum-rpm_4_2_branch.
-
-2003-02-09 16:13  skvidal
-
 	* Makefile.in, clientStuff.py, config.py, keepalive.py, nevral.py,
 	yum.conf: 
 	Added Michael Stenner's http keepalive patch and urlgrab rewrite
 	implemented most of file:// support  - need to clean it up some
 	more.
+
+2003-02-09 16:13  skvidal
+
+	* keepalive.py: file keepalive.py was initially added on branch
+	yum-rpm_4_2_branch.
 
 2003-02-07 00:53  skvidal
 

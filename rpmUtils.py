@@ -266,9 +266,12 @@ class Rpm_Ts_Work:
     operate with a list of the Base objects above, so I can refer to any one object there
     not sure the best way to do this yet, more thinking involved"""
     def __init__(self, dbPath='/'):
-        if conf.installroot:
-            if conf.installroot != '/':
-                dbPath = conf.installroot
+        try:
+            if conf.installroot:
+                if conf.installroot != '/':
+                    dbPath = conf.installroot
+        except NameError, e:
+            pass
 
         self.ts = rpm.TransactionSet(dbPath)
         

@@ -28,7 +28,7 @@ log=Logger(threshold=2, default=2, prefix='', preprefix='')
 serverStuff.log = log
 rpmUtils.log = log
 rpmUtils.errorlog = log
-ts = rpm.TransactionSet()
+ts = rpmUtils.Rpm_Ts_Work()
 rpmUtils.ts = ts
 serverStuff.ts = ts
 
