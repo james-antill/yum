@@ -85,8 +85,7 @@ distfiles:
 	cp \
 	$(srcdir)/Makefile.in \
 	$(srcdir)/pygettext.py\
-	$(srcdir)/ru.po \
-	$(srcdir)/es.po \
+	$(srcdir)/*.po \
 	$(srcdir)/yum.pot \
 	$(top_srcdir)/.disttmp/$$distdir/po
 dailyfiles:
@@ -95,8 +94,7 @@ dailyfiles:
 	cp \
 	$(srcdir)/Makefile.in \
 	$(srcdir)/pygettext.py\
-	$(srcdir)/ru.po \
-	$(srcdir)/es.po \
+	$(srcdir)/*.po \
 	$(srcdir)/yum.pot \
 	$(top_srcdir)/.disttmp/$$distdir/po
 

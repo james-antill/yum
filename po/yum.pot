@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"PO-Revision-Date: Thu Apr  1 00:22:47 2004\n"
+"PO-Revision-Date: Sat Apr  3 15:35:46 2004\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -33,7 +33,7 @@ msgstr ""
 msgid "Finding updated packages"
 msgstr ""
 
-#: ../clientStuff.py:1106
+#: ../clientStuff.py:1115
 #, c-format
 msgid "No Packages installed not included in a repository"
 msgstr ""
@@ -63,12 +63,12 @@ msgid ""
 "Error restoring the backup of lilo.conf  The backup was:\n"
 msgstr ""
 
-#: ../nevral.py:353
+#: ../nevral.py:359
 #, c-format
 msgid "bestarch %s does not provide resetting to arch %s"
 msgstr ""
 
-#: ../clientStuff.py:1029 ../clientStuff.py:1041
+#: ../clientStuff.py:1038 ../clientStuff.py:1050
 #, c-format
 msgid "Looking in available packages for a providing package"
 msgstr ""
@@ -88,7 +88,7 @@ msgstr ""
 msgid "Downloading Packages"
 msgstr ""
 
-#: ../clientStuff.py:1341
+#: ../clientStuff.py:1332
 #, c-format
 msgid ""
 "retrygrab() failed for:\n"
@@ -96,7 +96,7 @@ msgid ""
 "  Executing failover method"
 msgstr ""
 
-#: ../clientStuff.py:584
+#: ../clientStuff.py:593
 #, c-format
 msgid "I will install/upgrade these to satisfy the dependencies:"
 msgstr ""
@@ -106,12 +106,12 @@ msgstr ""
 msgid "Cannot delete %s - check perms"
 msgstr ""
 
-#: ../clientStuff.py:1068
+#: ../clientStuff.py:1077
 #, c-format
 msgid "Need to pass a list of pkgs to erase"
 msgstr ""
 
-#: ../clientStuff.py:1026
+#: ../clientStuff.py:1035
 #, c-format
 msgid "Need a provides to match"
 msgstr ""
@@ -122,13 +122,13 @@ msgid ""
 "lilo options that are not supported by yum are used in the default lilo.conf. This file will not be modified. The options include:\n"
 msgstr ""
 
-#: ../clientStuff.py:606 ../clientStuff.py:645
+#: ../clientStuff.py:615 ../clientStuff.py:654
 #, c-format
 msgid "Installed: "
 msgstr ""
 
-#: ../clientStuff.py:803 ../clientStuff.py:839 ../clientStuff.py:986
-#: ../clientStuff.py:1205
+#: ../clientStuff.py:812 ../clientStuff.py:848 ../clientStuff.py:995
+#: ../clientStuff.py:1214
 #, c-format
 msgid "Error getting file %s"
 msgstr ""
@@ -152,7 +152,7 @@ msgid ""
 "%s "
 msgstr ""
 
-#: ../clientStuff.py:607 ../clientStuff.py:646
+#: ../clientStuff.py:616 ../clientStuff.py:655
 #, c-format
 msgid "Dep Installed: "
 msgstr ""
@@ -167,12 +167,12 @@ msgstr ""
 msgid "Header for pkg %s not found"
 msgstr ""
 
-#: ../clientStuff.py:609 ../clientStuff.py:648
+#: ../clientStuff.py:618 ../clientStuff.py:657
 #, c-format
 msgid "Erased: "
 msgstr ""
 
-#: ../clientStuff.py:969
+#: ../clientStuff.py:978
 #, c-format
 msgid "getting %s from cachedb"
 msgstr ""
@@ -182,12 +182,12 @@ msgstr ""
 msgid "Unable to determine boot loader."
 msgstr ""
 
-#: ../clientStuff.py:958
+#: ../clientStuff.py:967
 #, c-format
 msgid "getting %s"
 msgstr ""
 
-#: ../clientStuff.py:1222
+#: ../clientStuff.py:1231
 #, c-format
 msgid "Error Reading Header on %s"
 msgstr ""
@@ -232,7 +232,7 @@ msgstr ""
 msgid "excluded: %s"
 msgstr ""
 
-#: ../clientStuff.py:851 ../clientStuff.py:948
+#: ../clientStuff.py:860 ../clientStuff.py:957
 #, c-format
 msgid "Please run yum in non-caching mode to correct this header."
 msgstr ""
@@ -252,18 +252,18 @@ msgstr ""
 msgid "Post-Trim Len: %d"
 msgstr ""
 
-#: ../clientStuff.py:1145
+#: ../clientStuff.py:1154
 #, c-format
 msgid "Cleaning packages and old headers"
 msgstr ""
 
-#: ../clientStuff.py:992
+#: ../clientStuff.py:1001
 #, c-format
 msgid "Cannot download %s in caching only mode or when running as non-root user."
 msgstr ""
 
-#: ../clientStuff.py:1218 ../clientStuff.py:1223 ../clientStuff.py:1227
-#: ../clientStuff.py:1232
+#: ../clientStuff.py:1227 ../clientStuff.py:1232 ../clientStuff.py:1236
+#: ../clientStuff.py:1241
 #, c-format
 msgid ""
 "Error: You may want to run yum clean or remove the file: \n"
@@ -308,7 +308,7 @@ msgid ""
 "ignoring bad rpm: %s"
 msgstr ""
 
-#: ../clientStuff.py:581
+#: ../clientStuff.py:590
 #, c-format
 msgid "[erase: %s]"
 msgstr ""
@@ -318,7 +318,7 @@ msgstr ""
 msgid "%s is not a dir"
 msgstr ""
 
-#: ../nevral.py:351
+#: ../nevral.py:357
 #, c-format
 msgid "bestarch = %s for %s"
 msgstr ""
@@ -328,7 +328,7 @@ msgstr ""
 msgid "Best version for %s is %s:%s-%s"
 msgstr ""
 
-#: ../clientStuff.py:592 ../clientStuff.py:603
+#: ../clientStuff.py:601 ../clientStuff.py:612
 #, c-format
 msgid "[deps: %s]"
 msgstr ""
@@ -338,7 +338,7 @@ msgstr ""
 msgid "Version"
 msgstr ""
 
-#: ../clientStuff.py:1108
+#: ../clientStuff.py:1117
 #, c-format
 msgid "Looking in Available Packages:"
 msgstr ""
@@ -394,7 +394,7 @@ msgstr ""
 msgid "Bad URL: %s"
 msgstr ""
 
-#: ../clientStuff.py:1226
+#: ../clientStuff.py:1235
 #, c-format
 msgid "Error: Untrusted GPG key on %s"
 msgstr ""
@@ -404,12 +404,12 @@ msgstr ""
 msgid "Creating Transaction Set"
 msgstr ""
 
-#: ../clientStuff.py:1110
+#: ../clientStuff.py:1119
 #, c-format
 msgid "Looking in Installed Packages:"
 msgstr ""
 
-#: ../clientStuff.py:1158
+#: ../clientStuff.py:1167
 #, c-format
 msgid "Invalid clean option %s"
 msgstr ""
@@ -438,22 +438,22 @@ msgstr ""
 msgid "%s is installed and is the latest version."
 msgstr ""
 
-#: ../nevral.py:260
+#: ../nevral.py:264
 #, c-format
 msgid "Found best arch for install only pkg %s"
 msgstr ""
 
-#: ../clientStuff.py:1031 ../clientStuff.py:1043
+#: ../clientStuff.py:1040 ../clientStuff.py:1052
 #, c-format
 msgid "Looking in installed packages for a providing package"
 msgstr ""
 
-#: ../clientStuff.py:554
+#: ../clientStuff.py:563
 #, c-format
 msgid "I will do the following:"
 msgstr ""
 
-#: ../clientStuff.py:976
+#: ../clientStuff.py:985
 #, c-format
 msgid "getting %s from comps db"
 msgstr ""
@@ -474,17 +474,17 @@ msgstr ""
 msgid "Completed Download and test, Exiting."
 msgstr ""
 
-#: ../clientStuff.py:1191
+#: ../clientStuff.py:1200
 #, c-format
 msgid "NonMatching RPM version, %s, removing."
 msgstr ""
 
-#: ../clientStuff.py:595
+#: ../clientStuff.py:604
 #, c-format
 msgid "I will erase these to satisfy the dependencies:"
 msgstr ""
 
-#: ../clientStuff.py:608 ../clientStuff.py:647
+#: ../clientStuff.py:617 ../clientStuff.py:656
 #, c-format
 msgid "Updated: "
 msgstr ""
@@ -518,17 +518,17 @@ msgid ""
 "     -h, --help = this screen"
 msgstr ""
 
-#: ../clientStuff.py:844
+#: ../clientStuff.py:853
 #, c-format
 msgid "Using cached header.info file"
 msgstr ""
 
-#: ../clientStuff.py:849 ../clientStuff.py:946
+#: ../clientStuff.py:858 ../clientStuff.py:955
 #, c-format
 msgid "Please ask your sysadmin to update the headers on this system."
 msgstr ""
 
-#: ../clientStuff.py:1038
+#: ../clientStuff.py:1047
 #, c-format
 msgid "Need an item to search"
 msgstr ""
@@ -538,7 +538,7 @@ msgstr ""
 msgid "Repo   : %s"
 msgstr ""
 
-#: ../clientStuff.py:823
+#: ../clientStuff.py:832
 #, c-format
 msgid "CacheDir: %s"
 msgstr ""
@@ -548,7 +548,7 @@ msgstr ""
 msgid "Exiting on user command."
 msgstr ""
 
-#: ../clientStuff.py:1233
+#: ../clientStuff.py:1242
 #, c-format
 msgid ""
 "Error: You may need to disable gpg checking to install this package\n"
@@ -585,7 +585,7 @@ msgstr ""
 msgid "Kernel Updated/Installed, checking for bootloader"
 msgstr ""
 
-#: ../clientStuff.py:1015
+#: ../clientStuff.py:1024
 #, c-format
 msgid "Need to pass a list of pkgs to install"
 msgstr ""
@@ -632,7 +632,7 @@ msgstr ""
 msgid "No bootloader found, Cannot configure kernel, continuing."
 msgstr ""
 
-#: ../clientStuff.py:774 ../clientStuff.py:781
+#: ../clientStuff.py:783 ../clientStuff.py:790
 #, c-format
 msgid "Attempt to delete a missing file %s - ignoring."
 msgstr ""
@@ -652,7 +652,7 @@ msgstr ""
 msgid "HTTP Error (%s): %s"
 msgstr ""
 
-#: ../clientStuff.py:1199
+#: ../clientStuff.py:1208
 #, c-format
 msgid "Getting %s"
 msgstr ""
@@ -674,7 +674,7 @@ msgstr ""
 msgid "Arch"
 msgstr ""
 
-#: ../clientStuff.py:817
+#: ../clientStuff.py:826
 #, c-format
 msgid "Gathering header information file(s) from server(s)"
 msgstr ""
@@ -700,7 +700,7 @@ msgid ""
 "Error installing the new bootloader: \n"
 msgstr ""
 
-#: ../clientStuff.py:1217
+#: ../clientStuff.py:1226
 #, c-format
 msgid "Error: Could not find the GPG Key necessary to validate pkg %s"
 msgstr ""
@@ -747,7 +747,7 @@ msgstr ""
 msgid "Unable to check if PID %s is active"
 msgstr ""
 
-#: ../clientStuff.py:1155
+#: ../clientStuff.py:1164
 #, c-format
 msgid "Cleaning old headers"
 msgstr ""
@@ -759,12 +759,12 @@ msgid ""
 " %s"
 msgstr ""
 
-#: ../clientStuff.py:1120 ../clientStuff.py:1136
+#: ../clientStuff.py:1129 ../clientStuff.py:1145
 #, c-format
 msgid "Need a list of groups to update"
 msgstr ""
 
-#: ../clientStuff.py:807
+#: ../clientStuff.py:816
 #, c-format
 msgid "using cached groups from server: %s"
 msgstr ""
@@ -774,12 +774,12 @@ msgstr ""
 msgid "Putting back old headers"
 msgstr ""
 
-#: ../clientStuff.py:799
+#: ../clientStuff.py:808
 #, c-format
 msgid "getting groups from server: %s"
 msgstr ""
 
-#: ../clientStuff.py:1010
+#: ../clientStuff.py:1019
 #, c-format
 msgid "You need to be root to perform these commands"
 msgstr ""
@@ -819,12 +819,12 @@ msgid ""
 "    "
 msgstr ""
 
-#: ../clientStuff.py:949 ../clientStuff.py:993
+#: ../clientStuff.py:958 ../clientStuff.py:1002
 #, c-format
 msgid "Deleting entry from Available packages"
 msgstr ""
 
-#: ../clientStuff.py:1266
+#: ../clientStuff.py:1257
 #, c-format
 msgid "Errors reported doing trial run"
 msgstr ""
@@ -849,12 +849,12 @@ msgstr ""
 msgid "Could not open RPM database for reading. Perhaps it is already in use?"
 msgstr ""
 
-#: ../clientStuff.py:572
+#: ../clientStuff.py:581
 #, c-format
 msgid "[update: %s]"
 msgstr ""
 
-#: ../clientStuff.py:944
+#: ../clientStuff.py:953
 #, c-format
 msgid "The file %s is damaged."
 msgstr ""
@@ -864,7 +864,7 @@ msgstr ""
 msgid "ERROR: Url Return no Content-Length  - something is wrong"
 msgstr ""
 
-#: ../clientStuff.py:809
+#: ../clientStuff.py:818
 #, c-format
 msgid "Got a file - yay"
 msgstr ""
@@ -905,7 +905,7 @@ msgstr ""
 msgid "Damaged Header %s"
 msgstr ""
 
-#: ../clientStuff.py:1149
+#: ../clientStuff.py:1158
 #, c-format
 msgid "Cleaning packages"
 msgstr ""
@@ -915,7 +915,7 @@ msgstr ""
 msgid "Group  : %s"
 msgstr ""
 
-#: ../clientStuff.py:822
+#: ../clientStuff.py:831
 #, c-format
 msgid "Server: %s"
 msgstr ""
@@ -930,7 +930,7 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: ../clientStuff.py:563
+#: ../clientStuff.py:572
 #, c-format
 msgid "[install: %s]"
 msgstr ""
@@ -950,7 +950,7 @@ msgstr ""
 msgid "No header - huh?"
 msgstr ""
 
-#: ../clientStuff.py:1152
+#: ../clientStuff.py:1161
 #, c-format
 msgid "Cleaning all headers"
 msgstr ""
@@ -960,7 +960,7 @@ msgstr ""
 msgid "depcheck: package %s needs %s"
 msgstr ""
 
-#: ../clientStuff.py:847
+#: ../clientStuff.py:856
 #, c-format
 msgid "Error - %s cannot be found"
 msgstr ""
@@ -1000,12 +1000,12 @@ msgstr ""
 msgid "Grub found - making this kernel the default"
 msgstr ""
 
-#: ../clientStuff.py:1231
+#: ../clientStuff.py:1240
 #, c-format
 msgid "Error: Unsigned Package %s"
 msgstr ""
 
-#: ../clientStuff.py:1182
+#: ../clientStuff.py:1191
 #, c-format
 msgid "Damaged RPM %s, removing."
 msgstr ""
@@ -1015,7 +1015,7 @@ msgstr ""
 msgid "Bad Header for pkg %s.%s trying to get headers for the nevral - exiting"
 msgstr ""
 
-#: ../clientStuff.py:1219 ../clientStuff.py:1228
+#: ../clientStuff.py:1228 ../clientStuff.py:1237
 #, c-format
 msgid "Error: You may also check that you have the correct GPG keys installed"
 msgstr ""
@@ -1040,12 +1040,12 @@ msgstr ""
 msgid "Directory of rpms must be a directory."
 msgstr ""
 
-#: ../clientStuff.py:1350
+#: ../clientStuff.py:1341
 #, c-format
 msgid "failover: out of servers to try"
 msgstr ""
 
-#: ../clientStuff.py:834
+#: ../clientStuff.py:843
 #, c-format
 msgid "Getting header.info from server"
 msgstr ""
