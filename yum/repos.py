@@ -374,16 +374,23 @@ class Repository:
         if self.proxy not in [None, '_none_']:
             proxy_string = '%s' % self.proxy
             if self.proxy_username is not None:
-                proxy_string = '%s@%s' % (self.proxy_username, self.proxy)
+                proxy_parsed = urlparse.urlsplit(self.proxy, allow_fragments=0)
+                proxy_proto = proxy_parsed[0]
+                proxy_host = proxy_parsed[1]
+                proxy_rest = proxy_parsed[2] + '?' + proxy_parsed[3]
+                proxy_string = '%s://%s@%s%s' % (proxy_proto,
+                        self.proxy_username, proxy_host, proxy_rest)
+                        
                 if self.proxy_password is not None:
-                    proxy_string = '%s:%s@%s' % (self.proxy_username,
-                                                 self.proxy_password, self.proxy)
+                    proxy_string = '%s://%s:%s@%s%s' % (proxy_proto,
+                              self.proxy_username, self.proxy_password,
+                              proxy_host, proxy_rest)
                                                  
         if proxy_string is not None:
             self.proxy_dict['http'] = proxy_string
             self.proxy_dict['https'] = proxy_string
             self.proxy_dict['ftp'] = proxy_string
-
+        
     def setupGrab(self):
         """sets up the grabber functions with the already stocked in urls for
            the mirror groups"""
