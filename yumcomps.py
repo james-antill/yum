@@ -7,6 +7,10 @@ import rpmUtils
 
 overwrite_groups = 0
 
+# debug
+ts = rpm.TransactionSet()
+
+
 # goals
 # be able to list which groups a user has installed based on whether or
 # not mandatory pkgs are installed and whether all the metapkgs are installed
@@ -27,13 +31,13 @@ class Groups_Info:
         self.group_installed = {}
         self.sub_groups = {}
         self.visible_groups = []
-        self.optionalpkgs = {}
-        self.mandatorypkgs = {}
-        self.defaultpkgs = {}
+        self.optional_pkgs = {}
+        self.mandatory_pkgs = {}
+        self.default_pkgs = {}
         self.pkgs_needed = {}
         self.grouplist = []
-        self.optionalmetapkgs = {}
-        self.defaultmetapkgs = {}
+        self.optional_metapkgs = {}
+        self.default_metapkgs = {}
         
         
     def add(self, filename):
@@ -54,19 +58,19 @@ class Groups_Info:
             if groupname not in self.grouplist:
                 self.grouplist.append(groupname)
                 self.group_installed[groupname]=0
-                self.mandatorypkgs[groupname] = []
+                self.mandatory_pkgs[groupname] = []
                 self.sub_groups[groupname] = []
-                self.optionalpkgs[groupname] = []
-                self.defaultpkgs[groupname] = []
+                self.optional_pkgs[groupname] = []
+                self.default_pkgs[groupname] = []
                 self.pkgs_needed[groupname] = []
                 
             # if we're overwriting groups - kill all the originals
             if overwrite_groups:
                 self.group_installed[groupname]=0
-                self.mandatorypkgs[groupname] = []
+                self.mandatory_pkgs[groupname] = []
                 self.sub_groups[groupname] = []
-                self.optionalpkgs[groupname] = []
-                self.defaultpkgs[groupname] = []
+                self.optional_pkgs[groupname] = []
+                self.default_pkgs[groupname] = []
                 self.pkgs_needed[groupname] = []
 
             packageobj = thisgroup.packages
@@ -75,11 +79,11 @@ class Groups_Info:
             for pkg in pkgs:
                 (type, name) = packageobj[pkg]
                 if type == u'mandatory':
-                    self.mandatorypkgs[groupname].append(name)
+                    self.mandatory_pkgs[groupname].append(name)
                 elif type == u'optional':
-                    self.optionalpkgs[groupname].append(name)
+                    self.optional_pkgs[groupname].append(name)
                 elif type == u'default':
-                    self.defaultpkgs[groupname].append(name)
+                    self.default_pkgs[groupname].append(name)
                 else:
                     print '%s not optional, default or mandatory - ignoring' % name
                 
@@ -92,37 +96,49 @@ class Groups_Info:
         self._installedgroups()
         
     def _installedgroups(self):
-            rpmdbpkgs = self._get_installed()
-            for groupname in self.grouplist:
+        rpmdb_pkgs = self._get_installed()
+        for groupname in self.grouplist:
+            if len(self.mandatory_pkgs[groupname]) > 0:
                 groupinstalled = 1
-                for reqpkg in self.mandatorypkgs[groupname]:
-                    if not rpmdbpkgs.has_key(reqpkg):
+                for reqpkg in self.mandatory_pkgs[groupname]:
+                    if not rpmdb_pkgs.has_key(reqpkg):
                         groupinstalled = 0
+                self.group_installed[groupname]=groupinstalled
+            else:
+                groupinstalled = 0
+                for anypkg in self.optional_pkgs[groupname] + self.default_pkgs[groupname]:
+                    if rpmdb_pkgs.has_key(anypkg):
+                        groupinstalled = 1
                 self.group_installed[groupname]=groupinstalled
 
 
     def _get_installed(self):
-        installedpkgs = {}
+        installed_pkgs = {}
         mi = ts.dbMatch()
         for hdr in mi:
-            installedpkgs[hdr['name']]=1
+            installed_pkgs[hdr['name']]=1
         
-        return installedpkgs
+        return installed_pkgs
         
         
     def _dumppkgs(self, reqgroup=None):
         if reqgroup is None:
             groups = self.visible_groups
+        elif reqgroup is "all_installed":
+            groups = []
+            for grp in self.group_installed.keys():
+                if self.group_installed[grp] and grp in self.visible_groups:
+                    groups.append(grp)
         else:
             groups = [reqgroup]
             
         for group in groups:
             print 'Group: %s' % group
-            for item in self.mandatorypkgs[group]:
+            for item in self.mandatory_pkgs[group]:
                 print '   %s *' % item
-            for item in self.defaultpkgs[group]:
+            for item in self.default_pkgs[group]:
                 print '   %s +' % item
-            for item in self.optionalpkgs[group]:
+            for item in self.optional_pkgs[group]:
                 print '   %s' % item
                 
 
@@ -130,8 +146,7 @@ class Groups_Info:
 def main():
     compsgrpfun = Groups_Info()
     compsgrpfun.add('./comps.xml')
-    compsgrpfun.add('./othercomps.xml')
-    compsgrpfun._dumppkgs()
+    compsgrpfun._dumppkgs('all_installed')
 
 
 if __name__ == '__main__':
