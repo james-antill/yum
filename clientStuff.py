@@ -654,10 +654,11 @@ def get_package_info_from_servers(serveridlist, HeaderInfo):
         HeaderInfoNevralLoad(headerinfofn, HeaderInfo, serverid)
 
 def download_headers(HeaderInfo, nulist):
+    total = len(nulist)
+    current = 1
     for (name, arch) in nulist:
         LocalHeaderFile = HeaderInfo.localHdrPath(name, arch)
         RemoteHeaderFile = HeaderInfo.remoteHdrUrl(name, arch)
-
         # if we have one cached, check it, if it fails, unlink it and continue
         # as if it never existed
         # else move along
@@ -679,7 +680,7 @@ def download_headers(HeaderInfo, nulist):
                 continue
                 
         if not conf.cache:
-            log(2, 'getting %s' % LocalHeaderFile)
+            log(2, 'getting %s' % (LocalHeaderFile))
             try:
                 hdrfn = retrygrab(RemoteHeaderFile, LocalHeaderFile, copy_local=1,
                                   checkfunc=(rpmUtils.checkheader, (name, arch), {}))
@@ -691,6 +692,7 @@ def download_headers(HeaderInfo, nulist):
         else:
             errorlog(1, 'Cannot download %s in caching only mode or when running as non-root user.' % RemoteHeaderFile)
             sys.exit(1)
+        current = current + 1
     close_all()
                 
 def take_action(cmds, nulist, uplist, newlist, obsoleting, tsInfo, HeaderInfo, rpmDBInfo, obsoleted):

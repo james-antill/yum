@@ -228,15 +228,36 @@ class Rpm_Ts_Work:
         else:
             raise AttributeError, attribute
             
-    def match(self, tag, search):
+    def match(self, tag = None, search = None, mire = None):
         """hands back a list of Header_Work objects"""
         hwlist = []
-        hdrlist = self.ts.dbMatch(tag, search)
+        # hand back the whole list of hdrs
+        if mire == None and tag == None and search == None:
+            hdrlist = self.ts.dbMatch()
+            
+        else:
+            #just do a non-mire'd search
+            if mire == None:
+                hdrlist = self.ts.dbMatch(tag, search)
+            else:
+                # mire search
+                if mire == 'glob':
+                    hdrlist = self.ts.dbMatch()
+                    hdrlist.pattern(tag, rpm.RPMMIRE_GLOB, search)
+                elif mire == 'regex':
+                    hdrlist = self.ts.dbMatch()
+                    hdrlist.pattern(tag, rpm.RPMMIRE_REGEX, search)
+                elif mire == 'strcmp':
+                    hdrlist = self.ts.dbMatch()
+                    hdrlist.pattern(tag, rpm.RPMMIRE_STRCMP, search)
+                else:
+                    hdrlist = self.ts.dbMatch()
+                    hdrlist.pattern(tag, rpm.RPMMIRE_DEFAULT, search)
+        
         for hdr in hdrlist:
             hdrobj = Header_Work(hdr)
-            _hwlist.appened(hdrobj)
+            hwlist.append(hdrobj)
         return hwlist
-    
     
     def sigChecking(self, sig):
         """pass type of check you want to occur, default is to have them off"""

@@ -420,14 +420,24 @@ def whatprovides(usereq, nulist, nevral, localrpmdb):
                         log(2, _('Available package: %s provides %s') % (name, item))
             del fullprovideslist
     elif localrpmdb == 1:
-        for (name, arch) in nevral.NAkeys():
-            hdr=nevral.getHeader(name,arch)
-            fullprovideslist = hdr[rpm.RPMTAG_PROVIDES] + hdr[rpm.RPMTAG_FILENAMES]
-            if hdr[rpm.RPMTAG_DIRNAMES] != None:
-                fullprovideslist = fullprovideslist + hdr[rpm.RPMTAG_DIRNAMES]
+        matchlist = ts.match()
+        for hdrobj in matchlist:
+            name = hdrobj.name()
+            arch = hdrobj.arch()
+            filenames = []
+            filenames = hdrobj._getTag('filenames')
+            provides = hdrobj._getTag('providename')
+            dirnames = hdrobj._getTag('dirnames')
+            fullprovideslist = []
+            if provides != None:
+                fullprovideslist = fullprovideslist + provides
+            if filenames != None:
+                fullprovideslist = fullprovideslist + filenames
+            if dirnames != None:
+                fullprovideslist = fullprovideslist + dirnames
             for req in usereq:
                 for item in fullprovideslist:
-                    log(6, '%s vs %s' % (item, req))
+                    log(5, '%s vs %s' % (item, req))
                     if req == item or fnmatch.fnmatch(item, req):
                         results = results + 1
                         log(2, _('Installed package: %s provides %s') % (name, item))
