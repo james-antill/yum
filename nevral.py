@@ -267,6 +267,7 @@ class nevral:
             errors=[]
             _ts = self.populateTs(addavailable = 1)
             deps = _ts.check()
+            
             CheckDeps = 0
             if not deps:
                 return (0, 'Success - deps resolved')
@@ -315,8 +316,8 @@ class nevral:
                                 whatprovides = _ts.dbMatch('basenames', reqname)
                             else:
                                 whatprovides = _ts.dbMatch('provides', reqname)
-                                
-                            if whatprovides:
+
+                            if whatprovides and whatprovides.count() != 0:
                                 for provhdr in whatprovides:
                                     if self.state(provhdr[rpm.RPMTAG_NAME],provhdr[rpm.RPMTAG_ARCH]) in ('e','ed'):
                                         ((e,v,r,a,l,i),s)=rpmDBInfo._get_data(name)
@@ -325,9 +326,9 @@ class nevral:
                                         CheckDeps=1
                                     else:
                                         unresolvable = 1
-                                        log(5, 'Got to an unresolvable dep - %s %s' %(name,arch))
                                         if clientStuff.nameInExcludes(reqname):
                                             errors.append('package %s needs %s that has been excluded' % (name, reqname))
+                                            log(5, 'Got to an unresolvable dep - %s %s' %(name,arch))
                                         else:
                                             errors.append('package %s needs %s (not provided)' % (name, rpmUtils.formatRequire(reqname, reqversion, flags)))
                             else:
