@@ -7,6 +7,8 @@ import gzip
 import sys
 from i18n import _
 
+rpm.addMacro("__dbi_cdb", "create private mpool mp_mmapsize=16Mb mp_size=1Mb")
+
 def checkheader(headerfile, name, arch):
     #return true(1) if the header is good
     #return false(0) if the header is bad
@@ -234,4 +236,3 @@ class Rpm_Ts_Work:
             self.ts.setVSFlags(rpm.RPMVSF_DEFAULT)
         else:
             raise AttributeError, sig
-    
