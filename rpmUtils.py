@@ -50,12 +50,12 @@ def checkRpmMD5(package, urlgraberror=0):
 
 def checkSig(package, serverid=None):
     """ take a package, check it's sigs, return 0 if they are all fine, return 
-    1 if the gpg key can't be found, 3 if the key is not trusted, 2 if the 
-    header is in someway damaged"""
+    1 if the gpg key can't be found,  2 if the header is in someway damaged,
+    3 if the key is not trusted, 4 if the pkg is not gpg or pgp signed"""
     ts.sigChecking('default')
     fdno = os.open(package, os.O_RDONLY)
     try:
-        ts.hdrFromFdno(fdno)
+        hdr = ts.hdrFromFdno(fdno)
     except rpm.error, e:
         if str(e) == "public key not availaiable":
             return 1
@@ -65,9 +65,32 @@ def checkSig(package, serverid=None):
             return 3
         if str(e) == "error reading package header":
             return 2
+    else:
+        error, siginfo = getSigInfo(hdr)
+        if error == 101:
+            os.close(fdno)
+            del hdr
+            return 4
+        else:
+            del hdr
     os.close(fdno)
     return 0
 
+def getSigInfo(hdr):
+    """checks if a computerhand back signature information and an error code"""
+    string = '%|DSAHEADER?{%{DSAHEADER:pgpsig}}:{%|RSAHEADER?{%{RSAHEADER:pgpsig}}:{%|SIGGPG?{%{SIGGPG:pgpsig}}:{%|SIGPGP?{%{SIGPGP:pgpsig}}:{(none)}|}|}|}|'
+    siginfo = hdr.sprintf(string)
+    if siginfo != '(none)':
+        error = 0 
+        sigtype, sigdate, sigid = siginfo.split(',')
+    else:
+        error = 101
+        sigtype = 'MD5'
+        sigdate = 'None'
+        sigid = 'None'
+        
+    infotuple = (sigtype, sigdate, sigid)
+    return error, infotuple
 
 def compareEVR((e1, v1, r1), (e2, v2, r2)):
     # return 1: a is newer than b 
