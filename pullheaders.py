@@ -86,7 +86,7 @@ def argParse(args):
                 
     except ValueError, e:
         log(0, _('Options Error: %s') % e)
-        usage()
+        serverStuff.Usage()
     if type(args) is types.ListType:
         if len(args) == 0:
            serverStuff.Usage()
@@ -278,7 +278,7 @@ def removeHeaderInfo(headerinfo):
     if os.path.exists(headerinfo):
         try:
             os.unlink(headerinfo)
-        except OSerror, e:
+        except OSError, e:
             print _('Cannot delete %s - check perms') % headerinfo
             
 
