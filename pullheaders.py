@@ -154,10 +154,11 @@ def main():
         for item in rpminfo.keys():
             (name,epoch, ver, rel, arch, source) = item
             rpmloc = rpminfo[item]
-            info = "%s:%s-%s-%s.%s=%s\n" % (epoch, name, ver, rel, arch, rpmloc)
             if source:
+                info = "%s:%s-%s-%s.src=%s\n" % (epoch, name, ver, rel, rpmloc)
                 srcheaderfd.write(info)
             else:
+                info = "%s:%s-%s-%s.%s=%s\n" % (epoch, name, ver, rel, arch, rpmloc)
                 headerfd.write(info)
         if cmds['dosrpms']:
             srcheaderfd.close()

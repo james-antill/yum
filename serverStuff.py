@@ -56,7 +56,8 @@ yum-arch [-v] [-z] [-l] [-c] [-n] [-d] [-q] [-vv] (path of dir where headers/ sh
    -vv = even more verbose output
    -n  = don't generate headers
    -c  = check pkgs with gpg and md5 checksums - cannot be used with -n
-   -z  = gzip compress the headers [default, will be deprecated as an option]
+   -z  = gzip compress the headers (default, deprecated as an option)
+   -s  = generate headers for source packages too
    -l  = use symlinks as valid rpms when building headers
    -q  = make the display more quiet""")
     sys.exit(1)
