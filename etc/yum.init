@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # yum           This shell script enables the automatic use of YUM
 #
@@ -13,14 +13,14 @@
 . /etc/rc.d/init.d/functions
 
 start() {
-	echo -n "Enabling yum: "
-	(/bin/touch /var/lock/subsys/yum && success) || failure
+	echo -n $"Starting yum service: "
+	touch /var/lock/subsys/yum && success || failure
 	echo
 }
 
 stop() {
-	echo -n "Disabling yum: "
-	(/bin/rm -f /var/lock/subsys/yum && success) || failure
+	echo -n $"Stopping yum service: "
+	rm -f /var/lock/subsys/yum && success || failure
 	echo
 }
 
@@ -35,6 +35,8 @@ case "$1" in
 	stop
 	start
 	;;
+  reload)
+	;;
   condrestart)
         if [ -f /var/lock/subsys/yum ]; then
 	    stop
@@ -43,13 +45,13 @@ case "$1" in
 	;;
   status)
 	if [ -f /var/lock/subsys/yum ]; then
-		echo "nightly yum update is enabled"
+		echo $"Nightly yum update is enabled."
 	else
-		echo "nightly yum update is disabled"
+		echo $"Nightly yum update is disabled."
 	fi
 	;;
   *)
-	echo "*** Usage: yum {start|stop|restart|condrestart|status}"
+	echo $"Usage: $0 {start|stop|status|restart|reload|condrestart}"
 	exit 1
 esac
 
