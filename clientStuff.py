@@ -1079,7 +1079,7 @@ def descfsize(size):
 
 def grab(serverID, url, filename=None, nofail=0, copy_local=0, 
           close_connection=0,
-          progress_obj=None, throttle=None, bandwidth=None,
+          progress_obj='normal', throttle=None, bandwidth=None,
           numtries=3, retrycodes=[-1,2,4,5,6,7], checkfunc=None):
 
     """Wrap retry grab and add in failover stuff.  This needs access to
@@ -1091,7 +1091,10 @@ def grab(serverID, url, filename=None, nofail=0, copy_local=0,
 
     We do look at retrycodes here to see if we should return or failover.
     On fail we will raise the last exception that we got."""
-
+    
+    if progress_obj == 'normal':
+        progress_obj = conf.progress_obj
+        
     fc = conf.get_failClass(serverID)
     base = ''
     findex = fc.get_index()
@@ -1123,7 +1126,8 @@ def grab(serverID, url, filename=None, nofail=0, copy_local=0,
             # What?  We were successful?
         except URLGrabError, e:
             if e.errno in retrycodes:
-                errorlog(1, "retrygrab() failed for:\n  %s%s\n  Executing failover method" % (base, filepath))
+                if not nofail:
+                    errorlog(1, "retrygrab() failed for:\n  %s%s\n  Executing failover method" % (base, filepath))
                 if nofail:
                     findex = findex + 1
                     base = fc.get_serverurl(findex)

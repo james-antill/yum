@@ -26,6 +26,7 @@ import re
 import failover
 import archwork
 import rpmUtils
+import progress_meter
 
 from i18n import _
 
@@ -81,7 +82,8 @@ class yumconf:
         self.yumvar['arch'] = os.uname()[4]
         self.bandwidth = None
         self.throttle = None
-        self.retries = 3
+        self.retries = 6
+        self.progress_obj = progress_meter.text_progress_meter(fo=sys.stdout)
         self.installroot = '/'
         self.installonlypkgs = ['kernel', 'kernel-bigmem', 'kernel-enterprise',
                            'kernel-smp', 'kernel-debug', 'kernel-unsupported']
@@ -119,6 +121,7 @@ class yumconf:
         if self._getoption('main', 'installroot') != None:
             self.installroot = self._getoption('main','installroot')
 
+            
         # figure out what the releasever really is from the distroverpkg
         self.yumvar['releasever'] = self._getsysver()
         

@@ -105,6 +105,11 @@ def parseCmdArgs(args):
     except ValueError, e:
         errorlog(0, _('Options Error: %s') % e)
         usage()
+    
+    # if we're below 2 on the debug level we don't need to be outputting
+    # progress bars - this is hacky - I'm open to other options
+    if conf.debuglevel < 2:
+        conf.progress_obj = None
         
     return (log, errorlog, filelog, conf, cmds)
     
