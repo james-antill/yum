@@ -840,7 +840,7 @@ def create_final_ts(tsInfo):
                 try:
                     localrpmpath = retrygrab(tsInfo.remoteRpmUrl(name, arch), rpmloc, copy_local=0) 
                 except URLGrabError, e:
-                    errorlog(0, 'Error getting file %s' % remotegroupfile)
+                    errorlog(0, 'Error getting file %s' % tsInfo.remoteRpmUrl(name, arch))
                     errorlog(0, '%s' % e)
                     sys.exit(1)
                 tsInfo.setlocalrpmpath(name, arch, localrpmpath)
