@@ -612,16 +612,16 @@ def get_groups_from_servers(serveridlist):
     return validservers
         
 def get_package_info_from_servers(serveridlist, HeaderInfo):
-    # this should hand back a list of servers that we could contact
-    # that HeaderInfoNevralLoad then deals with - it would speed up the 
-    # operation, even
-    log(2, 'Gathering package information from servers')
+    """gets header.info from each server if it can, checks it, if it can, then
+       builds the list of available pkgs from there by handing each headerinfofn
+       to HeaderInfoNevralLoad()"""
+    log(2, 'Gathering header information file(s) from server(s)')
     for serverid in serveridlist:
         servername = conf.servername[serverid]
         serverheader = conf.remoteHeader(serverid)
         servercache = conf.servercache[serverid]
-        log(2, 'Getting headers from: %s' % (servername))
-        log(4, 'Putting them into: %s' % (servercache))
+        log(2, 'Server: %s' % (servername))
+        log(4, 'CacheDir: %s' % (servercache))
         localpkgs = conf.serverpkgdir[serverid]
         localhdrs = conf.serverhdrdir[serverid]
         localheaderinfo = conf.localHeader(serverid)
@@ -632,17 +632,15 @@ def get_package_info_from_servers(serveridlist, HeaderInfo):
         if not os.path.exists(localhdrs):
             os.mkdir(localhdrs)
         if not conf.cache:
-            log(3, 'getting header.info from server')
+            log(3, 'Getting header.info from server')
             try:
-                # FIXME this should do a test here too of the headerinfo file
-                # if it is empty then just ignore the repo and move along
                 headerinfofn = retrygrab(serverheader, localheaderinfo, copy_local=1)
             except URLGrabError, e:
                 errorlog(0, 'Error getting file %s' % serverheader)
                 errorlog(0, '%s' % e)
                 sys.exit(1)
         else:
-            log(3, 'using cached header.info file')
+            log(3, 'Using cached header.info file')
             headerinfofn = localheaderinfo
         log(4,'headerinfofn: ' + headerinfofn)
         HeaderInfoNevralLoad(headerinfofn, HeaderInfo, serverid)
