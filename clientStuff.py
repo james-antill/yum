@@ -567,11 +567,11 @@ def clean_up_old_headers(rpmDBInfo, HeaderInfo):
             # if the rpmdb has an equal or better rpm then delete
             # the header
             if (rc >= 0):
-                log(4, 'Deleting Header %s' % hdrfn)
+                log(5, 'Deleting Header %s' % hdrfn)
                 os.unlink(hdrfn)
         if not HeaderInfo.exists(n, a):
             # if its not in the HeaderInfo nevral anymore just kill it
-            log(4, 'Deleting Header %s' % hdrfn)
+            log(5, 'Deleting Header %s' % hdrfn)
             os.unlink(hdrfn)
             
 
@@ -591,7 +591,7 @@ def get_package_info_from_servers(conf, HeaderInfo):
         servername = conf.servername[serverid]
         serverheader = os.path.join(baseurl, 'headers/header.info')
         servercache = conf.servercache[serverid]
-        log(4,'server name/cachedir:' + servername + '-' + servercache)
+        log(6,'server name/cachedir:' + servername + '-' + servercache)
         log(2,'Getting headers from: %s' % (servername))
         localpkgs = conf.serverpkgdir[serverid]
         localhdrs = conf.serverhdrdir[serverid]
@@ -634,7 +634,7 @@ def download_headers(HeaderInfo, nulist):
         RemoteHeaderFile = HeaderInfo.remoteHdrUrl(name, arch)
         while checkpass <= 3:
             if os.path.exists(LocalHeaderFile):
-                log(4, 'cached %s' % LocalHeaderFile)
+                log(5, 'cached %s' % LocalHeaderFile)
             else:
                 log(2, 'getting %s' % LocalHeaderFile)
                 hdrfn = urlgrab(RemoteHeaderFile, LocalHeaderFile, copy_local=1)

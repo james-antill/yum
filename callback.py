@@ -25,10 +25,13 @@ callbackfilehandles = {}
 def install_callback(what, bytes, total, h, user):
     if what == rpm.RPMCALLBACK_TRANS_PROGRESS:
         pass
+        
     elif what == rpm.RPMCALLBACK_TRANS_STOP:
         pass
+        
     elif what == rpm.RPMCALLBACK_TRANS_START:
         pass
+        
     elif what == rpm.RPMCALLBACK_INST_OPEN_FILE:
         hdr = None
         if h != None:
@@ -56,13 +59,14 @@ def install_callback(what, bytes, total, h, user):
         if h != None:
             pkg, rpmloc = h
             if total == 0:
-                percent=0
+                percent = 0
             else:
                 percent = (bytes*100L)/total
-            if conf.debuglevel >=2:
+            if conf.debuglevel >= 2:
                 sys.stdout.write("\r%s %d %% done" % (pkg[rpm.RPMTAG_NAME], percent))
                 if bytes == total:
                     print " "
             
-      
+
+        
     

@@ -121,29 +121,34 @@ def main(args):
         conf.cache=1
         
     # push the logs into the other namespaces
-    pkgaction.log=log
-    clientStuff.log=log
-    nevral.log=log
+    pkgaction.log = log
+    clientStuff.log = log
+    nevral.log = log
+    rpmUtils.log = log
 
-    pkgaction.errorlog=errorlog
-    clientStuff.errorlog=errorlog
-    nevral.errorlog=errorlog
-
-    pkgaction.filelog=filelog
-    clientStuff.filelog=filelog
-    nevral.filelog=filelog
-
+    pkgaction.errorlog = errorlog
+    clientStuff.errorlog = errorlog
+    nevral.errorlog = errorlog
+    rpmUtils.errorlog = errorlog
+    
+    pkgaction.filelog = filelog
+    clientStuff.filelog = filelog
+    nevral.filelog = filelog
+    rpmUtils.filelog = filelog
+    
     # push the conf file into the other namespaces
-    nevral.conf=conf
-    clientStuff.conf=conf
-    pkgaction.conf=conf
-    callback.conf=conf
+    nevral.conf = conf
+    clientStuff.conf = conf
+    pkgaction.conf = conf
+    callback.conf = conf
+    rpmUtils.conf = conf
     
     # get our ts together that we'll use all over the place
     ts = rpm.TransactionSet('/')
     clientStuff.ts = ts
     pkgaction.ts = ts
     nevral.ts = ts
+    rpmUtils.ts = ts
     
     # make remote nevral class
     HeaderInfo = nevral.nevral()

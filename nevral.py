@@ -225,32 +225,34 @@ class nevral:
                             ((e,v,r,a,l,i),s)=self._get_data(name,arch)
                             self.add((name,e,v,r,arch,l,i),'a')
                     else:
+                        log(5, 'Not a kernel, adding to ts')
                         tsfordeps.addInstall(pkghdr,(pkghdr,rpmloc),'u')
                     
                 elif self.state(name,arch) == 'i':
-                    log(4,'Installing: %s, %s' % (name, arch))
+                    log(4, 'Installing: %s, %s' % (name, arch))
                     rpmloc = self.rpmlocation(name, arch)
                     pkghdr = self.getHeader(name, arch)
                     tsfordeps.addInstall(pkghdr,(pkghdr,rpmloc),'i')
                 elif self.state(name,arch) == 'a':
+                    log(7, 'Adding %s into \'a\' state' % name)
                     rpmloc = self.rpmlocation(name, arch)
                     pkghdr = self.getHeader(name, arch)
                     tsfordeps.addInstall(pkghdr,(pkghdr,rpmloc),'a')
                 elif self.state(name,arch) == 'e' or self.state(name,arch) == 'ed':
-                    log(4,'Erasing: %s-%s' % (name,arch))
+                    log(4, 'Erasing: %s-%s' % (name,arch))
                     tsfordeps.addErase(name)
             deps = tsfordeps.check()
             
             CheckDeps = 0
             if not deps:
                 return (0, 'Success - deps resolved')
-            log (4, '# of Deps = %d' % len(deps))
-            
+            log (3, '# of Deps = %d' % len(deps))
             for ((name, version, release), (reqname, reqversion),
                                 flags, suggest, sense) in deps:
                 if sense == rpm.RPMDEP_SENSE_REQUIRES:
                     if suggest:
                         (header, sugname) = suggest
+                        log(4, '%s wants %s' % (name, sugname))
                         (name, arch) = self.nafromloc(sugname)
                         archlist = archwork.availablearchs(self,name)
                         bestarch = archwork.bestarch(archlist)
@@ -300,7 +302,7 @@ class nevral:
                                         CheckDeps=1
                                     else:
                                         unresolvable = 1
-                                        log(5, 'Got to an unresolvable dep - %s' %s %(name,arch))
+                                        log(5, 'Got to an unresolvable dep - %s %s' %(name,arch))
                                         if clientStuff.nameInExcludes(reqname):
                                             errors.append('package %s needs %s that has been excluded' % (name, reqname))
                                         else:
@@ -335,7 +337,7 @@ class nevral:
                     else:
                         errors.append('conflict between %s and %s' % (name, reqname))
                         conflicts=1
-            log(4, 'whee dep loop')
+            log(4, 'Restarting Dependency Loop')
             tsfordeps.closeDB()
             del tsfordeps
             if len(errors) > 0:
