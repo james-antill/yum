@@ -10,7 +10,7 @@ def checkheader(headerfile, name, arch):
     #return false(0) if the header is bad
     # test is fairly rudimentary - read in header - read two portions of the header
     h = Header_Work(headerfile)
-    if h == None:
+    if h is None:
         return 0
     else:
         if name != h.name() or arch != h.arch():
@@ -30,6 +30,23 @@ def checkRpmMD5(package):
     del h
     return 1
 
+def checkSig(package, serverid=None):
+    ts.setVSFlags(0)
+    fdno = os.open(package, os.O_RDONLY)
+    try:
+        ts.hdrFromFdno(fdno)
+    except rpm.error, e:
+        if str(e) == "public key not availaiable":
+            return 1
+        if str(e) == "public key not available":
+            return 1
+        if str(e) == "public key not trusted":
+            return 3
+        if str(e) == "error reading package header":
+            return 2
+    os.close(fdno)
+    return 0
+    
 def compareEVR((e1, v1, r1), (e2, v2, r2)):
     # return 1: a is newer than b 
     # 0: a and b are the same version 
@@ -60,6 +77,66 @@ def openrpmdb():
         raise RpmError(_("Could not open RPM database for reading. Perhaps it is already in use?"))
     return db
 
+
+
+class RPM_Base_Work:
+
+    def _getTag(self, tag):
+        if self.hdr is None:
+            errorlog(0, 'Got an empty Header, something has gone wrong')
+            sys.exit(1)
+        return self.hdr[tag]
+    
+    def isSource(self):
+        if self._getTag('sourcepackage') == 1:
+            return 1
+        else:
+            return 0
+        
+    def name(self):
+        return self._getTag('name')
+        
+    def arch(self):
+        return self._getTag('arch')
+        
+    def epoch(self):
+        return self._getTag('epoch')
+    
+    def version(self):
+        return self._getTag('version')
+        
+    def release(self):
+        return self_getTag('release')
+        
+    def evr(self):
+        e = self._getTag('epoch')
+        v = self._getTag('version')
+        r = self._getTag('release')
+        return (e, v, r)
+        
+    def nevra(self):
+        n = self._getTag('name')
+        e = self._getTag('epoch')
+        v = self._getTag('version')
+        r = self._getTag('release')
+        a = self._getTag('arch')
+        return (n, e, v, r, a)
+    
+    def writeHeader(self, headerdir, compress):
+    # write the header out to a file with the format: name-epoch-ver-rel.arch.hdr
+    # return the name of the file it just made - no real reason :)
+        (name, epoch, ver, rel, arch) = self.nevra()
+        if epoch is None:
+            epoch = '0'
+        headerfn = "%s/%s-%s-%s-%s.%s.hdr" % (headerdir, name, epoch, ver, rel, arch)
+        if compress:
+            headerout = gzip.open(headerfn, "w")
+        else:
+            headerout = open(headerfn, "w")
+        headerout.write(self.hdr.unload(1))
+        headerout.close()
+        return(headerfn)
+
 class Header_Work(RPM_Base_Work):
 
     def __init__(self, hdrfn):
@@ -84,39 +161,13 @@ class Header_Work(RPM_Base_Work):
 
 
 class RPM_Work(RPM_Base_Work):
-
     def __init__(self, rpmfn):
+        ts.setVSFlags(~(rpm._RPMVSF_NOSIGNATURES))
         fd = os.open(rpmfn, os.O_RDONLY)
         try:
             self.hdr = ts.hdrFromFdno(fd)
-        except RpmError, e:
+        except rpm.error, e:
             errorlog(0, 'Error opening rpm %s - error %s' % (rpmfn, e))
-            sys.exit(1)
+            self.hdr = None
         os.close(fd)
     
-
-class RPM_Base_Work:
-
-    def _getTag(self, tag):
-        return self.hdr[tag]
-    
-    def name(self):
-        return self._getTag('name')
-        
-    def arch(self):
-        return self._getTag('arch')
-        
-    def evr(self)
-        e = self._getTag('epoch')
-        v = self._getTag('version')
-        r = self._getTag('release')
-        return (e, v, r)
-        
-    def nevra(self)
-        n = self._getTag('name')
-        e = self._getTag('epoch')
-        v = self._getTag('version')
-        r = self._getTag('release')
-        a = self._getTag('arch')
-        return (n, e, v, r, a)
-        

@@ -17,66 +17,10 @@
 import os
 import sys
 import rpm
-import gzip
 import string
+import rpmUtils
 from i18n import _
 
-
-def cleanHeader(header):
-  # remove the below tags from all headers
-  # dup stdout and stderr b/c the header rewriting spews a lot of crap
-  # return the shortened header
-    badtags = [rpm.RPMTAG_POSTIN, rpm.RPMTAG_POSTUN, rpm.RPMTAG_PREIN, rpm.RPMTAG_PREUN, rpm.RPMTAG_FILEUSERNAME, \
-            rpm.RPMTAG_FILEGROUPNAME, rpm.RPMTAG_FILEVERIFYFLAGS, rpm.RPMTAG_FILERDEVS, rpm.RPMTAG_FILEMTIMES, \
-            rpm.RPMTAG_FILEDEVICES, rpm.RPMTAG_FILEINODES, rpm.RPMTAG_TRIGGERSCRIPTS, rpm.RPMTAG_TRIGGERVERSION, rpm.RPMTAG_TRIGGERFLAGS, \
-            rpm.RPMTAG_TRIGGERNAME, rpm.RPMTAG_CHANGELOGTIME, rpm.RPMTAG_CHANGELOGNAME, rpm.RPMTAG_CHANGELOGTEXT, rpm.RPMTAG_ICON, \
-            rpm.RPMTAG_GIF, rpm.RPMTAG_VENDOR, rpm.RPMTAG_DISTRIBUTION, rpm.RPMTAG_VERIFYSCRIPT, \
-            rpm.RPMTAG_SIGSIZE, rpm.RPMTAG_SIGGPG, rpm.RPMTAG_SIGPGP, rpm.RPMTAG_PACKAGER, rpm.RPMTAG_LICENSE, rpm.RPMTAG_BUILDTIME, \
-            rpm.RPMTAG_BUILDHOST, rpm.RPMTAG_RPMVERSION, rpm.RPMTAG_POSTINPROG, rpm.RPMTAG_POSTUNPROG, rpm.RPMTAG_PREINPROG, \
-            rpm.RPMTAG_PREUNPROG, rpm.RPMTAG_COOKIE, rpm.RPMTAG_OPTFLAGS, rpm.RPMTAG_PAYLOADFORMAT ]
-
-    saveStdout = os.dup(1)
-    saveStderr = os.dup(2)
-    redirStdout = os.open("/dev/null", os.O_WRONLY | os.O_APPEND)
-    redirStderr = os.open("/dev/null", os.O_WRONLY | os.O_APPEND)
-    os.dup2(redirStdout, 1)
-    os.dup2(redirStderr, 2)
-    for tag in badtags:
-        del header[tag]
-        header[tag] = ''
-    os.dup2(saveStdout, 1)
-    os.dup2(saveStderr, 2)
-    # close the redirect files.
-    os.close(redirStdout)
-    os.close(redirStderr)
-    os.close(saveStdout)
-    os.close(saveStderr)
-    return header
-
-
-def writeHeader(headerdir, header, compress):
-    # write the header out to a file with the format: name-epoch-ver-rel.arch.hdr
-    # return the name of the file it just made - no real reason :)
-    
-    name = header[rpm.RPMTAG_NAME]
-    ver = header[rpm.RPMTAG_VERSION]
-    rel = header[rpm.RPMTAG_RELEASE]
-    arch = header[rpm.RPMTAG_ARCH]
-    if header[rpm.RPMTAG_EPOCH] == None:
-        epoch = '0'
-    else:
-        epoch = '%s' % header[rpm.RPMTAG_EPOCH]
-
-    headerfn = "%s/%s-%s-%s-%s.%s.hdr" % (headerdir, name, epoch,ver, rel, arch)
-    if compress:
-        headerout = gzip.open(headerfn, "w")
-    else:
-        headerout = open(headerfn, "w")
-        
-    headerout.write(header.unload(1))
-    headerout.close()
-    
-    return(headerfn)
 
 
 def getfilelist(path, ext, list, usesymlinks):
@@ -103,24 +47,6 @@ def getfilelist(path, ext, list, usesymlinks):
     return(list)
 
 
-def readHeader(rpmfn):
-    # read the header from the rpm if its an rpm, from a file its a file
-    # return 'source' if its a src.rpm - something useful here would be good probably.
-    if string.lower(rpmfn[-4:]) == '.rpm':
-        ts = rpm.TransactionSet('',rpm._RPMVSF_NOSIGNATURES)
-        fd = os.open(rpmfn, os.O_RDONLY)
-        h = ts.hdrFromFdno(fd)
-        os.close(fd)
-        if h[rpm.RPMTAG_SOURCEPACKAGE]:
-            return 'source'
-        else:
-            return h
-    else:
-        fd = open(rpmfn, "r")
-        h = rpm.headerLoad(fd.read())
-        fd.close()
-        return h
-
 def Usage():
     print _("""Usage:
 yum-arch [-v] [-z] [-l] [-c] [-n] [-d] [-q] [-vv] (path of dir where headers/ should/does live)
@@ -135,23 +61,9 @@ yum-arch [-v] [-z] [-l] [-c] [-n] [-d] [-q] [-vv] (path of dir where headers/ sh
     sys.exit(1)
 
 
-def formatRequire (name, version, flags):
-    string = name
-        
-    if flags:
-      if flags & (rpm.RPMSENSE_LESS | rpm.RPMSENSE_GREATER | rpm.RPMSENSE_EQUAL):
-         string = string + " "
-      if flags & rpm.RPMSENSE_LESS:
-         string = string + "<"
-      if flags & rpm.RPMSENSE_GREATER:
-         string = string + ">"
-      if flags & rpm.RPMSENSE_EQUAL:
-         string = string + "="
-         string = string + " %s" % version
-    return string
 
 def depchecktree(rpmlist):
-    ts = rpm.TransactionSet('', rpm._RPMVSF_NOSIGNATURES)
+    _ts = rpm.TransactionSet('')
     error=0
     msgs=[]
     currpm=0
@@ -162,12 +74,11 @@ def depchecktree(rpmlist):
         sys.stdout.write('\r' + ' ' * 80)
         sys.stdout.write("\rChecking deps %d %% complete" %(percent))
         sys.stdout.flush()
-        h = readHeader(rpmfn)
-        if h != 'source':
-            print h[rpm.RPMTAG_NAME]
-            ts.addInstall(h, h[rpm.RPMTAG_NAME], 'i')
-            log(2, "adding %s" % h[rpm.RPMTAG_NAME])       
-    errors = ts.check()
+        hobj = rpmUtils.RPM_Work(rpmfn)
+        if not hobj.isSource():
+            _ts.addInstall(hobj.hdr, hobj.name(), 'i')
+            log(2, "adding %s" % hobj.name())
+    errors = _ts.check()
     print errors
     if errors:
         print 'errors found'
@@ -175,37 +86,10 @@ def depchecktree(rpmlist):
             flags, suggest, sense) in errors:
             if sense==rpm.RPMDEP_SENSE_REQUIRES:
                 error=1
-                msgs.append("depcheck: package %s needs %s" % ( name, formatRequire(reqname, reqversion, flags)))
+                msgs.append("depcheck: package %s needs %s" % ( name, rpmUtils.formatRequire(reqname, reqversion, flags)))
             elif sense==rpm.RPMDEP_SENSE_CONFLICTS:
                 error=1
                 msgs.append("depcheck: package %s conflicts with %s" % (name, reqname))
     print ""    
     return (error,msgs)
-
-def checkSig(package):
-    check = rpm.CHECKSIG_GPG | rpm.CHECKSIG_MD5
-    # RPM spews to stdout/stderr.  Redirect.
-    # code for this from up2date.py
-    saveStdout = os.dup(1)
-    saveStderr = os.dup(2)
-    redirStdout = os.open("/dev/null", os.O_WRONLY | os.O_APPEND)
-    redirStderr = os.open("/dev/null", os.O_WRONLY | os.O_APPEND)
-    os.dup2(redirStdout, 1)
-    os.dup2(redirStderr, 2)
-    # now do the rpm thing
-    sigcheck = rpm.checksig(package, check)
-    # restore normal stdout and stderr
-    os.dup2(saveStdout, 1)
-    os.dup2(saveStderr, 2)
-    # close the redirect files.
-    os.close(redirStdout)
-    os.close(redirStderr)
-    os.close(saveStdout)
-    os.close(saveStderr)
-    if sigcheck:
-        sys.stderr.write('Error:  Signature check failed for %s\n' %(package))
-        sys.stderr.write('Doing nothing.\n')
-        sys.exit(1)
-    return
-
 

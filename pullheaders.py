@@ -19,13 +19,19 @@
 
 import os
 import sys
-import rpm
+import rpmUtils
 import serverStuff
+import rpm
 from logger import Logger
 from i18n import _
 
 log=Logger(threshold=0, default=2, prefix='', preprefix='')
 serverStuff.log = log
+rpmUtils.log = log
+rpmUtils.errorlog = log
+ts = rpm.TransactionSet()
+rpmUtils.ts = ts
+serverStuff.ts = ts
 
 def main():
     headerdir = 'headers'
@@ -128,7 +134,6 @@ def main():
     os.chdir(curdir)
 
 def genhdrs(rpms,headerdir,cmds):
-    rpmdelete = 0 # define this if you have the rpmheader stripping patch built into rpm
     rpminfo = {}
     numrpms = len(rpms)
     goodrpm = 0
@@ -146,38 +151,33 @@ def genhdrs(rpms,headerdir,cmds):
                 sys.stdout.flush()
         if cmds['rpmcheck']:
             log(2,_("\nChecking sig on %s") % (rpmname))
-            serverStuff.checkSig(rpmfn)
-        header=serverStuff.readHeader(rpmfn)
+            if rpmUtils.checkSig(rpmfn) > 0:
+                log(0, '\n\nProblem with gpg key on %s\n\n' % rpmfn)
+                sys.exit(1)
+        hobj = rpmUtils.RPM_Work(rpmfn)
         #check to ignore src.rpms
-        if header != 'source':
-            if header[rpm.RPMTAG_EPOCH] == None:
+        if hobj.isSource():
+            log(2,"ignoring srpm: %s" % rpmfn)
+        else:
+            (name, epoch, ver, rel, arch) = hobj.nevra()
+            if epoch is None:
                 epoch = '0'
-            else:
-                epoch = '%s' % header[rpm.RPMTAG_EPOCH]
-            name = header[rpm.RPMTAG_NAME]
-            ver = header[rpm.RPMTAG_VERSION]
-            rel = header[rpm.RPMTAG_RELEASE]
-            arch = header[rpm.RPMTAG_ARCH]
             rpmloc = rpmfn
-            rpmtup = (name,arch)
+            rpmtup = (name, arch)
             # do we already have this name.arch tuple in the dict?
             if rpminfo.has_key(rpmtup):
                 log(2, _("Already found tuple: %s %s ") % (name, arch))
                 (e1, v1, r1, l1) = rpminfo[rpmtup]
                 oldhdrfile = "%s/%s-%s-%s-%s.%s.hdr" % (headerdir, name, e1, v1, r1, arch) 
                 # which one is newer?
-                rc = rpm.labelCompare((e1,v1,r1), (epoch, ver, rel))
+                rc = rpmUtils.compareEVR((e1,v1,r1), (epoch, ver, rel))
                 if rc <= -1:
                     # if the more recent one in is newer then throw away the old one
                     del rpminfo[rpmtup]
                     if os.path.exists(oldhdrfile):
                         print _("\nignoring older pkg: %s") % (l1)
                         os.unlink(oldhdrfile)
-                    if rpmdelete:
-                        shortheader = serverStuff.cleanHeader(header)
-                    else:
-                        shortheader = header
-                    headerloc = serverStuff.writeHeader(headerdir, shortheader, cmds['compress'])       
+                    headerloc = hobj.writeHeader(headerdir, cmds['compress'])
                     rpminfo[rpmtup]=(epoch,ver,rel,rpmloc)
                 elif rc == 0:
                     # hmm, they match complete - warn the user that they've got a dupe in the tree
@@ -186,15 +186,9 @@ def genhdrs(rpms,headerdir,cmds):
                     # move along, move along, nothing more to see here
                     print _("\nignoring older pkg: %s") % (rpmloc)
             else:
-                if rpmdelete:
-                    shortheader = serverStuff.cleanHeader(header)
-                else:
-                    shortheader = header
-                headerloc = serverStuff.writeHeader(headerdir, shortheader, cmds['compress'])
+                headerloc = hobj.writeHeader(headerdir, cmds['compress'])
                 rpminfo[rpmtup]=(epoch,ver,rel,rpmloc)
                 goodrpm = goodrpm + 1
-        else:
-            log(2,"ignoring srpm: %s" % rpmfn)
     if not cmds['quiet']:
         print _("\n   Total: %d\n   Used: %d") %(numrpms, goodrpm)
     return rpminfo
