@@ -26,6 +26,7 @@ class RPMInstallCallback:
         self.callbackfilehandles = {}
         self.total_actions = 0
         self.total_installed = 0
+        self.installed_pkg_names = []
         self.total_removed = 0
     def callback(self, what, bytes, total, h, user):
         if what == rpm.RPMCALLBACK_TRANS_START:
@@ -48,6 +49,7 @@ class RPMInstallCallback:
                 fd = os.open(rpmloc, os.O_RDONLY)
                 self.callbackfilehandles[handle]=fd
                 self.total_installed += 1
+                self.installed_pkg_names.append(hdr[rpm.RPMTAG_NAME])
                 return fd
             else:
                 print _("No header - huh?")
@@ -70,8 +72,8 @@ class RPMInstallCallback:
                 else:
                     percent = (bytes*100L)/total
                 if conf.debuglevel >= 2:
-                    sys.stdout.write("\r%s %d %% done %s/%s" % (pkg[rpm.RPMTAG_NAME], 
-                      percent, self.total_installed, self.total_actions))
+                    sys.stdout.write("\r%s %d %% done %d/%d" % (pkg[rpm.RPMTAG_NAME], 
+                      percent, self.total_installed + self.total_removed, self.total_actions))
                     if bytes == total:
                         print " "
         elif what == rpm.RPMCALLBACK_UNINST_START:
@@ -79,4 +81,9 @@ class RPMInstallCallback:
         elif what == rpm.RPMCALLBACK_UNINST_STOP:
             self.total_removed += 1
             if conf.debuglevel >= 2:
-                print '%s %s/%s' % (h, self.total_removed, self.total_actions)
+                if h not in self.installed_pkg_names:
+                    print 'Erasing: %s %d/%d' % (h, self.total_removed + 
+                      self.total_installed, self.total_actions)
+                else:
+                    print 'Completing update for %s  - %d/%d' % (h, self.total_removed +
+                      self.total_installed, self.total_actions)
