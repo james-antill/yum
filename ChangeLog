@@ -1,3 +1,81 @@
+2004-05-07 00:50  skvidal
+
+	* configure.in, yum-daily.spec, yum.spec, yummain.py: 
+	brand as 2.0.7
+
+2004-04-18 23:41  skvidal
+
+	* yummain.py: 
+	wrong mode on logfile - fixed
+
+2004-04-18 23:34  skvidal
+
+	* pkgaction.py: 
+	log level change for error result on yum upgrade
+
+2004-04-16 00:24  skvidal
+
+	* pkgaction.py: 
+	one space - no clue how it got there, I swear.
+
+2004-04-14 16:28  skvidal
+
+	* rpmUtils.py: <sigh> fix a 1 indent error in rpmUtils. It caused
+	error reporting display problems.
+
+2004-04-14 01:36  skvidal
+
+	* pkgaction.py: fix for bug 244 - user specifying pkg arg with more
+	than one . in it :)
+
+2004-04-03 15:37  skvidal
+
+	* po/: Makefile.in, cs.po, es.po, ru.po, uk.po, yum.pot: 
+	update the translation and the makefile
+
+2004-04-03 15:37  skvidal
+
+	* po/uk.po: file uk.po was initially added on branch yum-2_0_X.
+
+2004-04-03 15:37  skvidal
+
+	* po/cs.po: file cs.po was initially added on branch yum-2_0_X.
+
+2004-04-03 15:30  skvidal
+
+	* clientStuff.py: 
+	pychecker clean up of global shadows
+
+2004-04-03 15:18  skvidal
+
+	* clientStuff.py, nevral.py, pkgaction.py, yummain.py: 
+	yum erase foo.i386 works now removed a duplicate function - makes
+	code easier, too
+
+2004-04-01 01:11  skvidal
+
+	* clientStuff.py, po/es.po, po/ru.po, po/yum.pot: 
+	log level adjustment for action lists from David Christian's patch.
+
+2004-03-25 01:30  skvidal
+
+	* pkgaction.py: 
+	fix for yum upgrade foo.arch
+
+2004-03-25 00:54  skvidal
+
+	* nevral.py, pkgaction.py: 
+	preliminary patch to allow: yum install foo.arch yum update
+	foo.arch yum upgrade foo.arch
+	
+	but yum erase foo.arch is not possible b/c of limitations in the
+	python bindings
+
+2004-03-16 23:16  skvidal
+
+	* ChangeLog: 
+	Changelog updated for 2.0.6
+
 2004-03-16 23:13  skvidal
 
 	* configure.in, yum-daily.spec, yum.spec, yummain.py: 

@@ -65,6 +65,7 @@ exit 0
 %config(noreplace) %{_sysconfdir}/cron.daily/yum.cron
 %config %{_sysconfdir}/init.d/%{name}
 %config %{_sysconfdir}/logrotate.d/%{name}
+%dir %{_datadir}/yum
 %{_datadir}/yum/*
 %{_bindir}/yum
 %{_bindir}/yum-arch
