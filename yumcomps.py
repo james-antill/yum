@@ -4,6 +4,7 @@ import rpm
 import comps
 import sys
 import rpmUtils
+from libxml2 import parserError
 
 # goals
 # be able to list which groups a user has installed based on whether or
@@ -64,7 +65,10 @@ class Groups_Info:
         try:
             compsobj = comps.Comps(filename)
         except comps.CompsException, e:
-            print 'Damaged comps.xml file error:\n %s' % e
+            print 'Damaged xml file error:\n %s' % e
+            return
+        except parserError, e:
+            print 'Damaged or Empty xml file error: \n %s' % e
             return
         self.compscount = self.compscount + 1
         groupsobj = compsobj.groups
