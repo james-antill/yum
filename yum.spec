@@ -33,7 +33,7 @@ make
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 make DESTDIR=$RPM_BUILD_ROOT install
 # install -m 644 %{SOURCE1} $RPM_BUILD_ROOT/etc/yum.conf
-# install -m 644 %{SOURCE2} $RPM_BUILD_ROOT/etc/cron.daily/yum.cron
+# install -m 755 %{SOURCE2} $RPM_BUILD_ROOT/etc/cron.daily/yum.cron
 
 %find_lang %{name}
 
