@@ -96,8 +96,6 @@ class yumconf:
             self.logfile = self._getoption('main','logfile')
         if self._getoption('main','pkgpolicy') != None:
             self.pkgpolicy = self._getoption('main','pkgpolicy')
-        if self._getoption('main','exclude') != None:
-            self.excludes = self.parseList(self._getoption('main','exclude'))
         if self._getoption('main','assumeyes') != None:
             self.assumeyes = self.cfg.getboolean('main', 'assumeyes')
         if self._getoption('main','errorlevel') != None:
@@ -139,6 +137,12 @@ class yumconf:
             self.kernelpkgnames = self._doreplace(self.kernelpkgnames)
             self.kernelpkgnames = self.kernelpkgnames.split(' ')
 
+        # get the global exclude lists.
+        if self._getoption('main','exclude') != None:
+            self.excludes = self._getoption('main','exclude')
+            self.excludes = self._doreplace(self.excludes)
+            self.excludes = self.parseList(self.excludes)
+            
 
         if len(self.cfg.sections()) > 1:
             for section in self.cfg.sections(): # loop through the list of sections
