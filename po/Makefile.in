@@ -64,7 +64,21 @@ refresh-po: Makefile
 	done
 
 clean:
-	@rm -fv *mo *~ .depend
+	$(RM) -fv *mo *~ .depend
+
+distclean:
+	$(RM) $(srcdir)/Makefile
+	$(RM) -rf .libs
+	$(RM) -f core
+	$(RM) -fv *mo *~ .depend
+
+mostlyclean:
+	$(MAKE) clean
+
+
+maintainer-clean:
+	$(MAKE) distclean
+
 distfiles:
 	distdir=$(PACKAGE)-$(VERSION); \
 	mkdir $(top_srcdir)/.disttmp/$$distdir/po;\

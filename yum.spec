@@ -1,7 +1,7 @@
 Summary: RPM installer/updater
 Name: yum
-Version: 0.9.4
-Release: 1_8x
+Version: 1.95
+Release: 1
 License: GPL
 Group: System Environment/Base
 Source: %{name}-%{version}.tar.gz
@@ -9,7 +9,8 @@ URL: http://www.dulug.duke.edu/yum/
 BuildRoot: %{_tmppath}/%{name}-%{version}root
 BuildArchitectures: noarch
 BuildRequires: python
-Requires: python librpm404 rpm404-python
+Obsoletes: yum-phoebe
+Requires: python, rpm-python, rpm >= 0:4.1.1
 Prereq: /sbin/chkconfig, /sbin/service
 
 %description
@@ -28,20 +29,18 @@ make
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 make DESTDIR=$RPM_BUILD_ROOT install
-mkdir -p $RPM_BUILD_ROOT/%{_sbindir}
-cd $RPM_BUILD_ROOT/%{_sbindir}
-ln -s ../bin/yum .
-ln -s ../bin/yum-arch .
+
+%find_lang %{name}
 
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 
 
 %post
-/sbin/chkconfig --add yum
-/sbin/chkconfig yum on
-/sbin/service yum condrestart >> /dev/null
-exit 0
+#/sbin/chkconfig --add yum
+#/sbin/chkconfig yum on
+#/sbin/service yum condrestart >> /dev/null
+#exit 0
 
 
 %preun
@@ -54,7 +53,7 @@ exit 0
 
 
 
-%files 
+%files -f %{name}.lang
 %defattr(-, root, root)
 %doc README AUTHORS COPYING TODO INSTALL
 %config(noreplace) %{_sysconfdir}/yum.conf
@@ -62,14 +61,18 @@ exit 0
 %config %{_sysconfdir}/init.d/%{name}
 %config %{_sysconfdir}/logrotate.d/%{name}
 %{_libdir}/yum/*
-%{_sbindir}/yum
-%{_sbindir}/yum-arch
 %{_bindir}/yum
 %{_bindir}/yum-arch
 /var/cache/yum
 %{_mandir}/man*/*
 
 %changelog
+* Mon Apr  7 2003 Seth Vidal <skvidal@phy.duke.edu>
+- updated for 1.95 betaish release
+- remove /sbin legacy
+- no longer starts up by default
+- do the find_lang thing
+
 * Sun Dec 22 2002 Seth Vidal <skvidal@phy.duke.edu>
 - bumped ver to 0.9.4
 - new spec file for rhl 8.0

@@ -1,3 +1,272 @@
+2003-04-07 00:19  skvidal
+
+	* clientStuff.py: 
+	multiple retries for all downloads yay!
+
+2003-04-06 23:49  skvidal
+
+	* yummain.py: 
+	update one more error statement
+
+2003-04-06 23:44  skvidal
+
+	* clientStuff.py: 
+	bump the error level so it doesn't get complained about
+
+2003-04-06 23:43  skvidal
+
+	* clientStuff.py: 
+	getting too late to program
+
+2003-04-06 23:41  skvidal
+
+	* clientStuff.py: 
+	updating error codes for no yumgroups.xml
+
+2003-04-06 23:38  skvidal
+
+	* clientStuff.py: 
+	making output a bit nicer
+
+2003-04-06 23:35  skvidal
+
+	* clientStuff.py: 
+	retrygrab on get groups
+
+2003-04-06 22:06  skvidal
+
+	* clientStuff.py, pkgaction.py: 
+	look at that, it works
+
+2003-04-06 22:02  skvidal
+
+	* pkgaction.py: 
+	<sigh>
+
+2003-04-06 21:38  skvidal
+
+	* pkgaction.py: 
+	more debugging
+
+2003-04-06 21:37  skvidal
+
+	* clientStuff.py: 
+	debugging groupinstall
+
+2003-04-06 21:19  skvidal
+
+	* yummain.py: 
+	should be > 0 not > 1 <sigh>
+
+2003-04-06 21:18  skvidal
+
+	* clientStuff.py: 
+	fixing group getting
+
+2003-04-06 21:07  skvidal
+
+	* yummain.py: 
+	fix dumb bug
+
+2003-04-06 21:02  skvidal
+
+	* clientStuff.py, config.py, pkgaction.py, yumcomps.py, yummain.py:
+	
+	groupinstall and misc other cleanups.
+
+2003-04-05 22:33  mstenner
+
+	* keepalive.py, urlgrabber.py: added retrygrab to urlgrabber; fixed
+	connection reuse problem (after errors) in keepalive
+
+2003-04-05 18:08  skvidal
+
+	* progress_meter.py, urlgrabber.py: 
+	new urlgrabber functions - much more robust and option-ridden ;)
+	progress_meter fun - both of these from michael stenner
+
+2003-04-05 18:08  skvidal
+
+	* urlgrabber.py: file urlgrabber.py was initially added on branch
+	yum-rpm_4_2_branch.
+
+2003-04-05 18:08  skvidal
+
+	* progress_meter.py: file progress_meter.py was initially added on
+	branch yum-rpm_4_2_branch.
+
+2003-04-05 18:08  skvidal
+
+	* clientStuff.py, keepalive.py: 
+	updates to both for urlgrab functions
+
+2003-04-04 16:49  skvidal
+
+	* clientStuff.py, config.py, pkgaction.py: 
+	ooo look - groupupdate works waiting on the new urlgrab from
+	michael to make portions of this not suck LOTS of places to clean
+	up for display and separation
+
+2003-04-04 01:21  skvidal
+
+	* clientStuff.py, pkgaction.py, yummain.py: 
+	all the rest of the little changes to make the forward port of the
+	update, and upgrade functions work
+
+2003-04-04 01:11  skvidal
+
+	* clientStuff.py, pkgaction.py, yummain.py: 
+	forward port of new update and upgrade functions + obsoletes
+	resolution fixes
+
+2003-04-04 00:52  skvidal
+
+	* config.py: 
+	fix up to the variables - lowercase becomes uppercase
+
+2003-04-03 01:11  skvidal
+
+	* clientStuff.py, config.py: 
+	ported the config variables forward added $yum0 - $yum9 variables
+	usable on name, baseurl and commands fields worked on group stuff
+	some more
+
+2003-03-31 23:48  skvidal
+
+	* clientStuff.py, pkgaction.py, yumcomps.py: 
+	more work on yum group* grouplist implemented groupupdate started
+
+2003-03-29 18:35  skvidal
+
+	* clientStuff.py, config.py, pkgaction.py, yumcomps.py, yummain.py:
+	
+	groups integration clean up dumb functions new comments
+
+2003-03-27 16:37  skvidal
+
+	* yumcomps.py: 
+	refining the test in main()
+
+2003-03-27 16:28  skvidal
+
+	* yumcomps.py: 
+	update comments
+
+2003-03-27 16:12  skvidal
+
+	* yumcomps.py: 
+	comps merging working - needs more testing
+
+2003-03-27 14:39  skvidal
+
+	* yumcomps.py: 
+	trying to make multiple comps compilation work
+
+2003-03-27 02:43  skvidal
+
+	* yumcomps.py: 
+	dramatically enhance the comps mechanisms - note problem with
+	ordering of groups based upon which comps.xml was brought in first
+
+2003-03-26 02:10  skvidal
+
+	* yumcomps.py: 
+	make installed_groups more correct augment _dumppkgs options
+
+2003-03-25 01:51  skvidal
+
+	* comps.py: file comps.py was initially added on branch
+	yum-rpm_4_2_branch.
+
+2003-03-25 01:51  skvidal
+
+	* comps.py: 
+	added comps.py - copy out of rhpl from red hat linux phoebe3
+	brought into yum to avoid dep
+
+2003-03-25 01:51  skvidal
+
+	* yumcomps.py: file yumcomps.py was initially added on branch
+	yum-rpm_4_2_branch.
+
+2003-03-25 01:51  skvidal
+
+	* yumcomps.py: 
+	added yumcomps.py for the comps.xml support merge
+
+2003-03-24 14:09  skvidal
+
+	* nevral.py: 
+	fix unresolvable dep loop
+
+2003-03-24 13:43  skvidal
+
+	* nevral.py: <sigh>
+
+2003-03-24 13:42  skvidal
+
+	* nevral.py: 
+	debug info
+
+2003-03-24 13:36  skvidal
+
+	* nevral.py: 
+	fix name problem
+
+2003-03-24 13:32  skvidal
+
+	* nevral.py: 
+	clean up and check in
+
+2003-03-24 13:10  skvidal
+
+	* rpmUtils.py: 
+	fix int compare in compareEVR
+
+2003-03-24 00:30  skvidal
+
+	* nevral.py, rpmUtils.py, yum.conf, yummain.py: 
+	rpmUtilify things - AND make the nevral take up MUCH less memory in
+	the best case scenario.
+
+2003-03-23 12:34  skvidal
+
+	* rpmUtils.py: 
+	significant work done on RPM_DB_WORK class might be renamed before
+	I'm finished
+
+2003-03-22 16:10  skvidal
+
+	* pullheaders.py: 
+	misc cleanup in pullheaders.py
+
+2003-03-22 16:06  skvidal
+
+	* serverStuff.py: 
+	change the method for avoiding the localdb on yum-arch -c options
+
+2003-03-22 08:08  skvidal
+
+	* rpmUtils.py, serverStuff.py: 
+	depcheck bug in serverStuff.depchecktree() dumbass bug in
+	rpmUtils.formatRequire() Thanks to Axel Thimm for pointing these
+	up.
+
+2003-03-11 01:23  skvidal
+
+	* docs/: yum.8, yum.conf.5: 
+	doc fixes
+
+2003-03-07 17:16  skvidal
+
+	* yummain.py: 
+	fix the diskspace check call *doh*
+
+2003-03-07 10:54  skvidal
+
+	* ChangeLog: 
+	Update Changelog
+
 2003-03-07 00:12  skvidal
 
 	* clientStuff.py: 
