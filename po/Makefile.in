@@ -27,7 +27,7 @@ INSTALL_NLS_DIR = @datadir@/locale
 
 # PO catalog handling
 MSGMERGE	= msgmerge -v
-PYGETTEXT	= ./pygettext.py --default-domain=$(NLSPACKAGE) \
+PYGETTEXT	= python ./pygettext.py --default-domain=$(NLSPACKAGE) \
 		  --verbose --output-file=$(NLSPACKAGE).po
 XGETTEXT	= xgettext --default-domain=$(NLSPACKAGE) \
 		  --add-comments
