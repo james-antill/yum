@@ -14,6 +14,17 @@ try:
 except ImportError, msg:
     import urllib
     urllib2 = urllib
+else:
+    class MyOpenerDirector(urllib2.OpenerDirector):
+        def __init__(self):
+            self.addheaders = [('User-agent', "Yum/2.X")]
+            # manage the individual handlers
+            self.handlers = []
+            self.handle_open = {}
+            self.handle_error = {}
+    
+    urllib2.OpenerDirector = MyOpenerDirector
+
 
 try:
     from httplib import HTTPException
@@ -29,6 +40,7 @@ try:
     urllib2.install_opener(opener)
 except ImportError, msg:
     keepalive_handler = None
+
 
 class URLGrabError(IOError):
     """
