@@ -118,9 +118,7 @@ def parseCmdArgs(args):
 def lock(lockfile, mypid):
     """do the lock file work"""
     #check out/get the lockfile
-    if yumlock.lock(lockfile, mypid, 0644):
-        pass
-    else:
+    while not yumlock.lock(lockfile, mypid, 0644):
         fd = open(lockfile, 'r')
         try: oldpid = int(fd.readline())
         except ValueError:
@@ -143,8 +141,6 @@ def lock(lockfile, mypid):
                 msg = _('Existing lock %s: another copy is running. Aborting.')
                 print msg % lockfile
                 sys.exit(200)
-        # lock again.
-        yumlock.lock(lockfile, mypid, 0644)
 
 def main(args):
     """This does all the real work"""
@@ -325,7 +321,6 @@ def main(args):
         if clientStuff.userconfirm():
             errorlog(1, _('Exiting on user command.'))
             sys.exit(1)
-
     
     # Test run for file conflicts and diskspace check, etc.
     tstest = clientStuff.create_final_ts(tsInfo)
@@ -338,7 +333,7 @@ def main(args):
     # FIXME the actual run should probably be elsewhere and this should be
     # inside a try, except set
     tsfin = clientStuff.create_final_ts(tsInfo)
-    
+
     if conf.diskspacecheck == 0:
         tsfin.setProbFilter(rpm.RPMPROB_FILTER_DISKSPACE)
 
