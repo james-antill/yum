@@ -605,6 +605,7 @@ def get_groups_from_servers(serveridlist):
             if os.path.exists(localgroupfile):
                 log(3, 'using cached groups from server: %s' % serverid)
         if os.path.exists(localgroupfile):
+            log(3, 'Got a file - yay')
             validservers.append(serverid)
             
     return validservers
