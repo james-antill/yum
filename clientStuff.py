@@ -796,7 +796,7 @@ def download_headers(HeaderInfo, nulist):
                 continue
                 
         if not conf.cache:
-            log(2, _('getting %s') % (LocalHeaderFile))
+            log(3, _('getting %s') % (LocalHeaderFile))
             try:
                 hdrfn = grab(serverid, RemoteHeaderFile, LocalHeaderFile, copy_local=1,
                                   checkfunc=(rpmUtils.checkheader, (name, arch), {}))
