@@ -763,7 +763,7 @@ def download_headers(HeaderInfo, nulist):
                 good = 0
     if keepalive_handler: keepalive_handler.close_all()
                 
-def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmDBInfo, obsdict):
+def take_action(cmds, nulist, uplist, newlist, obsoleting, tsInfo, HeaderInfo, rpmDBInfo, obsoleted):
     from yummain import usage
     
     basecmd = cmds.pop(0)
@@ -793,13 +793,15 @@ def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmD
     
     elif basecmd == 'update':
         if len(cmds) == 0:
-            pkgaction.updatepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, obslist, 'all', 1)
+            pkgaction.updatepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, 'all', 1)
         else:
-            pkgaction.updatepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, obslist, cmds, 1)
-    
+            pkgaction.updatepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, cmds, 1)
+            
     elif basecmd == 'upgrade':
         if len(cmds) == 0:
-            pkgaction.upgradepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, obslist, obsdict, 'all')
+            pkgaction.upgradepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, obsoleted, obsoleting, 'all')
+        else:
+            pkgaction.upgradepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, obsoleted, obsoleting, cmds)
     
     elif basecmd in ('erase', 'remove'):
         if len(cmds) == 0:

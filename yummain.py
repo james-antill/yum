@@ -224,8 +224,8 @@ def main(args):
     # w/o getting anymore header info
     ##################################################################
 
-    clientStuff.take_action(cmds, nulist, uplist, newlist, obslist, tsInfo,\
-                            HeaderInfo, rpmDBInfo, obsdict)
+    clientStuff.take_action(cmds, nulist, uplist, newlist, obsoleting, tsInfo,\
+                            HeaderInfo, rpmDBInfo, obsoleted)
     # back from taking actions - if we've not exited by this point then we have
     # an action that will install/erase/update something
     

@@ -73,7 +73,7 @@ def installpkgs(tsnevral, nulist, userlist, hinevral, rpmnevral, exitoninstalled
     else:
         errorlog(1, _("No Packages Available for Update or Install"))
     
-def updatepkgs(tsnevral, hinevral, rpmnevral, nulist, uplist, userlist):
+def updatepkgs(tsnevral, hinevral, rpmnevral, nulist, uplist, userlist, exitoninstalled):
     """Update pkgs - will only update - will not install uninstalled pkgs.
        however it will, on occasion install a new, betterarch of a pkg"""
        
@@ -111,9 +111,11 @@ def updatepkgs(tsnevral, hinevral, rpmnevral, nulist, uplist, userlist):
         if not pkgfound:
             if rpmnevral.exists(n):
                 errorlog(1,"%s is installed and the latest version." % (n))
+                if exitoninstalled:
+                    sys.exit(1)
             else:
                 errorlog(0,"Cannot find any package matching %s available to be updated." % (n))
-            sys.exit(1)
+                sys.exit(1)
             
 def upgradepkgs(tsnevral, hinevral, rpmnevral, nulist, uplist, obsoleted, obsoleting, userlist):
     # must take user arguments
