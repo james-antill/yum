@@ -1,3 +1,156 @@
+2003-05-31 23:27  skvidal
+
+	* configure.in, yum.spec: 
+	update versions to 1.98
+
+2003-05-31 12:30  skvidal
+
+	* yummain.py, docs/yum.8: 
+	make docs consistent remove vs erase
+
+2003-05-29 00:32  skvidal
+
+	* docs/yum.conf.5: 
+	updated docs for failovermethod, baseurl handling and
+	diskspacecheck
+
+2003-05-28 01:20  skvidal
+
+	* clientStuff.py: 
+	typo - serverird -> serverid
+
+2003-05-27 23:43  skvidal
+
+	* Makefile.in: 
+	add failover to makefile
+
+2003-05-27 13:32  skvidal
+
+	* failover.py: file failover.py was initially added on branch
+	yum-rpm_4_2_branch.
+
+2003-05-27 13:32  skvidal
+
+	* failover.py: 
+	adding failover.py
+
+2003-05-27 13:25  skvidal
+
+	* clientStuff.py, config.py, nevral.py: 
+	failover implemented and cleaned up in a couple of places syntax in
+	config file is now:
+	
+	baseurl = url1		 url2		url3	       url4	   
+	  url5		 etc
+
+2003-05-27 00:28  skvidal
+
+	* clientStuff.py, pkgaction.py, rpmUtils.py: 
+	- fix up the match() method in rpm ts work - make rpmmire available
+	for other searching - simple counting stubs added to the download
+	header function in clientStuff
+
+2003-05-22 13:15  skvidal
+
+	* TODO: 
+	change link
+
+2003-05-22 01:42  skvidal
+
+	* clientStuff.py, rpmUtils.py: 
+	implement checkfunc for rpm retrygrab() fix it vis-a-vis the gpg
+	checking
+
+2003-05-21 17:33  skvidal
+
+	* lilocfg.py, pkgaction.py, translate.py: 
+	lilo updating error catch clean up up2date->yum string replaces in
+	user-areas
+
+2003-05-21 10:38  skvidal
+
+	* Makefile.in: 
+	remove depchecktree - considering it is entirely unused
+
+2003-05-13 01:24  skvidal
+
+	* clientStuff.py, yummain.py: 
+	catching errors in the headerinfo download and making sure yum
+	clean works as expected still
+
+2003-05-13 01:10  skvidal
+
+	* clientStuff.py: 
+	helps to look at caching before deciding to download headers
+
+2003-05-12 00:31  skvidal
+
+	* clientStuff.py: 
+	clean up the header.info grabbing should work ok now - I'm not sure
+	it needs a checkfunc at all
+
+2003-05-11 15:18  skvidal
+
+	* clientStuff.py, rpmUtils.py: 
+	header check function now works as part of retrygrab()
+
+2003-05-11 02:10  skvidal
+
+	* clientStuff.py, yummain.py: 
+	fix a few typos for diskspace check
+
+2003-05-11 02:04  skvidal
+
+	* clientStuff.py, config.py, yummain.py: 
+	port diskspacecheck option to 2.0
+
+2003-05-05 23:00  skvidal
+
+	* nevral.py: 
+	fix a tab->space issue
+
+2003-05-03 18:13  skvidal
+
+	* nevral.py: 
+	fixed depresolution issues and handle a broken rpmdb better
+
+2003-05-01 02:12  skvidal
+
+	* pullheaders.py: 
+	made yum-arch make a .newheaders dir, generate the headers in
+	there, move them into the headers dir once they are ready.  quicker
+	turnover in headers creation - less trouble on active servers
+
+2003-04-29 09:39  skvidal
+
+	* nevral.py: 
+	potential fix for nevral resolution issue
+
+2003-04-29 02:20  skvidal
+
+	* docs/yum.conf.5: 
+	docs update finally.
+
+2003-04-29 02:10  skvidal
+
+	* ChangeLog, clientStuff.py: 
+	import time in the right place ChangeLog changes
+
+2003-04-29 02:09  skvidal
+
+	* pullheaders.py, serverStuff.py: 
+	make yum-arch handle broken rpms more gracefully
+
+2003-04-23 02:23  skvidal
+
+	* yum.spec: 
+	turn on registration for chkconfig
+
+2003-04-22 12:45  skvidal
+
+	* pkgaction.py: 
+	fix unintialized value in listgroups.  forgot the other else :)
+
 2003-04-21 22:06  skvidal
 
 	* pkgaction.py: 
