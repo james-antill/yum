@@ -284,7 +284,9 @@ def listpkginfo(pkglist, userlist, nevral, short):
         else:    
             for (name,arch) in pkglist:
                 for n in userlist:
-                    if n == name or fnmatch.fnmatch(name, n):
+                    pattern = fnmatch.translate(n)
+                    regex = re.compile(pattern, re.IGNORECASE)
+                    if n == name or regex.match(name):
                         if short:
                             (e,v,r)=nevral.evr(name,arch)
                             id = nevral.serverid(name, arch)
@@ -424,9 +426,11 @@ def search(usereq, nulist, nevral, localrpmdb, tagslist):
 
             for req in usereq:
                 req = '*' + req + '*'
+                pattern = fnmatch.translate(req)
+                regex = re.compile(pattern, re.IGNORECASE)
                 for item in searchlist:
                     log(4, '%s vs %s' % (item, req))
-                    if req == item or fnmatch.fnmatch(item, req):
+                    if req == item or regex.match(item):
                         results = results + 1
                         log(2, _('Available package: %s.%s %s:%s-%s from %s matches with\n %s') % 
                                 (name, arch, epoch, ver, rel, id, item))
