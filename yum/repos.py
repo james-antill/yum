@@ -21,6 +21,8 @@ import os.path
 import types
 import re
 import urlparse
+import fnmatch
+
 
 import Errors
 from urlgrabber.grabber import URLGrabber
@@ -31,6 +33,9 @@ from repomd import mdErrors
 from repomd import packageSack
 from packages import YumAvailablePackage
 import mdcache
+
+_is_fnmatch_pattern = re.compile(r"[*?[]").search
+
 
 class YumPackageSack(packageSack.PackageSack):
     """imports/handles package objects from an mdcache dict object"""
@@ -122,15 +127,42 @@ class RepoStorage:
             raise Errors.RepoError, \
                 'Error getting repository data for %s, repository not found' % (repoid)
 
+    def findRepos(self,pattern):
+        """find all repositories matching fnmatch `pattern`"""
+
+        result = []
+        match = re.compile(fnmatch.translate(pattern)).match
+
+        for name,repo in self.repos.items():
+            if match(name):
+                result.append(repo)
+        return result
+
+
     def disableRepo(self, repoid):
-        """disable a repository from use"""
-        thisrepo = self.getRepo(repoid)
-        thisrepo.disable()
-            
+        """disable a repository from use
+
+        fnmatch wildcards may be used to disable a group of repositories.
+        """
+        if _is_fnmatch_pattern(repoid):
+            for repo in self.findRepos(repoid):
+                repo.disable()
+        else:
+            thisrepo = self.getRepo(repoid)
+            thisrepo.disable()
+
     def enableRepo(self, repoid):
-        """disable a repository from use"""
-        thisrepo = self.getRepo(repoid)
-        thisrepo.enable()
+        """enable a repository for use
+
+        fnmatch wildcards may be used to enable a group of repositories.
+        """
+        if _is_fnmatch_pattern(repoid):
+            repos = self.findRepos(repoid)
+            for repo in self.findRepos(repoid):
+                repo.enable()
+        else:
+            thisrepo = self.getRepo(repoid)
+            thisrepo.enable()
             
     def listEnabled(self):
         """return list of enabled repo objects"""

@@ -383,13 +383,13 @@ class YumOutput:
             for txmbr in pkglist:
                 (n,a,e,v,r) = txmbr.pkgtup
                 msg = "  %s: %s.%s %s:%s-%s\n" % (action, n,a,e,v,r)
-                userout = userout + msg
+                depout = depout + msg
 
         for txmbr in obsoleted:
             (n,a,e,v,r) = txmbr.pkgtup
             obspkg = None
             for (pkg, relationship) in txmbr.relatedto:
-                if relationship == 'osboletedby':
+                if relationship == 'obsoletedby':
                     obspkg = '%s.%s %s:%s-%s' % pkg
             if obspkg is not None:
                 otherout = otherout + "  Obsoleting: %s.%s %s:%s-%s with %s\n" % (n, a, e, v, r, obspkg)

@@ -121,6 +121,17 @@ GENERAL ARGUMENTS (kwargs)
     HTTP servers in the User-agent header. The module level default
     for this option is "urlgrabber/VERSION".
 
+  http_headers = None
+
+    a tuple of 2-tuples, each containing a header and value.  These
+    will be used for http and https requests only.  For example, you
+    can do
+      http_headers = (('Pragma', 'no-cache'),)
+
+  ftp_headers = None
+
+    this is just like http_headers, but will be used for ftp requests.
+
   proxies = None
 
     a dictionary that maps protocol schemes to proxy hosts. For
@@ -361,6 +372,7 @@ class URLGrabError(IOError):
         10   - Byte range requested, but range support unavailable
         11   - Illegal reget mode
         12   - Socket timeout.
+        13   - malformed proxy url
 
       MirrorGroup error codes (256 -- 511)
         256  - No more mirrors left to try
@@ -513,7 +525,9 @@ class URLGrabberOptions:
         self.cache_openers = True
         self.timeout = None
         self.text = None
- 
+        self.http_headers = None
+        self.ftp_headers = None
+
 class URLGrabber:
     """Provides easy opening of URLs with a variety of options.
     
@@ -727,14 +741,39 @@ class URLGrabberFileObject:
             return self.opts.opener
         elif self._opener is None:
             handlers = []
+            need_keepalive_handler = (keepalive_handler and self.opts.keepalive)
+            need_range_handler = (range_handlers and \
+                                  (self.opts.range or self.opts.reget))
             # if you specify a ProxyHandler when creating the opener
             # it _must_ come before all other handlers in the list or urllib2
             # chokes.
             if self.opts.proxies:
                 handlers.append( CachedProxyHandler(self.opts.proxies) )
-            if keepalive_handler and self.opts.keepalive:
+
+                # -------------------------------------------------------
+                # OK, these next few lines are a serious kludge to get
+                # around what I think is a bug in python 2.2's
+                # urllib2.  The basic idea is that default handlers
+                # get applied first.  If you override one (like a
+                # proxy handler), then the default gets pulled, but
+                # the replacement goes on the end.  In the case of
+                # proxies, this means the normal handler picks it up
+                # first and the proxy isn't used.  Now, this probably
+                # only happened with ftp or non-keepalive http, so not
+                # many folks saw it.  The simple approach to fixing it
+                # is just to make sure you override the other
+                # conflicting defaults as well.  I would LOVE to see
+                # these go way or be dealt with more elegantly.  The
+                # problem isn't there after 2.2.  -MDS 2005/02/24
+                if not need_keepalive_handler:
+                    handlers.append( urllib2.HTTPHandler() )
+                if not need_range_handler:
+                    handlers.append( urllib2.FTPHandler() )
+                # -------------------------------------------------------
+                    
+            if need_keepalive_handler:
                 handlers.append( keepalive_handler )
-            if range_handlers and (self.opts.range or self.opts.reget):
+            if need_range_handler:
                 handlers.extend( range_handlers )
             handlers.append( auth_handler )
             if self.opts.cache_openers:
@@ -749,14 +788,14 @@ class URLGrabberFileObject:
     def _do_open(self):
         opener = self._get_opener()
 
-        # build request object
-        req = urllib2.Request(self.url)
-        if self.opts.user_agent:
-            req.add_header('User-agent', self.opts.user_agent)
-
+        req = urllib2.Request(self.url) # build request object
+        self._add_headers(req) # add misc headers that we need
         self._build_range(req) # take care of reget and byterange stuff
+
         fo, hdr = self._make_request(req, opener)
         if self.reget_time and self.opts.reget == 'check_timestamp':
+            # do this if we have a local file with known timestamp AND
+            # we're in check_timestamp reget mode.
             fetch_again = 0
             try:
                 modified_tuple  = hdr.getdate_tz('last-modified')
@@ -794,6 +833,18 @@ class URLGrabberFileObject:
             self.opts.progress_obj.update(0)
         (self.fo, self.hdr) = (fo, hdr)
     
+    def _add_headers(self, req):
+        if self.opts.user_agent:
+            req.add_header('User-agent', self.opts.user_agent)
+        try: req_type = req.get_type()
+        except ValueError: req_type = None
+        if self.opts.http_headers and req_type in ('http', 'https'):
+            for h, v in self.opts.http_headers:
+                req.add_header(h, v)
+        if self.opts.ftp_headers and req_type == 'ftp':
+            for h, v in self.opts.ftp_headers:
+                req.add_header(h, v)
+
     def _build_range(self, req):
         self.reget_time = None
         self.append = 0
@@ -971,10 +1022,17 @@ _proxy_cache = []
 def CachedProxyHandler(proxies):
     for (pdict, handler) in _proxy_cache:
         if pdict == proxies:
-            return handler
-    handler = urllib2.ProxyHandler(proxies)
-    _proxy_cache.append( (proxies,handler) )
+            break
+    else:
+        for k, v in proxies.items():
+            utype, url = urllib.splittype(v)
+            host, other = urllib.splithost(url)
+            if (utype is None) or (host is None):
+                raise URLGrabError(13, _('Bad proxy URL: %s') % v)
 
+        handler = urllib2.ProxyHandler(proxies)
+        _proxy_cache.append( (proxies, handler) )
+    return handler
 
 #####################################################################
 # DEPRECATED FUNCTIONS
@@ -1123,4 +1181,3 @@ if __name__ == '__main__':
     _main_test()
     _retry_test()
     _file_object_test('test')
-    

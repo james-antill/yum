@@ -307,7 +307,10 @@ class YumBase(depsolve.Depsolve):
         # if we're not root then we don't lock - just return nicely
         if self.conf.getConfigOption('uid') != 0:
             return
-        
+
+        root = self.conf.installroot
+        lockfile = root + '/' + lockfile # lock in the chroot
+
         mypid=str(os.getpid())    
         while not self._lock(lockfile, mypid, 0644):
             fd = open(lockfile, 'r')
@@ -336,6 +339,10 @@ class YumBase(depsolve.Depsolve):
         # if we're not root then we don't lock - just return nicely
         if self.conf.getConfigOption('uid') != 0:
             return
+
+        root = self.conf.installroot
+        lockfile = root + '/' + lockfile # lock in the chroot
+
         self._unlock(lockfile)
         
     def _lock(self, filename, contents='', mode=0777):
@@ -1044,7 +1051,8 @@ class YumBase(depsolve.Depsolve):
         """Pass in a generic [build]require string and this function will 
            pass back the best(or first) package it finds providing that dep."""
         
-        flags = {'>':'GT', '<':'LT', '=': 'EQ', '>=':'GE', '<=':'LE'}
+        flags = {'>':'GT', '<':'LT', '=': 'EQ', '==': 'EQ', '>=':'GE', '<=':'LE'}
+
         self.doRepoSetup()
         # parse the string out
         #  either it is 'dep (some operator) e:v-r'
@@ -1058,6 +1066,8 @@ class YumBase(depsolve.Depsolve):
             # not a file dep - look at it for being versioned
             if re.search('[>=<]', depstring):  # versioned
                 depname, flagsymbol, depver = depstring.split()
+                if not flags.has_key(flagsymbol):
+                    raise Errors.YumBaseError, 'No Packages found for %s' % depstring
                 depflags = flags[flagsymbol]
                 
         sack = self.whatProvides(depname, depflags, depver)
