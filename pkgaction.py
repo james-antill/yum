@@ -167,9 +167,11 @@ def upgradepkgs(tsnevral, hinevral, rpmnevral, nulist, uplist, obsoleted, obsole
     oulist = []
     globalupgrade = 0
     for oname in obsoleted.keys():
-        if rpmnevral.exists(oname):
-            ((e, v, r, oarch, l, i), s) = rpmnevral._get_data(oname)
-            oulist.append((oname, oarch))
+        archs = archwork.availablearchs(rpmnevral, oname)
+        for arch in archs:
+            if rpmnevral.exists(oname, arch):
+                ((e, v, r, oarch, l, i), s) = rpmnevral._get_data(oname, arch)
+            oulist.append((oname, arch))
 
     for (name,  arch) in uplist:
         oulist.append((name, arch))
@@ -183,19 +185,19 @@ def upgradepkgs(tsnevral, hinevral, rpmnevral, nulist, uplist, obsoleted, obsole
         pkgfound = 0
         # check for a name.arch specification in the userlist
         if n.find('.') != -1:
-            name, arch = n.split('.')
-            if (name, arch) in oulist:
-                log(3, "Found a specified arch: %s, %s" % (name, arch))
+            myname, myarch = n.split('.')
+            if (myname, myarch) in oulist:
+                log(3, "Found a specified arch: %s, %s" % (myname, myarch))
                 pkgfound = 1
-                if obsoleted.has_key(name):
-                    for (obsname, obsarch) in obsoleted[name]:
-                        log(4, '%s obsoleted by %s' % (name, obsname))
+                if myname in obsoleted.keys():
+                    for (obsname, obsarch) in obsoleted[myname]:
+                        log(4, '%s obsoleted by %s' % (myname, obsname))
                         ((e, v, r, a, l, i), s) = hinevral._get_data(obsname, obsarch)
                         tsnevral.add((obsname,e,v,r,a,l,i),'u')
                 else:
-                    log(4,"Updating: %s.%s" % (name, arch))
-                    ((e, v, r, a, l, i), s)=hinevral._get_data(name, arch)
-                    tsnevral.add((name,e,v,r,a,l,i),'u')
+                    log(4,"Updating: %s.%s" % (myname, myarch))
+                    ((e, v, r, a, l, i), s)=hinevral._get_data(myname, myarch)
+                    tsnevral.add((myname,e,v,r,a,l,i),'u')
                 continue
         
         for (name, arch) in oulist:
