@@ -267,7 +267,7 @@ def removeCurrentHeaders(hdrlist):
         if os.path.exists(hdr):
             try:
                 os.unlink(hdr)
-            except OSerror, e:
+            except OSError, e:
                 print _('Cannot delete file %s') % hdr
         else:
             print _('Odd header %s suddenly disappeared') % hdr

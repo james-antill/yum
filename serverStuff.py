@@ -30,8 +30,12 @@ def getfilelist(path, ext, list, usesymlinks):
     # return list
     # ignore symlinks unless told otherwise
 
-    dir_list = os.listdir(path)
-
+    try:
+        dir_list = os.listdir(path)
+    except OSError, e:
+        log(0, 'Error accessing directory %s, %s' % (path, e))
+        sys.exit(1)
+        
     for d in dir_list:
         if os.path.isdir(path + '/' + d):
             list = getfilelist(path + '/' + d, ext, list, usesymlinks)
