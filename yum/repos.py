@@ -322,19 +322,20 @@ class Repository:
             raise Errors.RepoError, 'Error opening file for checksum'
         
     def dump(self):
-        string = '[%s]\n' % self.id
-        for attr in dir(self):
-            if attr in ['name', 'bandwidth', 'enabled', 'enablegroups', 
-                        'gpgcheck', 'includepkgs', 'keepalive', 'proxy'
-                        'proxy_password', 'proxy_username', 'excludes', 
-                        'retries', 'throttle', 'timeout']:
-                
-                string = string + '%s = %s\n' % (attr, getattr(self, attr))
-        string = string + 'baseurl='
+        output = '[%s]\n' % self.id
+        vars = ['name', 'bandwidth', 'enabled', 'enablegroups', 
+                 'gpgcheck', 'includepkgs', 'keepalive', 'proxy',
+                 'proxy_password', 'proxy_username', 'excludes', 
+                 'retries', 'throttle', 'timeout', 'mirrorlistfn', 
+                 'cachedir', 'gpgkey', 'pkgdir', 'hdrdir']
+        vars.sort()
+        for attr in vars:
+            output = output + '%s = %s\n' % (attr, getattr(self, attr))
+        output = output + 'baseurl ='
         for url in self.urls:
-            string = string + ' %s\n' % url
+            output = output + ' %s\n' % url
         
-        return string
+        return output
     
     def enable(self):
         self.baseurlSetup()
@@ -369,17 +370,20 @@ class Repository:
             return
         
         self.proxy_dict = {} # zap it
-        if self.proxy is not None:
+        proxy_string = None
+        if self.proxy not in [None, '_none_']:
             proxy_string = '%s' % self.proxy
             if self.proxy_username is not None:
                 proxy_string = '%s@%s' % (self.proxy_username, self.proxy)
                 if self.proxy_password is not None:
                     proxy_string = '%s:%s@%s' % (self.proxy_username,
                                                  self.proxy_password, self.proxy)
+                                                 
+        if proxy_string is not None:
             self.proxy_dict['http'] = proxy_string
             self.proxy_dict['https'] = proxy_string
             self.proxy_dict['ftp'] = proxy_string
-        
+
     def setupGrab(self):
         """sets up the grabber functions with the already stocked in urls for
            the mirror groups"""
@@ -393,7 +397,7 @@ class Repository:
         self.doProxyDict()
         prxy = None
         if self.proxy_dict:
-            pryx = self.proxy_dict
+            prxy = self.proxy_dict
         
         self.grabfunc = URLGrabber(keepalive=self.keepalive, 
                                    bandwidth=self.bandwidth,
@@ -480,7 +484,7 @@ class Repository:
         self.doProxyDict()
         prxy = None
         if self.proxy_dict:
-            pryx = self.proxy_dict
+            prxy = self.proxy_dict
 
         if url is not None:
             ug = URLGrabber(keepalive = self.keepalive, 
