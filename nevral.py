@@ -194,7 +194,34 @@ class nevral:
     def setPkgState(self, name, arch, newstate):
         ((e,v,r,a,l,i),state) = self._get_data(name, arch)
         self.add((name,e,v,r,arch,l,i), newstate)
+    
+    def bestArchsByVersion(self, name):
+        """returns a list of archs that have the highest version for name"""
+        returnarchs = []
+
+        archs = archwork.availablearchs(self, name)
+        currentarch = archs[0]
+        for arch in archs[1:]:
+            rc = rpmUtils.compareEVR(self.evr(name, currentarch), self.evr(name, arch))
+            if rc < 0:
+                currentarch = arch
+            elif rc == 0:
+                pass
+            elif rc > 0:
+                pass
+        (best_e, best_v, best_r) = self.evr(name, currentarch)
+        log(3, 'Best version for %s is %s:%s-%s' % (name, best_e, best_v, best_r))
+    
+        for arch in archs:
+            rc = rpmUtils.compareEVR(self.evr(name, arch), (best_e, best_v, best_r))
+            if rc == 0:
+                returnarchs.append(arch)
+            elif rc > 0:
+                log(4, 'What the hell, we just determined it was the bestversion')
         
+        log(7, returnarchs)
+        return returnarchs
+    
     def populateTs(self, addavailable = 1):
         installonlypkgs = ['kernel', 'kernel-bigmem', 'kernel-enterprise',
                            'kernel-smp', 'kernel-debug']
@@ -206,19 +233,19 @@ class nevral:
                 rpmloc = self.rpmlocation(name, arch)
                 pkghdr = self.getHeader(name, arch)
                 if name in installonlypkgs:
-                    kernarchlist = archwork.availablearchs(self,name)
-                    bestarch = archwork.bestarch(kernarchlist)
+                    bestarchlist = self.bestArchsByVersion(name)
+                    bestarch = archwork.bestarch(bestarchlist)
                     if arch == bestarch:
-                        log(3, 'Found best kernel arch: %s' %(arch))
+                        log(3, 'Found best arch for install only pkg %s' %(arch))
                         _ts.addInstall(pkghdr,(pkghdr,rpmloc),'i')
                         self.setPkgState(name, arch, 'i')
                     else:
-                        log(3, 'Removing dumb kernel with silly arch %s' %(arch))
+                        log(3, 'Removing dumb arch for install only pkg: %s' %(arch))
                         if addavailable:
                             _ts.addInstall(pkghdr,(pkghdr,rpmloc),'a')
                         self.setPkgState(name, arch, 'a')
                 else:
-                    log(5, 'Not a kernel, adding to ts')
+                    log(5, 'Not an install only pkg, adding to ts')
                     _ts.addInstall(pkghdr,(pkghdr,rpmloc),'u')
                     
             elif self.state(name,arch) == 'i':
@@ -282,7 +309,7 @@ class nevral:
                         (header, sugname) = suggest
                         log(4, '%s wants %s' % (name, sugname))
                         (name, arch) = self.nafromloc(sugname)
-                        archlist = archwork.availablearchs(self,name)
+                        archlist = self.bestArchsByVersion(name)
                         bestarch = archwork.bestarch(archlist)
                         log(3, 'bestarch = %s for %s' % (bestarch, name))
                         self.setPkgState(name, bestarch, 'ud')
@@ -299,7 +326,7 @@ class nevral:
                                 self.add((name,e,v,r,arch,l,i),'ed')
                                 log(4, 'Got Erase Dep: %s, %s' %(name,arch))
                             else:
-                                archlist = archwork.availablearchs(self, reqname)
+                                archlist = self.bestArchsByVersion(reqname)
                                 if len(archlist) > 0:
                                     arch = archwork.bestarch(archlist)
                                     self.setPkgState(name, arch, 'ud')

@@ -270,7 +270,7 @@ class Groups_Info:
             if group not in grplist:
                 grplist.append(group)
          
-         return grouplist
+        return grouplist
     
     def allPkgs(self, groupname):
         """duh - return list of all pkgs in group"""
