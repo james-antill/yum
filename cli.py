@@ -824,7 +824,6 @@ For more information contact your distribution or package provider.
                 continue # it was something on disk and it ended in rpm 
                          # no matter what we don't go looking at repos
 
-            if arg[0] == '/':
             arglist = [arg]
             exactmatch, matched, unmatched = parsePackages(avail, arglist)
             if len(unmatched) > 0: # if we get back anything in unmatched, check it for a virtual-provide
