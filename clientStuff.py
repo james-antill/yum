@@ -897,12 +897,6 @@ def create_final_ts(tsInfo):
     return tsfin
 
 
-def checkGPGInstallation():
-    if not os.access("/usr/bin/gpg", os.X_OK):
-        errorlog(0, _("Error: GPG is not installed"))
-        return 1
-    return 0
-    
 def descfsize(size):
     """The purpose of this function is to accept a file size in bytes,
     and describe it in a human readable fashion."""
