@@ -241,7 +241,7 @@ def main(args):
     tstest = clientStuff.create_final_ts(tsInfo)
     log(2, _('Calculating available disk space - this could take a bit'))
     tstest.setFlags(rpm.RPMTRANS_FLAG_TEST)
-    tstest.setProbFilter(rpm.RPMPROB_FILTER_DISKSPACE)
+    tstest.setProbFilter(~rpm.RPMPROB_FILTER_DISKSPACE)
     tserrors = tstest.run(callback.install_callback, '')
     if tserrors:
         log(2, 'Error: Disk space Error')
