@@ -47,7 +47,9 @@ def parseCmdArgs(args):
         yumconffile="/etc/yum.conf"
         
     try:
-        gopts, cmds = getopt.getopt(args, 'tCc:hR:e:d:y', ['help', 'version', 'installroot='])
+        gopts, cmds = getopt.getopt(args, 'tCc:hR:e:d:y', ['help', 'version', 
+                                                           'installroot=',
+                                                           'exclude='])
     except getopt.error, e:
         errorlog(0, _('Options Error: %s') % e)
         usage()
@@ -102,6 +104,8 @@ def parseCmdArgs(args):
                 conf.tolerant=1
             if o == '--installroot':
                 conf.installroot=a
+            if o == '--exclude':
+                conf.excludes.append(a)
                 
     except ValueError, e:
         errorlog(0, _('Options Error: %s') % e)
@@ -383,6 +387,8 @@ def usage():
           -C run from cache only - do not update the cache
           --installroot=[path] - set the install root (default '/')
           --version - output the version of yum
+          --exclude=some_pkg_name - packagename to exclude - you can use
+            this more than once
           -h, --help this screen
     """)
     sys.exit(1)
