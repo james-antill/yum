@@ -56,7 +56,7 @@ exit 0
 
 %files -f %{name}.lang
 %defattr(-, root, root)
-%doc README AUTHORS COPYING TODO INSTALL
+%doc README AUTHORS COPYING TODO INSTALL ChangeLog
 %config(noreplace) %{_sysconfdir}/yum.conf
 %config %{_sysconfdir}/cron.daily/yum.cron
 %config %{_sysconfdir}/init.d/%{name}
