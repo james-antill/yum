@@ -860,11 +860,12 @@ def create_final_ts(tsInfo):
                 pass
             else:
                 log(2, 'Getting %s' % (os.path.basename(rpmloc)))
+                remoterpmurl = tsInfo.remoteRpmUrl(name, arch)
                 try:
-                    localrpmpath = grab(serverid, tsInfo.remoteRpmUrl(name, arch), rpmloc, copy_local=0,
+                    localrpmpath = grab(serverid, remoterpmurl, rpmloc, copy_local=0,
                                              checkfunc=(rpmUtils.checkRpmMD5, (), {'urlgraberror':1})) 
                 except URLGrabError, e:
-                    errorlog(0, 'Error getting file %s' % tsInfo.remoteRpmUrl(name, arch))
+                    errorlog(0, 'Error getting file %s' % remoterpmurl)
                     errorlog(0, '%s' % e)
                     sys.exit(1)
                 else:
@@ -977,7 +978,7 @@ def grab(serverID, url, filename=None, copy_local=0, close_connection=0,
             # What?  We were successful?
         except URLGrabError, e:
             if e.errno in retrycodes:
-                errorlog(1, "retrygrab() failed for %s -- executing failover methodm" % base)
+                errorlog(1, "retrygrab() failed for %s -- executing failover method" % base)
                 fc.server_failed()
                 base = fc.get_serverurl()
                 if base == None:
