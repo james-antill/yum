@@ -142,13 +142,6 @@ class nevral:
         else:
             return state
             
-    def serverid(self, name, arch=None):
-        ((e,v,r,a,l,i),state) = self._get_data(name, arch)
-        if state == None: 
-            return None
-        else:
-            return i
-    
     def nafromloc(self, loc):
         keys = self.rpmbynamearch.keys()
         for (name, arch) in keys:
