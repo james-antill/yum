@@ -7,7 +7,7 @@ import sys
 
 def checkheader(headerfile, name, arch):
     #return true(1) if the header is good
-    #return  false(0) if the header is bad
+    #return false(0) if the header is bad
     # test is fairly rudimentary - read in header - read two portions of the header
     h = Header_Work(headerfile)
     if h == None:
@@ -24,8 +24,10 @@ def checkRpmMD5(package):
         h = ts.hdrFromFdno(fdno)
     except rpm.error, e:
         os.close(fdno)
+        del h
         return 0
     os.close(fdno)
+    del h
     return 1
 
 def compareEVR((e1, v1, r1), (e2, v2, r2)):
@@ -38,18 +40,16 @@ def compareEVR((e1, v1, r1), (e2, v2, r2)):
     
 
 def formatRequire (name, version, flags):
-    string = name
-        
     if flags:
         if flags & (rpm.RPMSENSE_LESS | rpm.RPMSENSE_GREATER | rpm.RPMSENSE_EQUAL):
-            string = string + ' '
+            name = name + ' '
         if flags & rpm.RPMSENSE_LESS:
-            string = string + '<'
+            name = name + '<'
         if flags & rpm.RPMSENSE_GREATER:
-            string = string + '>'
+            name = name + '>'
         if flags & rpm.RPMSENSE_EQUAL:
-            string = string + '='
-            string = string + ' %s' % version
+            name = name + '='
+            name = name + ' %s' % version
     return string
 
 
@@ -81,23 +81,17 @@ class Header_Work(RPM_Base_Work):
             h = None
         fd.close()
         self.hdr = h
-    def checkheader(self, hdrfn):
-        #return true(1) if the header is good
-        #return  false(0) if the header is bad
-        # test is fairly rudimentary - read in header - read two portions of the header
-        if h == None:
-            return 0
-        else:
-            if name != h[rpm.RPMTAG_NAME] or arch != h[rpm.RPMTAG_ARCH]:
-                return 0
-        return 1
 
 
 class RPM_Work(RPM_Base_Work):
 
     def __init__(self, rpmfn):
         fd = os.open(rpmfn, os.O_RDONLY)
-        self.hdr = ts.hdrFromFdno(fd)
+        try:
+            self.hdr = ts.hdrFromFdno(fd)
+        except RpmError, e:
+            errorlog(0, 'Error opening rpm %s - error %s' % (rpmfn, e))
+            sys.exit(1)
         os.close(fd)
     
 
