@@ -195,14 +195,18 @@ def installgroups(rpmnevral, nulist, uplist, grouplist):
     """for each group requested attempt to install all pkgs/metapkgs of default
        or mandatory. Also recurse lists of groups to provide for them too."""
     returnlist = []
-    
+    nupkglist = []
+    for (name, arch) in nulist:
+        nupkglist.append(name)
+        
     for group in grouplist:
         if group not in GroupInfo.grouplist:
             errorlog(0, 'Group %s does not exist' % group)
             return returnlist
         pkglist = GroupInfo.pkgTree(group)
         for pkg in pkglist:
-            if pkg in nulist:
+            print 
+            if pkg in nupkglist:
                 print 'adding pkg %s' % pkg
                 returnlist.append(pkg)
         
