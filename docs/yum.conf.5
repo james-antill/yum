@@ -75,6 +75,15 @@ rpm transaction is run. default is 1 (to perform the check)
 Set the number of times any attempt to retrieve a file should retry before 
 returning an error. Setting this to 0 makes it try forever. Default to 3.
 
+.IP \fBkernelpkgnames \fR
+list of package names that are kernels - this is really only here for the
+kernel updating portion - this should be removed out in 2.1 series.
+
+.IP \fBinstallonlypkgs \fR
+list of packages that should only ever be installed, never updated - kernels
+in particular fall into this category. Defaults to kernel, kernel-smp,
+kernel-bigmem, kernel-enterprise, kernel-debug, kernel-unsupported.
+
 .SH "[server] options"
 .LP 
 The server section(s) take the following form:

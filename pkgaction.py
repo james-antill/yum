@@ -479,7 +479,7 @@ def kernelupdate(tsnevral):
     for (name,arch) in tsnevral.NAkeys():
         s = tsnevral.state(name,arch)
         if s in ['i','u','ud','iu']:
-            if name in ['kernel','kernel-smp','kernel-enterprise','kernel-bigmem','kernel-BOOT']:
+            if name in conf.kernelpkgnames:
                 hdr=tsnevral.getHeader(name,arch)
                 if "kernel-smp" in hdr[rpm.RPMTAG_PROVIDES]:
                     extraInfo = "kernel-smp"

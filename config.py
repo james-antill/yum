@@ -83,6 +83,10 @@ class yumconf:
         self.throttle = None
         self.retries = 3
         self.installroot = '/'
+        self.installonlypkgs = ['kernel', 'kernel-bigmem', 'kernel-enterprise',
+                           'kernel-smp', 'kernel-debug', 'kernel-unsupported']
+        self.kernelpkgnames = ['kernel','kernel-smp','kernel-enterprise',
+                           'kernel-bigmem','kernel-BOOT', 'kernel-unsupported']
       
         if self._getoption('main','cachedir') != None:
             self.cachedir = self._getoption('main','cachedir')
@@ -124,6 +128,17 @@ class yumconf:
             self.commands = self._getoption('main', 'commands')
             self.commands = self._doreplace(self.commands)
             self.commands = self.commands.split(' ')
+
+        if self._getoption('main','installonlypkgs') != None:
+            self.installonlypkgs = self._getoption('main', 'installonlypkgs')
+            self.installonlypkgs = self._doreplace(self.installonlypkgs)
+            self.installonlypkgs = self.installonlypkgs.split(' ')
+
+        if self._getoption('main','kernelpkgnames') != None:
+            self.kernelpkgnames = self._getoption('main', 'kernelpkgnames')
+            self.kernelpkgnames = self._doreplace(self.kernelpkgnames)
+            self.kernelpkgnames = self.kernelpkgnames.split(' ')
+
 
         if len(self.cfg.sections()) > 1:
             for section in self.cfg.sections(): # loop through the list of sections

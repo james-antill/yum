@@ -239,8 +239,6 @@ class nevral:
         return returnarchs
     
     def populateTs(self, addavailable = 1):
-        installonlypkgs = ['kernel', 'kernel-bigmem', 'kernel-enterprise',
-                           'kernel-smp', 'kernel-debug']
                      
         _ts = rpmUtils.Rpm_Ts_Work(conf.installroot)
         for (name, arch) in self.NAkeys(): 
@@ -248,7 +246,7 @@ class nevral:
                 log(4,'Updating: %s, %s' % (name, arch))
                 rpmloc = self.rpmlocation(name, arch)
                 pkghdr = self.getHeader(name, arch)
-                if name in installonlypkgs:
+                if name in conf.installonlypkgs:
                     bestarchlist = self.bestArchsByVersion(name)
                     bestarch = archwork.bestarch(bestarchlist)
                     if arch == bestarch:
