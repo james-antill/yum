@@ -307,10 +307,17 @@ def listgroups(userlist):
     # it also needs to handle a userlist - duh
     # take list - if it's zero then it's '_all_' - push that into list
     # otherwise iterate over list producing output
-    groups = GroupInfo.visible_groups
-    groups.sort()
+    if len(userlist) > 0:
+        if userlist[0] == "hidden":
+            groups = GroupInfo.grouplist
+            userlist.pop(0)
+        else:
+            groups = GroupInfo.visible_groups
+
     if len(userlist) == 0:
         userlist = ['_all_']
+
+    groups.sort()
     for item in userlist:
         if item == 'installed':
             print 'Installed Groups'
@@ -345,7 +352,34 @@ def listgroups(userlist):
                 if group == item or fnmatch.fnmatch(group, item):
                     grpid = GroupInfo.group_by_name[group]
                     log(4, '%s - %s' % (grpid, group))
-                    print '   %s' % group
+                    displayPkgsInGroups(group)
+
+def displayPkgsInGroups(group):
+    print 'Group: %s' % group
+    if len(GroupInfo.sub_groups[group]) > 0:
+        print ' Required Groups:'
+        for item in GroupInfo.sub_groups[group]:
+            print '   %s' % item
+    if len(GroupInfo.default_metapkgs[group]) > 0:
+        print ' Default Metapkgs:'
+        for item in GroupInfo.default_metapkgs[group]:
+            print '   %s' % item
+    if len(GroupInfo.optional_metapkgs[group]) > 0:
+        print ' Optional Metapkgs:'
+        for item in GroupInfo.optional_metapkgs[group]:
+            print '   %s' % item
+    if len(GroupInfo.mandatory_pkgs[group]) > 0:
+        print ' Mandatory Packages:'
+        for item in GroupInfo.mandatory_pkgs[group]:
+            print '   %s' % item
+    if len(GroupInfo.default_pkgs[group]) > 0:
+        print ' Default Packages:'
+        for item in GroupInfo.default_pkgs[group]:
+            print '   %s' % item
+    if len(GroupInfo.optional_pkgs[group]) > 0:
+        print ' Optional Packages'
+        for item in GroupInfo.optional_pkgs[group]:
+            print '   %s' % item
 
                 
 def whatprovides(usereq, nulist, nevral, localrpmdb):
