@@ -593,7 +593,6 @@ def clean_up_headers():
             os.unlink(hdr)
             
 
-
 def clean_up_packages():
     serverlist = conf.servers
     for serverid in serverlist:
@@ -620,11 +619,17 @@ def clean_up_old_headers(rpmDBInfo, HeaderInfo):
             # the header
             if (rc >= 0):
                 log(5, 'Deleting Header %s' % hdrfn)
-                os.unlink(hdrfn)
+                try:
+                    os.unlink(hdrfn)
+                except OSError, e:
+                    errorlog(2, 'Attempt to delete a missing file %s - ignoring.' % hdrfn)
         if not HeaderInfo.exists(n, a):
             # if its not in the HeaderInfo nevral anymore just kill it
             log(5, 'Deleting Header %s' % hdrfn)
-            os.unlink(hdrfn)
+            try:
+                os.unlink(hdrfn)
+            except OSError, e:
+                errorlog(2, 'Attempt to delete a missing file %s - ignoring.' % hdrfn)
             
 
 def printtime():
