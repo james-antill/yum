@@ -45,7 +45,6 @@ MODULES = $(srcdir)/pullheaders.pyc \
 	  $(srcdir)/archwork.pyc \
 	  $(srcdir)/callback.pyc \
 	  $(srcdir)/clientStuff.pyc \
-	  $(srcdir)/depchecktree.pyc \
 	  $(srcdir)/iutil.pyc \
 	  $(srcdir)/lilocfg.pyc \
 	  $(srcdir)/lilo.pyc \
