@@ -14,8 +14,6 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 # Copyright 2002 Duke University 
 
-#NTS XXX might be worthwhile to have an option to do sigchecking on the server side
-
 
 import os
 import sys
@@ -69,9 +67,9 @@ def main():
             log.verbosity = 4
         if arg in ['-h','--help']:
             serverStuff.Usage()
-    #save where we are right now
+    # save where we are right now
     curdir = os.getcwd()
-    #start the sanity/stupidity checks
+    # start the sanity/stupidity checks
     if not os.path.exists(basedir):
         print _("Directory of rpms must exist")
         serverStuff.Usage()
@@ -79,17 +77,29 @@ def main():
         print _("Directory of rpms must be a directory.")
         sys.exit(1)
         
-    #change to the basedir to work from w/i the path - for relative url paths
+    # change to the basedir to work from w/i the path - for relative url paths
     os.chdir(basedir)
     
-    #get the list of rpms
+    # get the list of rpms
     rpms=serverStuff.getfilelist('./', '.rpm', [], cmds['usesymlinks'])
-    
-    #and a few more sanity checks
-    if len(rpms) < 1:
-        print _("No rpms to look at. Exiting.")
-        sys.exit(1)
 
+    # some quick checks - we know we don't have ANY rpms - so, umm what do we
+    # do? - if we have a headers dir then maybe we already had some and its
+    # a now-empty repo - well, lets clean it up
+    # kill the hdrs, kill the header.info - write an empty one
+    if len(rpms) == 0:
+        if os.path.exists(headerdir):
+            hdrlist = serverStuff.getfilelist(headerdir, '.hdr', [], 0)
+            removeCurrentHeaders(headerdir, hdrlist)
+            removeHeaderInfo(headerinfo)
+            headerfd = open(headerinfo, "w")
+            headerfd.close()
+            sys.exit(0)
+        else:
+            print _('No rpms to work with and no header dir. Exiting.')
+            sys.exit(1)
+            
+    # depcheck if requested
     if cmds['checkdeps']:
         (error,msgs) = serverStuff.depchecktree(rpms)
         if error==1:
@@ -101,28 +111,25 @@ def main():
             print _("All dependencies resolved and no conflicts detected")
     
     if cmds['writehdrs']:
-        #if the headerdir exists and its a file then we're in deep crap
+        # if the headerdir exists and its a file then we're in deep crap
         if os.path.isfile(headerdir):
             print _("%s is a file") % (headerdir)
             sys.exit(1)
 
-        #if it doesn't exist then make the dir
+        # if it doesn't exist then make the dir
         if not os.path.exists(headerdir):
             os.mkdir(headerdir)
         # done with the sanity checks, on to the cleanups
+        
         # looks for a list of .hdr files and the header.info file
         hdrlist = serverStuff.getfilelist(headerdir, '.hdr', [], 0)
-
-        #removes both entirely 
-        for hdr in hdrlist:
-            os.unlink(hdr)
-        if os.path.exists(headerinfo):
-            os.unlink(headerinfo)
-
+        removeCurrentHeaders(headerdir, hdrlist)
+        removeHeaderInfo(headerinfo)
+        
         # generate the new headers
         rpminfo = genhdrs(rpms, headerdir, cmds)
 
-        #Write header.info file
+        # Write header.info file
         print _("\nWriting header.info file")
         headerfd = open(headerinfo, "w")
         for item in rpminfo.keys():
@@ -132,8 +139,28 @@ def main():
             headerfd.write(info)
         headerfd.close()
 
-    #take us home mr. data
+    # take us home mr. data
     os.chdir(curdir)
+
+def removeCurrentHeaders(headerdir, hdrlist):
+    """remove the headers before building the new ones"""
+    for hdr in hdrlist:
+        if os.path.exists(hdr):
+            try:
+                os.unlink(hdr)
+            except OSerror, e:
+                print _('Cannot delete file %s') % hdr
+        else:
+            print _('Odd header %s suddenly disappeared') % hdr
+
+def removeHeaderInfo(headerinfo):
+    """remove header.info file"""
+    if os.path.exists(headerinfo):
+        try:
+            os.unlink(headerinfo)
+        except OSerror, e:
+            print _('Cannot delete header.info - check perms') % hdr
+            
 
 def genhdrs(rpms,headerdir,cmds):
     rpminfo = {}
@@ -194,6 +221,8 @@ def genhdrs(rpms,headerdir,cmds):
     if not cmds['quiet']:
         print _("\n   Total: %d\n   Used: %d") %(numrpms, goodrpm)
     return rpminfo
+
+
 
 if __name__ == "__main__":
     main()
