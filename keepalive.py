@@ -122,8 +122,9 @@ class HTTPHandler(urllib2.HTTPHandler):
                 except socket.error, e:
                     r = None
                 else:
-                    r = h.getresponse()
-
+                    try: r = h.getresponse()
+                    except httplib.ResponseNotReady, e: r = None
+                    
                 if r is None or r.version == 9:
                     # httplib falls back to assuming HTTP 0.9 if it gets a
                     # bad header back.  This is most likely to happen if

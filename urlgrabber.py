@@ -2,6 +2,8 @@ import os.path
 import urlparse
 import time
 
+DEBUG=0
+
 try:
     from i18n import _
 except ImportError, msg:
@@ -26,6 +28,7 @@ except ImportError, msg:
 class URLGrabError(IOError):
     """
     URLGrabError error codes:
+      -1 - default retry code for retrygrab check functions
       0  - everything looks good (you should never see this)
       1  - malformed url
       2  - local file doesn't exist
@@ -33,6 +36,9 @@ class URLGrabError(IOError):
       4  - IOError on fetch
       5  - OSError on fetch
       6  - no content length header when we expected one
+
+    Negative codes are reserved for use by functions passed in to
+    retrygrab with checkfunc.
 
     You can use it like this:
       try: urlgrab(url)
@@ -115,6 +121,82 @@ def set_bandwidth(new_bandwidth):
     global _bandwidth
     _bandwidth = new_bandwidth
 
+
+def retrygrab(url, filename=None, copy_local=0, close_connection=0,
+              progress_obj=None, throttle=None, bandwidth=None,
+              numtries=3, retrycodes=[-1,2,4,5,6], checkfunc=None):
+    """a wrapper function for urlgrab that retries downloads
+
+    The args for retrygrab are the same as urlgrab except for numtries,
+    retrycodes, and checkfunc.  You should use keyword arguments for
+    both in case new args are added to urlgrab later.  If you use keyword
+    args (especially for the retrygrab-specific options) then retrygrab
+    will continue to be a drop-in replacement for urlgrab.  Otherwise,
+    things may break.
+
+    retrygrab exits just like urlgrab in either case.  Either it
+    returns the local filename or it raises an exception.  The
+    exception raised will be the one raised MOST RECENTLY by urlgrab.
+
+    retrygrab ONLY retries if URLGrabError is raised.  If urlgrab (or
+    checkfunc) raise some other exception, it will be passed up
+    immediately.
+
+    numtries
+       number of times to retry the grab before bailing
+
+    retrycodes
+       the errorcodes (values of e.errno) for which it should retry.
+       See the doc on URLGrabError for more details on this.
+
+    checkfunc
+
+       a function to do additional checks.  This defaults to None,
+       which means no additional checking.  The function should simply
+       return on a successful check.  It should raise URLGrabError on
+       and unsuccessful check.  Raising of any other exception will
+       be considered immediate failure and no retries will occur.
+
+       Negative error numbers are reserved for use by these passed in
+       functions.  By default, -1 results in a retry, but this can be
+       customized with retrycodes.
+
+       If you simply pass in a function, it will be given exactly one
+       argument: the local file name as returned by urlgrab.  If you
+       need to pass in other arguments,  you can do so like this:
+
+         checkfunc=(function, ('arg1', 2), {'kwarg': 3})
+
+       if the downloaded file as filename /tmp/stuff, then this will
+       result in this call:
+
+         function('/tmp/stuff', 'arg1', 2, kwarg=3)
+
+       NOTE: both the "args" tuple and "kwargs" dict must be present
+       if you use this syntax, but either (or both) can be empty.
+    """
+
+    tries = 0
+    if not checkfunc is None:
+        if callable(checkfunc):
+            func, args, kwargs = checkfunc, (), {}
+        else:
+            func, args, kwargs = checkfunc
+    else:
+        func = None
+
+    while 1:
+        tries = tries + 1
+        if DEBUG: print 'TRY #%i: %s' % (tries, url)
+        try:
+            fname = urlgrab(url, filename, copy_local, close_connection,
+                            progress_obj, throttle, bandwidth)
+            if not func is None: apply(func, (fname, )+args, kwargs)
+            if DEBUG: print 'RESULT = success (%s)' % fname
+            return fname
+        except URLGrabError, e:
+            if DEBUG: print 'EXCEPTION: %s' % e
+            if tries == numtries or (e.errno not in retrycodes): raise
 
 def urlgrab(url, filename=None, copy_local=0, close_connection=0,
             progress_obj=None, throttle=None, bandwidth=None):
@@ -356,26 +438,45 @@ def _speed_test():
 
     close_all()
 
-def retrygrab(url, filename=None, copy_local=0, close_connection=0, 
-              progress_obj=None, throttle=None, bandwidth=None, numtries=3, 
-              retrycodes=[2,4,5,6]):
-    """Exactly like urlgrab except it takes two more args - the number of times 
-       to retry(numtries) and the error codes where retries should be attempted(retrycodes)
-       Defaults are the same as urlgrab - numtries=3 and retrycodes = [2,4,5,6]"""
-    retry = 0
-    while retry <= numtries:
-        try:
-            returnfile = urlgrab(url, filename, copy_local, close_connection, progress_obj, throttle, bandwidth)
-        except URLGrabError, e:
-            if e.errno not in retrycodes:
-                raise
-            else:
-                retry = retry + 1
-        else:
-            return returnfile
-    raise
-       
-       
+def _retry_test():
+    import sys
+    try: url, filename = sys.argv[1:3]
+    except ValueError:
+        print 'usage:', sys.argv[0], \
+              '<url> <filename> [copy_local=0|1] [close_connection=0|1]'
+        sys.exit()
+
+    kwargs = {}
+    for a in sys.argv[3:]:
+        k, v = a.split('=', 1)
+        kwargs[k] = int(v)
+
+    try: from progress_meter import text_progress_meter
+    except ImportError, e: pass
+    else: kwargs['progress_obj'] = text_progress_meter()
+
+    global DEBUG
+    #DEBUG = 1
+    def cfunc(filename, hello, there='foo'):
+        print hello, there
+        import random
+        rnum = random.random()
+        if rnum < .5:
+            print 'forcing retry'
+            raise URLGrabError(-1, 'forcing retry')
+        if rnum < .75:
+            print 'forcing failure'
+            raise URLGrabError(-2, 'forcing immediate failure')
+        print 'success'
+        return
+        
+    close_all()
+    kwargs['checkfunc'] = (cfunc, ('hello',), {'there':'there'})
+    try: name = apply(retrygrab, (url, filename), kwargs)
+    except URLGrabError, e: print e
+    else: print 'LOCAL FILE:', name
+
 if __name__ == '__main__':
     _main_test()
     #_speed_test()
+    #_retry_test()
