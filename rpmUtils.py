@@ -185,7 +185,7 @@ class Header_Work(RPM_Base_Work):
             except IOError,e:
                 fd = open(header, 'r')
                 try:
-                    self.hdr = rpm.headerLoad(fd.read())
+                    h = rpm.headerLoad(fd.read())
                 except rpm.error, e:
                     errorlog(0,_('Damaged Header %s') % header)
                     h = None
