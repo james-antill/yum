@@ -62,7 +62,7 @@ exit 0
 %defattr(-, root, root)
 %doc README AUTHORS COPYING TODO INSTALL ChangeLog
 %config(noreplace) %{_sysconfdir}/yum.conf
-%config %{_sysconfdir}/cron.daily/yum.cron
+%config(noreplace) %{_sysconfdir}/cron.daily/yum.cron
 %config %{_sysconfdir}/init.d/%{name}
 %config %{_sysconfdir}/logrotate.d/%{name}
 %{_datadir}/yum/*
@@ -72,6 +72,9 @@ exit 0
 %{_mandir}/man*/*
 
 %changelog
+* Sat Jul 12 2003 Seth Vidal <skvidal@phy.duke.edu>
+- made yum.cron config(noreplace)
+
 * Sat Jun  7 2003 Seth Vidal <skvidal@phy.duke.edu>
 - add stubs to spec file for rebuilding easily with custom yum.conf and
 - yum.cron files
