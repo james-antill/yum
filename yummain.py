@@ -205,7 +205,7 @@ def main(args):
             clientStuff.GroupInfo = GroupInfo
             pkgaction.GroupInfo = GroupInfo
         else:
-            errorlog(1, 'No groups provided or accessible on any server.')
+            errorlog(0, 'No groups provided or accessible on any server.')
             errorlog(1, 'Exiting.')
             sys.exit(1)
     
