@@ -12,16 +12,27 @@
 # source function library
 . /etc/rc.d/init.d/functions
 
+lockfile=/var/lock/subsys/yum
+
 start() {
-	echo -n $"Starting yum service: "
-	touch /var/lock/subsys/yum && success || failure
+	echo -n $"Enabling nightly yum update: "
+	touch $lockfile && success || failure
+	retval=$?
 	echo
+	return $retval
 }
 
 stop() {
-	echo -n $"Stopping yum service: "
-	rm -f /var/lock/subsys/yum && success || failure
+	echo -n $"Disabling nightly yum update: "
+	rm -f $lockfile && success || failure
+	retval=$?
 	echo
+	return $retval
+}
+
+restart() {
+	stop
+	start
 }
 
 case "$1" in
@@ -31,28 +42,24 @@ case "$1" in
   stop) 
 	stop
 	;;
-  restart)
-	stop
-	start
+  restart|force-reload)
+	restart
 	;;
   reload)
 	;;
   condrestart)
-        if [ -f /var/lock/subsys/yum ]; then
-	    stop
-	    start
-	fi
+	[ ! -f $lockfile ] || restart
 	;;
   status)
-	if [ -f /var/lock/subsys/yum ]; then
+	if [ -f $lockfile ]; then
 		echo $"Nightly yum update is enabled."
+		exit 0
 	else
 		echo $"Nightly yum update is disabled."
+		exit 3
 	fi
 	;;
   *)
-	echo $"Usage: $0 {start|stop|status|restart|reload|condrestart}"
+	echo $"Usage: $0 {start|stop|status|restart|reload|force-reload|condrestart}"
 	exit 1
 esac
-
-exit 0
