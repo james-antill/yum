@@ -57,7 +57,6 @@ class nevral:
         else: 
             if l == 'in_rpm_db':
                 # we're in the rpmdb - get the header from there
-                ts = rpm.TransactionSet()
                 hindexes = ts.dbMatch('name', name)
                 for hdr in hindexes:
                     return hdr
@@ -183,7 +182,7 @@ class nevral:
         unresolvable = 0
         while CheckDeps==1 or (conflicts != 1 and unresolvable != 1 ):
             errors=[]
-            ts = rpm.TransactionSet('/')
+            tsfordeps = rpm.TransactionSet('/')
             for (name, arch) in self.NAkeys(): 
                 if self.state(name, arch) in ('u','ud','iu'):
                     log(4,'Updating: %s, %s' % (name, arch))
@@ -194,30 +193,30 @@ class nevral:
                         bestarch = archwork.bestarch(kernarchlist)
                         if arch == bestarch:
                             log(3, 'Found best kernel arch: %s' %(arch))
-                            ts.addInstall(pkghdr,(pkghdr,rpmloc),'i')
+                            tsfordeps.addInstall(pkghdr,(pkghdr,rpmloc),'i')
                             ((e, v, r, a, l, i), s)=self._get_data(name,arch)
                             self.add((name,e,v,r,arch,l,i),'i')
                         else:
                             log(3, 'Removing dumb kernel with silly arch %s' %(arch))
-                            ts.addInstall(pkghdr,(pkghdr,rpmloc),'a')
+                            tsfordeps.addInstall(pkghdr,(pkghdr,rpmloc),'a')
                             ((e,v,r,a,l,i),s)=self._get_data(name,arch)
                             self.add((name,e,v,r,arch,l,i),'a')
                     else:
-                        ts.addInstall(pkghdr,(pkghdr,rpmloc),'u')
+                        tsfordeps.addInstall(pkghdr,(pkghdr,rpmloc),'u')
                     
                 elif self.state(name,arch) == 'i':
                     log(4,'Installing: %s, %s' % (name, arch))
                     rpmloc = self.rpmlocation(name, arch)
                     pkghdr = self.getHeader(name, arch)
-                    ts.addInstall(pkghdr,(pkghdr,rpmloc),'i')
+                    tsfordeps.addInstall(pkghdr,(pkghdr,rpmloc),'i')
                 elif self.state(name,arch) == 'a':
                     rpmloc = self.rpmlocation(name, arch)
                     pkghdr = self.getHeader(name, arch)
-                    ts.addInstall(pkghdr,(pkghdr,rpmloc),'a')
+                    tsfordeps.addInstall(pkghdr,(pkghdr,rpmloc),'a')
                 elif self.state(name,arch) == 'e' or self.state(name,arch) == 'ed':
                     log(4,'Erasing: %s-%s' % (name,arch))
-                    ts.addErase(name)
-            deps=ts.check()
+                    tsfordeps.addErase(name)
+            deps=tsfordeps.check()
             CheckDeps = 0
             if not deps:
                 return (0, 'Success - deps resolved')
@@ -261,7 +260,7 @@ class nevral:
                         else:
                             # this is horribly ugly but I have to find some way to see if what it needed is provided
                             # by what we are removing - if it is then remove it -otherwise its a real dep problem - move along
-                            whatprovides = ts.dbMatch('provides', reqname)
+                            whatprovides = tsfordeps.dbMatch('provides', reqname)
                             if whatprovides:
                                 for provhdr in whatprovides:
                                     if self.state(provhdr[rpm.RPMTAG_NAME],provhdr[rpm.RPMTAG_ARCH]) in ('e','ed'):
@@ -306,6 +305,6 @@ class nevral:
                         errors.append('conflict between %s and %s' % (name, reqname))
                         conflicts=1
             log(4, 'whee dep loop')
-            del ts
+            del tsfordeps
             if len(errors) > 0:
                 return(1, errors)

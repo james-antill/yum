@@ -21,6 +21,7 @@ import sys
 import gzip
 import archwork
 import fnmatch
+import pkgaction
 
 def stripENVRA(foo):
     archIndex = string.rfind(foo, '.')
@@ -134,7 +135,6 @@ def openrpmdb(option=0, dbpath=None):
 
 def rpmdbNevralLoad(nevral):
     rpmdbdict = {}
-    ts = rpm.TransactionSet()
     serverid = 'db'
     rpmloc = 'in_rpm_db'
     hdrs = ts.dbMatch()
@@ -568,7 +568,6 @@ def download_headers(HeaderInfo, nulist):
             urlgrab(HeaderInfo.remoteHdrUrl(name, arch), HeaderInfo.localHdrPath(name, arch), 'nohook')
 
 def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmDBInfo, obsdict):
-    import pkgaction
     from yummain import usage
     if conf.uid != 0:
         if cmds[0] in ['install','update','clean','upgrade','erase']:

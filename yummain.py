@@ -24,6 +24,7 @@ import pkgaction
 import callback
 import time
 import random
+import rpm
 from logger import Logger
 from config import yumconf
 
@@ -132,7 +133,13 @@ def main(args):
     clientStuff.conf=conf
     pkgaction.conf=conf
     callback.conf=conf
-
+    
+    # get our ts together that we'll use all over the place
+    ts = rpm.TransactionSet('/')
+    clientStuff.ts = ts
+    pkgaction.ts = ts
+    nevral.ts = ts
+    
     # make remote nevral class
     HeaderInfo = nevral.nevral()
     
@@ -215,6 +222,10 @@ def main(args):
         if clientStuff.userconfirm():
             errorlog(1, 'Exiting on user command.')
             sys.exit(1)
+    
+    
+    #FIXME = this is dumb and doesn't have any meaning anymore now that the db 
+    # is meaningless - not sure how to get a read-only connection the rpmdb now, though
     
     if conf.uid==0:
         dbfin = clientStuff.openrpmdb(1, '/')

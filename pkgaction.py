@@ -226,7 +226,9 @@ def whatprovides(usereq, nulist, nevral, localrpmdb):
     if localrpmdb == 0:
         for (name, arch) in nulist:
             hdr = nevral.getHeader(name, arch)
-            fullprovideslist = hdr[rpm.RPMTAG_PROVIDES] + hdr[rpm.RPMTAG_FILENAMES]
+            fullprovideslist = hdr[rpm.RPMTAG_PROVIDES]
+            if hdr[rpm.RPMTAG_FILENAMES] != None:
+                fullprovideslist = fullprovideslist + hdr[rpm.RPMTAG_FILENAMES]
             if hdr[rpm.RPMTAG_DIRNAMES] != None:
                 fullprovideslist = fullprovideslist + hdr[rpm.RPMTAG_DIRNAMES]
             for req in usereq:
