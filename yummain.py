@@ -33,7 +33,7 @@ from logger import Logger
 from config import yumconf
 from i18n import _
 
-__version__='2.0'
+__version__='2.0.1'
 
 def parseCmdArgs(args):
    
@@ -73,6 +73,8 @@ def parseCmdArgs(args):
             sys.exit(1)
         # who are we:
         conf.uid=os.geteuid()
+        # version of yum
+        conf.yumversion = __version__
         # we'd like to have a log object now
         log=Logger(threshold=conf.debuglevel, file_object=sys.stdout)
         # syslog-style log

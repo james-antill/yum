@@ -68,6 +68,7 @@ class yumconf:
         self.errorlevel = 2
         self.cache = 0
         self.uid = 0
+        self.yumversion = 'unversioned'
         self.commands = None
         self.exactarch = 0
         self.overwrite_groups = 0
