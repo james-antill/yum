@@ -39,11 +39,15 @@ def installpkgs(tsnevral, nulist, userlist, hinevral, rpmnevral, exitoninstalled
             myname=None
             foundit=0
             if n.find('.') != -1:
-                newN, a = n.split('.')
-                if (newN, a) in nulist or rpmnevral.exists(newN, a):
-                    log(3, "Found a specified arch: %s, %s" % (newN, a))
-                    myarch = a
-                    myname = newN       
+                try:
+                    newN, a = n.split('.')
+                except ValueError:
+                    pass
+                else:
+                    if (newN, a) in nulist or rpmnevral.exists(newN, a):
+                        log(3, "Found a specified arch: %s, %s" % (newN, a))
+                        myarch = a
+                        myname = newN       
             for (name,arch) in nulist:
                 if myname is not None:
                     n = myname
@@ -116,13 +120,17 @@ def updatepkgs(tsnevral, hinevral, rpmnevral, nulist, uplist, userlist, exitonin
         pkgfound = 0
         # check for a name.arch specification in the userlist
         if n.find('.') != -1:
-            name, arch = n.split('.')
-            if (name, arch) in uplist:
-                log(3, "Found a specified arch: %s, %s" % (name, arch))
-                pkgfound = 1
-                ((e, v, r, a, l, i), s) = hinevral._get_data(name, arch)
-                tsnevral.add((name,e,v,r,a,l,i),'u')
-                continue
+            try:
+                name, arch = n.split('.')
+            except ValueError:
+                pass
+            else:
+                if (name, arch) in uplist:
+                    log(3, "Found a specified arch: %s, %s" % (name, arch))
+                    pkgfound = 1
+                    ((e, v, r, a, l, i), s) = hinevral._get_data(name, arch)
+                    tsnevral.add((name,e,v,r,a,l,i),'u')
+                    continue
                         
         for (name, arch) in uplist:
             if n == name or fnmatch.fnmatch(name, n):
@@ -185,20 +193,24 @@ def upgradepkgs(tsnevral, hinevral, rpmnevral, nulist, uplist, obsoleted, obsole
         pkgfound = 0
         # check for a name.arch specification in the userlist
         if n.find('.') != -1:
-            myname, myarch = n.split('.')
-            if (myname, myarch) in oulist:
-                log(3, "Found a specified arch: %s, %s" % (myname, myarch))
-                pkgfound = 1
-                if myname in obsoleted.keys():
-                    for (obsname, obsarch) in obsoleted[myname]:
-                        log(4, '%s obsoleted by %s' % (myname, obsname))
-                        ((e, v, r, a, l, i), s) = hinevral._get_data(obsname, obsarch)
-                        tsnevral.add((obsname,e,v,r,a,l,i),'u')
-                else:
-                    log(4,"Updating: %s.%s" % (myname, myarch))
-                    ((e, v, r, a, l, i), s)=hinevral._get_data(myname, myarch)
-                    tsnevral.add((myname,e,v,r,a,l,i),'u')
-                continue
+            try:
+                myname, myarch = n.split('.')
+            except ValueError:
+                pass
+            else:
+                if (myname, myarch) in oulist:
+                    log(3, "Found a specified arch: %s, %s" % (myname, myarch))
+                    pkgfound = 1
+                    if myname in obsoleted.keys():
+                        for (obsname, obsarch) in obsoleted[myname]:
+                            log(4, '%s obsoleted by %s' % (myname, obsname))
+                            ((e, v, r, a, l, i), s) = hinevral._get_data(obsname, obsarch)
+                            tsnevral.add((obsname,e,v,r,a,l,i),'u')
+                    else:
+                        log(4,"Updating: %s.%s" % (myname, myarch))
+                        ((e, v, r, a, l, i), s)=hinevral._get_data(myname, myarch)
+                        tsnevral.add((myname,e,v,r,a,l,i),'u')
+                    continue
         
         for (name, arch) in oulist:
             if n == name or fnmatch.fnmatch(name, n):
@@ -212,7 +224,7 @@ def upgradepkgs(tsnevral, hinevral, rpmnevral, nulist, uplist, obsoleted, obsole
                 else:
                     log(4,"Updating: %s" % name)
                     ((e, v, r, a, l, i), s)=hinevral._get_data(name, arch)
-                    tsnevral.add((name,e,v,r,a,l,i),'u')
+                     tsnevral.add((name,e,v,r,a,l,i),'u')
         if not pkgfound:
             if rpmnevral.exists(n):
                 errorlog(1,"No Upgrades available for %s." % (n))
@@ -236,13 +248,17 @@ def erasepkgs(tsnevral,rpmnevral,userlist, exitoninstalled):
         foundit = 0
 
         if n.find('.') != -1:
-            myname, myarch = n.split('.')
-            if rpmnevral.exists(myname, myarch):
-                foundit = 1
-                log(4,"Erasing %s.%s" % (myname, myarch))
-                ((e, v, r, a, l, i), s)=rpmnevral._get_data(myname, myarch)
-                tsnevral.add((myname,e,v,r,myarch,l,i),'e')
-                continue
+            try:
+                myname, myarch = n.split('.')
+            except ValueError:
+                pass
+            else:
+                if rpmnevral.exists(myname, myarch):
+                    foundit = 1
+                    log(4,"Erasing %s.%s" % (myname, myarch))
+                    ((e, v, r, a, l, i), s)=rpmnevral._get_data(myname, myarch)
+                    tsnevral.add((myname,e,v,r,myarch,l,i),'e')
+                    continue
              
         for (name,arch) in rpmnevral.NAkeys():
             if n == name or fnmatch.fnmatch(name, n):
