@@ -1009,6 +1009,7 @@ def create_final_ts(tsInfo):
                 elif rc == 4:
                     errorlog(0, _('Error: Unsigned Package %s') % rpmloc)
                     errorlog(0, _('Error: You may want to run yum clean or remove the file: \n %s') % rpmloc)
+                    errotlog(0, _('Error: You may need to disable gpg checking to install this package\n'))
                     sys.exit(1)
             if state == 'i':
                 tsfin.addInstall(pkghdr, (pkghdr, rpmloc), 'i')
