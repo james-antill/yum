@@ -1154,6 +1154,8 @@ def grab(serverID, url, filename=None, nofail=0, copy_local=0,
 
     We do look at retrycodes here to see if we should return or failover.
     On fail we will raise the last exception that we got."""
+    if not conf.keepalive:
+        urlgrabber.disable_keepalive()
     
     if progress_obj == 'normal':
         progress_obj = conf.progress_obj

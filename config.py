@@ -83,6 +83,7 @@ class yumconf:
         self.bandwidth = None
         self.throttle = None
         self.retries = 6
+        self.keepalive = 1
         self.progress_obj = progress_meter.text_progress_meter(fo=sys.stdout)
         self.installroot = '/'
         self.installonlypkgs = ['kernel', 'kernel-bigmem', 'kernel-enterprise',
@@ -117,6 +118,8 @@ class yumconf:
             self.bandwidth = self._getoption('main','bandwidth')
         if self._getoption('main', 'throttle') != None:
             self.throttle = self._getoption('main','throttle')
+        if self._getoption('main', 'keepalive') != None:
+            self.keepalive = self._getoption('main','keepalive')
         if self._getoption('main', 'retries') != None:
             self.retries = self.cfg.getint('main','retries')
         if self._getoption('main', 'installroot') != None:

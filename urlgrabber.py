@@ -45,6 +45,13 @@ if have_urllib2:
     opener = apply(urllib2.build_opener, special_handlers)
     urllib2.install_opener(opener)
 
+def disable_keepalive():
+    if keepalive_handler in special_handlers:
+        special_handlers.remove(keepalive_handler)
+        
+    if keepalive_handler is not None:
+        keepalive_handler = None
+
 def set_user_agent(new_user_agent):
     if have_urllib2: addheaders = opener.addheaders
     else:            addheaders = urllib._urlopener.addheaders

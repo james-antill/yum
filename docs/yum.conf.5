@@ -75,6 +75,11 @@ rpm transaction is run. default is 1 (to perform the check)
 Set the number of times any attempt to retrieve a file should retry before 
 returning an error. Setting this to 0 makes it try forever. Default to 6.
 
+.IP \fBkeepalive\fR
+Enable or disable http keepalive support. The default is 1(enable). If you
+are behind a proxy cache and you're experiencing lots of timeouts or
+transfer failures try setting this to 0.
+
 .IP \fBkernelpkgnames \fR
 list of package names that are kernels - this is really only here for the
 kernel updating portion - this should be removed out in 2.1 series.
