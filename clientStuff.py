@@ -898,8 +898,13 @@ def returnCacheDBHeaders(nulist):
         # this is what jbj said to do:
         for lock in ['__db.001', '__db.002', '__db.003']:
             if os.path.exists(conf.cachedb + '/' + lock):
-                os.unlink(conf.cachedb + '/' + lock)
-                
+                try:
+                    os.unlink(conf.cachedb + '/' + lock)
+                except OSError, e:
+                    # we got an error deleting these, let's just move along, shall we?
+                    log(6, 'Error deleting cachedb lockfile: %s' % e)
+                    return returndict
+                    
         cachedb = rpmUtils.Rpm_Ts_Work(dbPath=conf.cachedb)
         cachedb.setVSFlags(-1)
     
