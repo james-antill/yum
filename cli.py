@@ -25,8 +25,8 @@ import random
 import fcntl
 import fnmatch
 import re
-import output
 
+import output
 from urlgrabber.progress import TextMeter
 import yum
 import yum.Errors
@@ -42,7 +42,7 @@ import callback
 import urlgrabber
 import urlgrabber.grabber
 
-__version__ = '2.1.13'
+__version__ = '2.2.0'
 
 
 class YumBaseCli(yum.YumBase, output.YumOutput):
