@@ -16,7 +16,7 @@ yum \- Yellowdog Updater Modified
 .br 
 .I \fR * check-update
 .br 
-.I \fR * upgrade
+.I \fR * upgrade [package1] [package2] [\&.\&.\&.]
 .br 
 .I \fR * remove [package1] [package2] [\&.\&.\&.]
 .br 
@@ -60,7 +60,10 @@ to be updated in list format. Returns 0 and no packages are available for
 update.
 .IP
 .IP "\fBupgrade\fP"
-takes no arguments, this performs a complete upgrade of the system \- good for distro\-version changes as it includes packages obsoleting other packages in its updating calculations.
+Can take packages as arguments, upgrade is just like update except that it
+includes package obsoletes in its calculations - this makes it better for
+distro\-version changes, for example: upgrading from somelinux 8.0 to
+somelinux 9.
 .IP 
 .IP "\fBremove\fP"
 is used to remove the specified packages from the system
