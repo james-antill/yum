@@ -85,5 +85,3 @@ def availablearchs(nevral, name):
         if nevral.exists(name, arch):
             finalarchs.append(arch)
     return finalarchs
-
-

@@ -130,7 +130,7 @@ def main(args):
 
     if cmds[0] not in ('update', 'upgrade', 'install','info', 'list', 'erase',\
                        'grouplist','groupupdate','groupinstall','clean', \
-                       'remove', 'provides', 'check-update'):
+                       'remove', 'provides', 'check-update', 'search'):
         usage()
     process = cmds[0]
     
@@ -202,10 +202,14 @@ def main(args):
     ################################################################################
     log(2, _('Finding updated packages'))
     (uplist, newlist, nulist) = clientStuff.getupdatedhdrlist(HeaderInfo, rpmDBInfo)
+    
     if process != 'clean':
         log(2, _('Downloading needed headers'))
         clientStuff.download_headers(HeaderInfo, nulist)
-        
+    # once we've gone through and found out which headers we know about
+    # generate the lists again so there is no confusion about what is available
+    (uplist, newlist, nulist) = clientStuff.getupdatedhdrlist(HeaderInfo, rpmDBInfo)
+    
     if process in ['upgrade', 'groupupgrade']:
         log(2, _('Finding obsoleted packages'))
         obsoleting, obsoleted = clientStuff.returnObsoletes(HeaderInfo, rpmDBInfo, nulist)
@@ -336,7 +340,7 @@ def main(args):
 def usage():
     print _("""
     Usage:  yum [options] <update | upgrade | install | info | remove | list |
-            clean | provides | check-update | groupinstall | groupupdate |
+            clean | provides | search | check-update | groupinstall | groupupdate |
             grouplist >
                 
          Options:

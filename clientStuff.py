@@ -745,7 +745,8 @@ def get_package_info_from_servers(serveridlist, HeaderInfo):
                 os.mkdir(localhdrs)
             log(3, 'Getting header.info from server')
             try:
-                headerinfofn = grab(serverid, serverheader, localheaderinfo, copy_local=1)
+                headerinfofn = grab(serverid, serverheader, localheaderinfo, copy_local=1,
+                                    progress_obj=None)
             except URLGrabError, e:
                 errorlog(0, 'Error getting file %s' % serverheader)
                 errorlog(0, '%s' % e)
@@ -786,7 +787,9 @@ def download_headers(HeaderInfo, nulist):
                         errorlog(1, 'Please ask your sysadmin to update the headers on this system.')
                     else:
                         errorlog(1, 'Please run yum in non-caching mode to correct this header.')
-                    sys.exit(1)
+                    errorlog(1, 'Deleting entry from Available packages')
+                    HeaderInfo.delete(name, arch)
+                    #sys.exit(1)
                 else:
                     os.unlink(LocalHeaderFile)
             else:
@@ -804,7 +807,9 @@ def download_headers(HeaderInfo, nulist):
             HeaderInfo.setlocalhdrpath(name, arch, hdrfn)
         else:
             errorlog(1, 'Cannot download %s in caching only mode or when running as non-root user.' % RemoteHeaderFile)
-            sys.exit(1)
+            errorlog(1, 'Deleting entry from Available packages')
+            HeaderInfo.delete(name, arch)
+            #sys.exit(1)
         current = current + 1
     close_all()
                 
@@ -829,16 +834,29 @@ def take_action(cmds, nulist, uplist, newlist, obsoleting, tsInfo, HeaderInfo, r
                 pkgaction.installpkgs(tsInfo, nulist, cmds, HeaderInfo, rpmDBInfo, 1)
                 
     elif basecmd == 'provides':
+        taglist = ['filenames', 'dirnames', 'provides']
         if len(cmds) == 0:
             errorlog(0, _('Need a provides to match'))
             usage()
         else:
             log(2, _('Looking in available packages for a providing package'))
-            pkgaction.whatprovides(cmds, nulist, HeaderInfo,0)
+            pkgaction.search(cmds, nulist, HeaderInfo, 0, taglist)
             log(2, _('Looking in installed packages for a providing package'))
-            pkgaction.whatprovides(cmds, nulist, rpmDBInfo,1)
+            pkgaction.search(cmds, nulist, rpmDBInfo, 1, taglist)
         sys.exit(0)
     
+    elif basecmd == 'search':
+        taglist = ['description', 'summary', 'packager', 'name']
+        if len(cmds) == 0:
+            errorlog(0, _('Need an item to search'))
+            usage()
+        else:
+            log(2, _('Looking in available packages for a providing package'))
+            pkgaction.search(cmds, nulist, HeaderInfo, 0, taglist)
+            log(2, _('Looking in installed packages for a providing package'))
+            pkgaction.search(cmds, nulist, rpmDBInfo, 1, taglist)
+        sys.exit(0)
+
     elif basecmd == 'update':
         if len(cmds) == 0:
             pkgaction.updatepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, 'all', 0)

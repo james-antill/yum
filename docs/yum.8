@@ -80,6 +80,12 @@ can be used to find out which package provides some feature
 or file. Just use a specific name or a file-glob-syntax wildcards to list
 the packages available or installed that provide that feature or file\&.
 .IP 
+.IP "\fBsearch\fP"
+can be used to find any packages matching a string in the description, summary,
+packager and package name fields of an rpm. Useful for finding a package
+you do not know by name but know by some word related to it. Takes the same file
+glob wildcards as provides.
+.IP 
 .IP "\fBinfo\fP"
 can be used to list a description and summary information about available
 packages; takes the same arguments as in the \fIList Options\fP
@@ -191,4 +197,4 @@ Seth Vidal <skvidal@phy.duke.edu>
 .SH "BUGS"
 There of course aren't any bugs, but if you find any, they should be sent
 to the mailing list: yum@dulug.duke.edu
-.fi 
+.fi
