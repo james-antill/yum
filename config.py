@@ -81,6 +81,7 @@ class yumconf:
         releasever = None
         self.bandwidth = None
         self.throttle = None
+        self.retries = 3
         self.installroot = '/'
       
         if self._getoption('main','cachedir') != None:
@@ -111,6 +112,8 @@ class yumconf:
             self.bandwidth = self._getoption('main','bandwidth')
         if self._getoption('main', 'throttle') != None:
             self.throttle = self._getoption('main','throttle')
+        if self._getoption('main', 'retries') != None:
+            self.retries = self.cfg.getint('main','retries')
         if self._getoption('main', 'installroot') != None:
             self.throttle = self._getoption('main','installroot')
 

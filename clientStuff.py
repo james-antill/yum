@@ -1005,7 +1005,7 @@ def grab(serverID, url, filename=None, nofail=0, copy_local=0,
             finalurl = urlparse.urlunparse((scheme, host, path, parm, query, frag))
             return retrygrab(finalurl, filename, copy_local,
                              close_connection, progress_obj, throttle,
-                             bandwidth, numtries, retrycodes, checkfunc)
+                             bandwidth, conf.retries, retrycodes, checkfunc)
             # What?  We were successful?
         except URLGrabError, e:
             if e.errno in retrycodes:

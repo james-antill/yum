@@ -71,6 +71,9 @@ package you have installed - defaults to redhat-release.
 set this to 0 to disable the checking for sufficient diskspace before the
 rpm transaction is run. default is 1 (to perform the check)
 
+.IP \fBretries\fR
+Set the number of times any attempt to retrieve a file should retry before 
+returning an error. Setting this to 0 makes it try forever. Default to 3.
 
 .SH "[server] options"
 .LP 
