@@ -871,7 +871,7 @@ def returnCompsHeaders():
                 pass
         if fd2:
             try:
-                rpm.mergeHeaderListFromFD(hdrlist, fd, 1000004)
+                rpm.mergeHeaderListFromFD(hdrlist, fd2, 1000004)
             except rpm.error:
                 pass
 
@@ -879,6 +879,7 @@ def returnCompsHeaders():
         del fd2
         
         for hdr in hdrlist:
+            hdr.fullFileList()
             hdrobj = rpmUtils.Header_Work(hdr)
             (n,e,v,r,a) = hdrobj.nevra()
             e = hdrobj.fixedEpoch()
