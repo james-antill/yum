@@ -34,7 +34,8 @@ yum-arch is run in one of two ways:
 
 
 
-Theory of operation/use:Yum works by providing the headers of all the rpm packages in any system
+Theory of operation/use:
+Yum works by providing the headers of all the rpm packages in any system
 repository. These headers are stored on the webserver in a subdir of the 
 top level of the repository. The client downloads all of the headers of 
 the packages it doesn't have installed or of packages that have been updated.
@@ -44,4 +45,7 @@ performs the transaction.
 
 Multiple repositories - explanation of how it came out/why.
 
-Explanation of why not apt-rpm
+More Docs:
+http://www.phy.duke.edu/~rgb/General/yum_HOWTO/yum_HOWTO/
+
+
