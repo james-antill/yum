@@ -849,8 +849,6 @@ def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmD
 
 def create_final_ts(tsInfo):
     # download the pkgs to the local paths and add them to final transaction set
-    # FIXME plug sigchecking back in here both md5 and gpg
-    # make this work so we don't end up sigchecking twice
     tsfin = rpm.TransactionSet('/')
     for (name, arch) in tsInfo.NAkeys():
         pkghdr = tsInfo.getHeader(name, arch)

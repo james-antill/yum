@@ -56,8 +56,8 @@ class yumconf:
         self.debuglevel = 2
         self.logfile = '/var/log/yum.log'
         self.pkgpolicy = 'newest'
-        self.gpghome = '/root/.gnupg'
-        self.gpgkeyring = None
+        #self.gpghome = '/root/.gnupg'
+        #self.gpgkeyring = None
         self.assumeyes = 0
         self.errorlevel = 2
         self.cache = 0
@@ -79,10 +79,10 @@ class yumconf:
             self.assumeyes=self.cfg.getboolean('main', 'assumeyes')
         if self._getoption('main','errorlevel') != None:
             self.errorlevel=self._getoption('main', 'errorlevel')
-        if self._getoption('main','gpghome') != None:
-            self.gpghome=self._getoption('main', 'gpghome')
-        if self._getoption('main','gpgkeyring') != None:
-            self.gpgkeyring=self._getoption('main', 'gpgkeyring')
+        #if self._getoption('main','gpghome') != None:
+        #    self.gpghome=self._getoption('main', 'gpghome')
+        #if self._getoption('main','gpgkeyring') != None:
+        #    self.gpgkeyring=self._getoption('main', 'gpgkeyring')
         if self._getoption('main','commands') != None:
             self.commands=string.split(self._getoption('main', 'commands'),' ')
         if self._getoption('main','exactarch') != None:
