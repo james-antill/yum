@@ -208,7 +208,7 @@ class yumconf:
         else:
             hdr = idx.next()
             releasever = hdr['version']
-        del hdr
+            del hdr
         del idx
         del ts
         return releasever
