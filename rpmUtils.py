@@ -171,7 +171,7 @@ class RPM_Work(RPM_Base_Work):
         os.close(fd)
     
 
-class RPM_DB_Work():
+class RPM_DB_Work:
     """ This should operate on groups of headers/matches/etc in the rpmdb - ideally it will 
     operate with a list of the Base objects above, so I can refer to any one object there
     not sure the best way to do this yet, more thinking involved"""
