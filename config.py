@@ -120,16 +120,21 @@ class yumconf:
         if self._getoption('main','commands') != None:
             self.commands = self._getoption('main', 'commands')
             self.commands = self._doreplace(self.commands)
-            self.commands = string.split(self.commands,' ')
+            self.commands = self.commands.split(' ')
 
         if len(self.cfg.sections()) > 1:
             for section in self.cfg.sections(): # loop through the list of sections
                 if section != 'main': # must be a serverid
-                    name = self._getoption(section, 'name')
-                    urls = self._getoption(section, 'baseurl')
-                    urls = self._doreplace(urls)
-                    urls = self.parseList(urls)
-                    if name != None and len(urls) > 0:
+                    if self._getoption(section, 'baseurl') != None:
+                        name = self._getoption(section, 'name')
+                        urls = self._getoption(section, 'baseurl')
+                        urls = self._doreplace(urls)
+                        urls = self.parseList(urls)
+                    else:
+                        name = None
+                        urls = []
+                        
+                    if name != None and len(urls) > 0 and urls[0] != None:
                         self.servers.append(section)
                         name = self._doreplace(name)
                         self.servername[section] = name
@@ -245,7 +250,10 @@ class yumconf:
         return yumvar
         
     def _doreplace(self, string):
-        """ do the replacement of yumvar, release, arch and basearch on any string passed to it"""
+        """ do the replacement of yumvar, release, arch and basearch on any 
+            string passed to it"""
+        if string is None:
+            return string
         basearch_reg = re.compile('\$basearch')
         arch_reg = re.compile('\$arch')
         releasever_reg = re.compile('\$releasever')

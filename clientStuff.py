@@ -472,28 +472,35 @@ def printactions(i_list, u_list, e_list, ud_list, ed_list):
 
 def filelogactions(i_list, u_list, e_list, ud_list, ed_list):
     i_log = 'Installed: '
+    ud_log = 'Dep Installed: '
     u_log = 'Updated: '
     e_log = 'Erased: '
         
     for (name, arch) in i_list:
         filelog(1, i_log + name + '.' + arch)
-    for (name, arch) in u_list+ud_list:
+    for (name, arch) in ud_list:
         filelog(1, u_log + name + '.' + arch)
+    for (name, arch) in u_list:
+        filelog(1, ud_log + name + '.' + arch)
     for (name, arch) in e_list+ed_list:
         filelog(1, e_log + name + '.' + arch)
         
 
 def shortlogactions(i_list, u_list, e_list, ud_list, ed_list):
     i_log = 'Installed: '
+    ud_log = 'Dep Installed: '
     u_log = 'Updated: '
     e_log = 'Erased: '
     
     for (name, arch) in i_list:
-        i_log=i_log + ' ' + name + '.' + arch
-    for (name, arch) in u_list+ud_list:
-        u_log=u_log + ' ' + name + '.' + arch
+        i_log = i_log + ' ' + name + '.' + arch
+    for (name, arch) in ud_list:
+        ud_log = ud_log + ' ' + name + '.' + arch
+    for (name, arch) in u_list:
+        u_log = u_log + ' ' + name + '.' + arch
     for (name, arch) in e_list+ed_list:
-        e_log=e_log + ' ' + name + '.' + arch
+        e_log = e_log + ' ' + name + '.' + arch
+
     if len(i_list) > 0:
         log(1, i_log)
     if len(u_list+ud_list) > 0:
