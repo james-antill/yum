@@ -200,7 +200,7 @@ def main(args):
             for serverid in servers_with_groups:
                 log(4, 'Adding Group from %s' % serverid)
                 GroupInfo.add(conf.localGroups(serverid))
-        if GroupInfo.compscount > 1:
+        if GroupInfo.compscount > 0:
             GroupInfo.compileGroups()
             clientStuff.GroupInfo = GroupInfo
             pkgaction.GroupInfo = GroupInfo
