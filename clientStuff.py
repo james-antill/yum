@@ -416,7 +416,7 @@ def bestversion(nevral, name):
         elif rc > 0:
             pass
     (best_e, best_v, best_r) = nevral.evr(name, currentarch)
-    log(3, 'Best version for %s is %s:%s-%s' % (name, best_e, best_v, best_r))
+    log(3, _('Best version for %s is %s:%s-%s') % (name, best_e, best_v, best_r))
     
     for arch in archs:
         rc = rpmUtils.compareEVR(nevral.evr(name, arch), (best_e, best_v, best_r))
@@ -506,7 +506,7 @@ def printactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
             log(2, _('[deps: %s]') % pkgstring)
             
     if len(ed_list) > 0:
-        log(2, 'I will erase these to satisfy the dependencies:')
+        log(2, _('I will erase these to satisfy the dependencies:'))
         for pkg in ed_list:
             (name, arch) = pkg
             (e, v, r) = nevral.evr(name, arch)
@@ -517,10 +517,10 @@ def printactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
             log(2, _('[deps: %s]') % pkgstring)
 
 def filelogactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
-    i_log = 'Installed: '
-    ud_log = 'Dep Installed: '
-    u_log = 'Updated: '
-    e_log = 'Erased: '
+    i_log = _('Installed: ')
+    ud_log = _('Dep Installed: ')
+    u_log = _('Updated: ')
+    e_log = _('Erased: ')
         
     for (name, arch) in i_list:
         (e, v, r) = nevral.evr(name, arch)
@@ -556,10 +556,10 @@ def filelogactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
         
 
 def shortlogactions(i_list, u_list, e_list, ud_list, ed_list, nevral):
-    i_log = 'Installed: '
-    ud_log = 'Dep Installed: '
-    u_log = 'Updated: '
-    e_log = 'Erased: '
+    i_log = _('Installed: ')
+    ud_log = _('Dep Installed: ')
+    u_log = _('Updated: ')
+    e_log = _('Erased: ')
     
     for (name, arch) in i_list:
         (e, v, r) = nevral.evr(name, arch)
@@ -685,14 +685,14 @@ def clean_up_old_headers(rpmDBInfo, HeaderInfo):
                 try:
                     os.unlink(hdrfn)
                 except OSError, e:
-                    errorlog(2, 'Attempt to delete a missing file %s - ignoring.' % hdrfn)
+                    errorlog(2, _('Attempt to delete a missing file %s - ignoring.') % hdrfn)
         if not HeaderInfo.exists(n, a):
             # if its not in the HeaderInfo nevral anymore just kill it
             log(5, 'Deleting Header %s' % hdrfn)
             try:
                 os.unlink(hdrfn)
             except OSError, e:
-                errorlog(2, 'Attempt to delete a missing file %s - ignoring.' % hdrfn)
+                errorlog(2, _('Attempt to delete a missing file %s - ignoring.') % hdrfn)
             
 
 def printtime():
@@ -708,17 +708,17 @@ def get_groups_from_servers(serveridlist):
         remotegroupfile = conf.remoteGroups(serverid)
         localgroupfile = conf.localGroups(serverid)
         if not conf.cache:
-            log(3, 'getting groups from server: %s' % serverid)
+            log(3, _('getting groups from server: %s') % serverid)
             try:
                 localgroupfile = grab(serverid, remotegroupfile, localgroupfile, nofail=1, copy_local=1)
             except URLGrabError, e:
-                log(3, 'Error getting file %s' % remotegroupfile)
+                log(3, _('Error getting file %s') % remotegroupfile)
                 log(3, '%s' % e)
         else:
             if os.path.exists(localgroupfile):
-                log(2, 'using cached groups from server: %s' % serverid)
+                log(2, _('using cached groups from server: %s') % serverid)
         if os.path.exists(localgroupfile):
-            log(3, 'Got a file - yay')
+            log(3, _('Got a file - yay'))
             validservers.append(serverid)
     return validservers
         
@@ -726,13 +726,13 @@ def get_package_info_from_servers(serveridlist, HeaderInfo):
     """gets header.info from each server if it can, checks it, if it can, then
        builds the list of available pkgs from there by handing each headerinfofn
        to HeaderInfoNevralLoad()"""
-    log(2, 'Gathering header information file(s) from server(s)')
+    log(2, _('Gathering header information file(s) from server(s)'))
     for serverid in serveridlist:
         servername = conf.servername[serverid]
         serverheader = conf.remoteHeader(serverid)
         servercache = conf.servercache[serverid]
-        log(2, 'Server: %s' % (servername))
-        log(4, 'CacheDir: %s' % (servercache))
+        log(2, _('Server: %s') % (servername))
+        log(4, _('CacheDir: %s') % (servercache))
         localpkgs = conf.serverpkgdir[serverid]
         localhdrs = conf.serverhdrdir[serverid]
         localheaderinfo = conf.localHeader(serverid)
@@ -743,24 +743,24 @@ def get_package_info_from_servers(serveridlist, HeaderInfo):
                 os.mkdir(localpkgs)
             if not os.path.exists(localhdrs):
                 os.mkdir(localhdrs)
-            log(3, 'Getting header.info from server')
+            log(3, _('Getting header.info from server'))
             try:
                 headerinfofn = grab(serverid, serverheader, localheaderinfo, copy_local=1,
                                     progress_obj=None)
             except URLGrabError, e:
-                errorlog(0, 'Error getting file %s' % serverheader)
+                errorlog(0, _('Error getting file %s') % serverheader)
                 errorlog(0, '%s' % e)
                 sys.exit(1)
         else:
             if os.path.exists(localheaderinfo):
-                log(3, 'Using cached header.info file')
+                log(3, _('Using cached header.info file'))
                 headerinfofn = localheaderinfo
             else:
-                errorlog(0, 'Error - %s cannot be found' % localheaderinfo)
+                errorlog(0, _('Error - %s cannot be found') % localheaderinfo)
                 if conf.uid != 0:
-                    errorlog(1, 'Please ask your sysadmin to update the headers on this system.')
+                    errorlog(1, _('Please ask your sysadmin to update the headers on this system.'))
                 else:
-                    errorlog(1, 'Please run yum in non-caching mode to correct this header.')
+                    errorlog(1, _('Please run yum in non-caching mode to correct this header.'))
                 sys.exit(1)
         log(4,'headerinfofn: ' + headerinfofn)
         HeaderInfoNevralLoad(headerinfofn, HeaderInfo, serverid)
@@ -782,12 +782,12 @@ def download_headers(HeaderInfo, nulist):
                 rpmUtils.checkheader(LocalHeaderFile, name, arch)
             except URLGrabError, e:
                 if conf.cache:
-                    errorlog(0, 'The file %s is damaged.' % LocalHeaderFile)
+                    errorlog(0, _('The file %s is damaged.') % LocalHeaderFile)
                     if conf.uid != 0:
-                        errorlog(1, 'Please ask your sysadmin to update the headers on this system.')
+                        errorlog(1, _('Please ask your sysadmin to update the headers on this system.'))
                     else:
-                        errorlog(1, 'Please run yum in non-caching mode to correct this header.')
-                    errorlog(1, 'Deleting entry from Available packages')
+                        errorlog(1, _('Please run yum in non-caching mode to correct this header.'))
+                    errorlog(1, _('Deleting entry from Available packages'))
                     HeaderInfo.delete(name, arch)
                     #sys.exit(1)
                 else:
@@ -796,18 +796,18 @@ def download_headers(HeaderInfo, nulist):
                 continue
                 
         if not conf.cache:
-            log(2, 'getting %s' % (LocalHeaderFile))
+            log(2, _('getting %s') % (LocalHeaderFile))
             try:
                 hdrfn = grab(serverid, RemoteHeaderFile, LocalHeaderFile, copy_local=1,
                                   checkfunc=(rpmUtils.checkheader, (name, arch), {}))
             except URLGrabError, e:
-                errorlog(0, 'Error getting file %s' % RemoteHeaderFile)
+                errorlog(0, _('Error getting file %s') % RemoteHeaderFile)
                 errorlog(0, '%s' % e)
                 sys.exit(1)
             HeaderInfo.setlocalhdrpath(name, arch, hdrfn)
         else:
-            errorlog(1, 'Cannot download %s in caching only mode or when running as non-root user.' % RemoteHeaderFile)
-            errorlog(1, 'Deleting entry from Available packages')
+            errorlog(1, _('Cannot download %s in caching only mode or when running as non-root user.') % RemoteHeaderFile)
+            errorlog(1, _('Deleting entry from Available packages'))
             HeaderInfo.delete(name, arch)
             #sys.exit(1)
         current = current + 1
@@ -991,7 +991,7 @@ def create_final_ts(tsInfo):
             if os.path.exists(rpmloc):
                 log(4, 'Checking cached RPM %s' % (os.path.basename(rpmloc)))
                 if not rpmUtils.checkRpmMD5(rpmloc):
-                    errorlog(0, 'Damaged RPM %s, removing.' % (rpmloc))
+                    errorlog(0, _('Damaged RPM %s, removing.') % (rpmloc))
                     os.unlink(rpmloc)
                 else:
                     rpmobj = rpmUtils.RPM_Work(rpmloc)
@@ -1000,7 +1000,7 @@ def create_final_ts(tsInfo):
                     hdrr = pkghdr['release']
                     (rpme, rpmv, rpmr) = rpmobj.evr()
                     if (rpme, rpmv, rpmr) != (hdre, hdrv, hdrr):
-                        errorlog(2, 'NonMatching RPM version, %s, removing.' %(rpmloc))
+                        errorlog(2, _('NonMatching RPM version, %s, removing.') %(rpmloc))
                         os.unlink(rpmloc)
 
             # gotten rid of the bad ones
@@ -1008,13 +1008,13 @@ def create_final_ts(tsInfo):
             if os.path.exists(rpmloc):
                 pass
             else:
-                log(2, 'Getting %s' % (os.path.basename(rpmloc)))
+                log(2, _('Getting %s') % (os.path.basename(rpmloc)))
                 remoterpmurl = tsInfo.remoteRpmUrl(name, arch)
                 try:
                     localrpmpath = grab(serverid, remoterpmurl, rpmloc, copy_local=0,
                                              checkfunc=(rpmUtils.checkRpmMD5, (), {'urlgraberror':1})) 
                 except URLGrabError, e:
-                    errorlog(0, 'Error getting file %s' % remoterpmurl)
+                    errorlog(0, _('Error getting file %s') % remoterpmurl)
                     errorlog(0, '%s' % e)
                     sys.exit(1)
                 else:
@@ -1065,7 +1065,7 @@ def tsTest(checkts):
         for (descr, (type, mount, need)) in tserrors:
             reserrors.append(descr)
     if len(reserrors) > 0:
-        errorlog(0, 'Errors reported doing trial run')
+        errorlog(0, _('Errors reported doing trial run'))
         for error in reserrors:
             errorlog(0, '%s' % error)
         sys.exit(1)
@@ -1137,7 +1137,7 @@ def grab(serverID, url, filename=None, nofail=0, copy_local=0,
         except URLGrabError, e:
             if e.errno in retrycodes:
                 if not nofail:
-                    errorlog(1, "retrygrab() failed for:\n  %s%s\n  Executing failover method" % (base, filepath))
+                    errorlog(1, _("retrygrab() failed for:\n  %s%s\n  Executing failover method") % (base, filepath))
                 if nofail:
                     findex = findex + 1
                     base = fc.get_serverurl(findex)
@@ -1146,7 +1146,7 @@ def grab(serverID, url, filename=None, nofail=0, copy_local=0,
                     base = fc.get_serverurl()
                 if base == None:
                     if not nofail:
-                        errorlog(1, "failover: out of servers to try")
+                        errorlog(1, _("failover: out of servers to try"))
                     raise
             else:
                 raise

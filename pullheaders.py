@@ -259,13 +259,13 @@ def genhdrs(rpms,headerdir,cmds):
                 sys.exit(1)
         hobj = rpmUtils.RPM_Work(rpmfn)
         if hobj.hdr is None:
-            log(1, "\nignoring bad rpm: %s" % rpmfn)
+            log(1, _("\nignoring bad rpm: %s") % rpmfn)
         else:
             (name, epoch, ver, rel, arch) = hobj.nevra()
             if hobj.isSource():
                 if not cmds['dosrpms']:
                     if cmds['loud']:
-                        print "\nignoring srpm: %s" % rpmfn
+                        print _("\nignoring srpm: %s") % rpmfn
                     continue
                     
             if epoch is None:

@@ -47,9 +47,9 @@ class nevral:
             del self.rpmbynamearch[(name, arch)]
         else:
             if arch is None:
-                errolog(2, 'No Package %s' % (name))
+                errolog(2, _('No Package %s') % (name))
             else:
-                errorlog(2, 'No Package %s, %s' %(name, arch))
+                errorlog(2, _('No Package %s, %s') %(name, arch))
                 
             
             
@@ -180,7 +180,7 @@ class nevral:
             if conf.serverhdrdir.has_key(i):
                 base = conf.serverhdrdir[i]
             else:
-                errorlog(0, 'asking for package %s.%s - does not exist in nevral - bailing out - check rpmdb for errors' % (name, arch))
+                errorlog(0, _('asking for package %s.%s - does not exist in nevral - bailing out - check rpmdb for errors') % (name, arch))
                 sys.exit(1)
             log(7, 'localhdrpath= %s for %s %s' % (base + '/' + hdrfn, name, arch))
             return base + '/' + hdrfn
@@ -234,7 +234,7 @@ class nevral:
             elif rc > 0:
                 pass
         (best_e, best_v, best_r) = self.evr(name, currentarch)
-        log(3, 'Best version for %s is %s:%s-%s' % (name, best_e, best_v, best_r))
+        log(3, _('Best version for %s is %s:%s-%s') % (name, best_e, best_v, best_r))
     
         for arch in archs:
             rc = rpmUtils.compareEVR(self.evr(name, arch), (best_e, best_v, best_r))
@@ -258,11 +258,11 @@ class nevral:
                     bestarchlist = self.bestArchsByVersion(name)
                     bestarch = archwork.bestarch(bestarchlist)
                     if arch == bestarch:
-                        log(3, 'Found best arch for install only pkg %s' %(arch))
+                        log(3, _('Found best arch for install only pkg %s') %(arch))
                         _ts.addInstall(pkghdr,(pkghdr,rpmloc),'i')
                         self.setPkgState(name, arch, 'i')
                     else:
-                        log(3, 'Removing dumb arch for install only pkg: %s' %(arch))
+                        log(3, ('Removing dumb arch for install only pkg: %s') %(arch))
                         if addavailable:
                             _ts.addInstall(pkghdr,(pkghdr,rpmloc),'a')
                         self.setPkgState(name, arch, 'a')
@@ -346,7 +346,7 @@ class nevral:
                         (name, arch) = self.nafromloc(sugname)
                         archlist = self.bestArchsByVersion(name)
                         bestarch = archwork.bestarch(archlist)
-                        log(3, 'bestarch = %s for %s' % (bestarch, name))
+                        log(3, _('bestarch = %s for %s') % (bestarch, name))
                         self.setPkgState(name, bestarch, 'ud')
                         log(4, 'Got dep: %s, %s' % (name,bestarch))
                         CheckDeps = 1

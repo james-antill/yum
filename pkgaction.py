@@ -81,7 +81,7 @@ def updatepkgs(tsnevral, hinevral, rpmnevral, nulist, uplist, userlist, exitonin
        
     # get rid of the odd state of no updates or uninstalled pkgs
     if len(uplist) <= 0 :
-        errorlog(1, "No Packages Available for Update")
+        errorlog(1, _("No Packages Available for Update"))
         return
     # just update them all
     if type(userlist) is types.StringType and userlist == 'all':
@@ -212,7 +212,7 @@ def installgroups(rpmnevral, nulist, uplist, grouplist):
         
     for group in grouplist:
         if group not in GroupInfo.grouplist:
-            errorlog(0, 'Group %s does not exist' % group)
+            errorlog(0, _('Group %s does not exist') % group)
             return returnlist
         pkglist = GroupInfo.pkgTree(group)
         for pkg in pkglist:
@@ -254,11 +254,11 @@ def updategroups(rpmnevral, nulist, uplist, userlist):
                 if pkg in required:
                     installpkgs.append((group, pkg))
     for (group, pkg) in updatepkgs:
-        log(2, 'From %s updating %s' % (group, pkg))
+        log(2, _('From %s updating %s') % (group, pkg))
     for (group, pkg) in installpkgs:
-        log(2, 'From %s installing %s' % (group, pkg))
+        log(2, _('From %s installing %s') % (group, pkg))
     if len(installpkgs) + len(updatepkgs) == 0:
-        log(2,'Nothing in any group to update or install')
+        log(2, _('Nothing in any group to update or install'))
     return installpkgs, updatepkgs
              
 def listpkginfo(pkglist, userlist, nevral, short):
@@ -515,7 +515,7 @@ def kernelupdate(tsnevral):
         import up2datetheft
         if bootloader == "LILO":
             from lilocfg import LiloConfError, LiloConfRestoreError, LiloInstallError, LiloConfReadError, LiloConfParseError
-            log(2, 'Lilo found - adding kernel to lilo and making it the default')
+            log(2, _('Lilo found - adding kernel to lilo and making it the default'))
             try:
                 up2datetheft.install_lilo(kernel_list)
             except LiloConfError, e:
@@ -536,4 +536,4 @@ def kernelupdate(tsnevral):
             up2datetheft.install_grub(kernel_list)
         else:
             errorlog(1, _('No bootloader found, Cannot configure kernel, continuing.'))
-            filelog(1, 'No bootloader found, Cannot configure kernel.')
+            filelog(1, _('No bootloader found, Cannot configure kernel.'))

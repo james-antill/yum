@@ -229,8 +229,8 @@ def main(args):
             clientStuff.GroupInfo = GroupInfo
             pkgaction.GroupInfo = GroupInfo
         else:
-            errorlog(0, 'No groups provided or accessible on any server.')
-            errorlog(1, 'Exiting.')
+            errorlog(0, _('No groups provided or accessible on any server.'))
+            errorlog(1, _('Exiting.'))
             sys.exit(1)
     
     log(3, 'nulist = %s' % len(nulist))
