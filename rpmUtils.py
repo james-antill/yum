@@ -341,7 +341,7 @@ class Rpm_Ts_Work:
         lst = []
         hwlist = []
         # lifted from up2date - way to easy and useful NOT to steal - thanks adrian
-        mi = self.ts.dbMatch()
+        mi = self.dbMatch()
         for keyword in kwargs.keys():
             mi.pattern(keyword, rpm.RPMMIRE_GLOB, kwargs[keyword])
                                                                                                                              

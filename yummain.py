@@ -122,7 +122,7 @@ def parseCmdArgs(args):
     # progress bars - this is hacky - I'm open to other options
     if conf.debuglevel < 2:
         conf.progress_obj = None
-        
+
     return (log, errorlog, filelog, conf, cmds)
     
 
