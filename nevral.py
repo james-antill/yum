@@ -287,6 +287,7 @@ class nevral:
                         log(4, 'Got dep: %s, %s' % (name,bestarch))
                         CheckDeps = 1
                     else:
+                        log(5, 'No suggestion for %s needing %s' % (name, reqname))
                         if self.exists(reqname):
                             if self.state(reqname) in ('e', 'ed'):
                                 # this is probably an erase depedency
@@ -362,5 +363,6 @@ class nevral:
                         conflicts=1
             log(4, 'Restarting Dependency Loop')
             del _ts
+            del deps
             if len(errors) > 0:
                 return(1, errors)
