@@ -86,7 +86,7 @@ class yumconf:
         self.installonlypkgs = ['kernel', 'kernel-bigmem', 'kernel-enterprise',
                            'kernel-smp', 'kernel-debug', 'kernel-unsupported']
         self.kernelpkgnames = ['kernel','kernel-smp','kernel-enterprise',
-                           'kernel-bigmem','kernel-BOOT', 'kernel-unsupported']
+                           'kernel-bigmem','kernel-BOOT']
       
         if self._getoption('main','cachedir') != None:
             self.cachedir = self._getoption('main','cachedir')
