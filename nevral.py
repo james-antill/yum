@@ -273,7 +273,7 @@ class nevral:
             log (3, '# of Deps = %d' % len(deps))
             for ((name, version, release), (reqname, reqversion),
                                 flags, suggest, sense) in deps:
-                log (4, 'dep: %s req %s - %s - %s' % (name, reqname, reqversion, sense)
+                log (4, 'dep: %s req %s - %s - %s' % (name, reqname, reqversion, sense))
                 if sense == rpm.RPMDEP_SENSE_REQUIRES:
                     if suggest:
                         (header, sugname) = suggest
