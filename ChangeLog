@@ -1,3 +1,20 @@
+2003-02-11 00:27  skvidal
+
+	* archwork.py, clientStuff.py, nevral.py: 
+	got rid of dumb 'garbage' arch comparison - thanks to Bor for that
+	patch cleaned up in other places
+
+2003-02-10 23:38  skvidal
+
+	* pullheaders.py, serverStuff.py: 
+	made -vv work more sanely and make sense to me
+
+2003-02-09 23:43  skvidal
+
+	* ChangeLog, clientStuff.py, nevral.py, yum.conf: 
+	Made file:// urls be done more the "right way" by modifying the
+	nevral.nevral class to support them
+
 2003-02-09 16:27  skvidal
 
 	* checkbootloader.py, yum.conf: 
