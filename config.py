@@ -55,6 +55,7 @@ class yumconf:
         self.serverhdrdir = {}
         self.servercache = {}
         self.servergpgcheck={}
+        self.serverexclude={}
         self.failoverclass = {}
         self.excludes=[]
         
@@ -133,6 +134,7 @@ class yumconf:
                         name = self._doreplace(name)
                         self.servername[section] = name
                         self.serverurl[section] = urls
+                        
                         failmeth = self._getoption(section,'failovermethod')
                         if failmeth == 'roundrobin':
                             failclass = failover.roundRobin(self, section)
@@ -141,11 +143,19 @@ class yumconf:
                         else:
                             failclass = failover.roundRobin(self, section)
                         self.failoverclass[section] = failclass
+                        
                         if self._getoption(section,'gpgcheck') != None:
                             self.servergpgcheck[section]=self.cfg.getboolean(section,'gpgcheck')
                         else:
                             self.servergpgcheck[section]=0
-
+                        if self._getoption(section, 'exclude') != None:
+                            srvexcludelist = self._getoption(section, 'exclude')
+                            srvexcludelist = self._doreplace(srvexcludelist)
+                            srvexcludelist = self.parseList(srvexcludelist)
+                        else:
+                            srvexcludelist = []
+                        self.serverexclude[section] = srvexcludelist
+                        
                         for url in self.serverurl[section]:
                             (s,b,p,q,f,o) = urlparse.urlparse(url)
                             # currently only allowing http and ftp servers 

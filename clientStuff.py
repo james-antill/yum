@@ -101,7 +101,7 @@ def HeaderInfoNevralLoad(filename, nevral, serverid):
         (epoch, name, ver, rel, arch) = stripENVRA(envraStr)
         rpmpath = string.replace(rpmpath, '\n', '')
         if arch in archlist:
-            if not nameInExcludes(name):
+            if not nameInExcludes(name, serverid):
                 if conf.pkgpolicy == 'last':
                     nevral.add((name, epoch, ver, rel, arch, rpmpath, serverid), 'a')
                 else:
@@ -116,7 +116,7 @@ def HeaderInfoNevralLoad(filename, nevral, serverid):
                         nevral.add((name, epoch, ver, rel, arch, rpmpath, serverid), 'a')
 
 
-def nameInExcludes(name):
+def nameInExcludes(name, serverid=None):
     # this function should take a name and check it against the excludes
     # list to see if it shouldn't be in there
     # return true if it is in the Excludes list
@@ -124,6 +124,10 @@ def nameInExcludes(name):
     for exclude in conf.excludes:
         if name == exclude or fnmatch.fnmatch(name, exclude):
             return 1
+    if serverid != None: 
+        for exclude in conf.serverexclude[serverid]:
+            if name == exclude or fnmatch.fnmatch(name, exclude):
+                return 1
     return 0
 
 def rpmdbNevralLoad(nevral):
