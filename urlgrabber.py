@@ -1,6 +1,7 @@
 import os.path
 import urlparse
 import time
+import string
 
 DEBUG=0
 
@@ -10,37 +11,52 @@ except ImportError, msg:
     def _(st): return st
 
 try:
-    import urllib2
-except ImportError, msg:
-    import urllib
-    urllib2 = urllib
-else:
-    class MyOpenerDirector(urllib2.OpenerDirector):
-        def __init__(self):
-            self.addheaders = [('User-agent', "Yum/2.X")]
-            # manage the individual handlers
-            self.handlers = []
-            self.handle_open = {}
-            self.handle_error = {}
-    
-    urllib2.OpenerDirector = MyOpenerDirector
-
-
-try:
     from httplib import HTTPException
 except ImportError, msg:
     HTTPException = None
+
+special_handlers = []
+
+try:
+    import urllib2
+except ImportError, msg:
+    import urllib
+    urllib._urlopener = urllib.FancyURLopener() # make sure it ready now
+    urllib2 = urllib   # this way, we can always just do urllib.urlopen()
+    have_urllib2 = 0
+    auth_handler = None
+else:
+    have_urllib2 = 1
+    auth_handler = urllib2.HTTPBasicAuthHandler( \
+        urllib2.HTTPPasswordMgrWithDefaultRealm())
+    special_handlers.append(auth_handler)
 
 try:
     # This is a convenient way to make keepalive optional.
     # Just rename the module so it can't be imported.
     from keepalive import HTTPHandler
-    keepalive_handler = HTTPHandler()
-    opener = urllib2.build_opener(keepalive_handler)
-    urllib2.install_opener(opener)
 except ImportError, msg:
     keepalive_handler = None
+else:
+    keepalive_handler = HTTPHandler()
+    special_handlers.append(keepalive_handler)
 
+if have_urllib2:
+    opener = apply(urllib2.build_opener, special_handlers)
+    urllib2.install_opener(opener)
+
+def set_user_agent(new_user_agent):
+    if have_urllib2: addheaders = opener.addheaders
+    else:            addheaders = urllib._urlopener.addheaders
+
+    new_tuple = ('User-agent', new_user_agent)
+
+    for i in range(len(addheaders)):
+        if addheaders[i][0] == 'User-agent':
+            addheaders[i] = new_tuple
+            break
+    else:
+        addheaders.append(new_tuple)
 
 class URLGrabError(IOError):
     """
@@ -161,14 +177,15 @@ def retrygrab(url, filename=None, copy_local=0, close_connection=0,
     immediately.
 
     numtries
-       number of times to retry the grab before bailing
+       number of times to retry the grab before bailing.  If this is
+       zero, it will retry forever.  This was intentional... really,
+       it was :)
 
     retrycodes
        the errorcodes (values of e.errno) for which it should retry.
        See the doc on URLGrabError for more details on this.
 
     checkfunc
-
        a function to do additional checks.  This defaults to None,
        which means no additional checking.  The function should simply
        return on a successful check.  It should raise URLGrabError on
@@ -253,6 +270,16 @@ def urlgrab(url, filename=None, copy_local=0, close_connection=0,
 
     (scheme, host, path, parm, query, frag) = urlparse.urlparse(url)
     path = os.path.normpath(path)
+    if '@' in host and auth_handler and scheme in ['http', 'https']:
+        try:
+            # should we be using urllib.splituser and splitpasswd instead?
+            user_password, host = string.split(host, '@', 1)
+            user, password = string.split(user_password, ':', 1)
+        except ValueError, e:
+            raise URLGrabError(1, _('Bad URL: %s') % url)
+        if DEBUG: print 'adding HTTP auth: %s, %s' % (user, password)
+        auth_handler.add_password(None, host, user, password)
+
     url = urlparse.urlunparse((scheme, host, path, parm, query, frag))
 
     if filename == None:
@@ -292,8 +319,10 @@ def urlgrab(url, filename=None, copy_local=0, close_connection=0,
     # header then its probably something generated dynamically, such
     # as php, cgi, a directory listing, or an error message.  It is
     # probably not what we want.
-    if not hdr is None and not hdr.has_key('Content-Length'):
-        raise URLGrabError(6, _('ERROR: Url Return no Content-Length  - something is wrong'))
+    if have_urllib2 or scheme != file:
+        # urllib does not provide content-length for local files
+        if not hdr is None and not hdr.has_key('Content-Length'):
+            raise URLGrabError(6, _('ERROR: Url Return no Content-Length  - something is wrong'))
 
     # download and store the file
     try:
@@ -382,7 +411,7 @@ def _main_test():
 
     kwargs = {}
     for a in sys.argv[3:]:
-        k, v = a.split('=', 1)
+        k, v = string.split(a, '=', 1)
         kwargs[k] = int(v)
 
     set_throttle(1.0)
@@ -472,7 +501,7 @@ def _retry_test():
 
     kwargs = {}
     for a in sys.argv[3:]:
-        k, v = a.split('=', 1)
+        k, v = string.split(a, '=', 1)
         kwargs[k] = int(v)
 
     try: from progress_meter import text_progress_meter
@@ -501,6 +530,7 @@ def _retry_test():
     else: print 'LOCAL FILE:', name
 
 if __name__ == '__main__':
+    set_user_agent('URLGrabber')
     _main_test()
     #_speed_test()
     #_retry_test()
