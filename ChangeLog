@@ -1,3 +1,50 @@
+2004-09-08 23:53  skvidal
+
+	* clientStuff.py, configure.in, yum-daily.spec, yum.spec,
+	yummain.py: 
+	2.0.8
+
+2004-07-19 14:12  skvidal
+
+	* archwork.py, nevral.py: 
+	arch updates and simple errorlog typo
+
+2004-06-23 02:40  skvidal
+
+	* archwork.py: 
+	add extra archs into x86_64 (i586 and i486)
+
+2004-06-23 02:39  skvidal
+
+	* Makefile.in, etc/Makefile.in: 
+	add makefiles patches to correctly interpret configure's sysconfdir
+	option patch sent by Josh Nichols
+
+2004-06-23 02:38  skvidal
+
+	* clientStuff.py: 
+	fixed bad date format in yum.log file - now matches syslog standard
+	fixed poor obsolete look up for versioned obsoletes
+
+2004-06-23 02:36  skvidal
+
+	* rpmUtils.py: 
+	fix caos bug 591 and Fedora Core bug 111022 - gpg check fails on
+	correctly signed package, with right key installed in CZ locale.
+
+2004-06-10 01:41  skvidal
+
+	* yummain.py: 
+	post depresolve check for number of actions to perform.
+	
+	If nothing, then exit.
+
+2004-06-09 22:17  skvidal
+
+	* ChangeLog, yum-daily.spec, yum.spec: 
+	update spec file to own /usr/share/yum ci changelog from 2.0.7
+	(whoops)
+
 2004-05-07 00:50  skvidal
 
 	* configure.in, yum-daily.spec, yum.spec, yummain.py: 
