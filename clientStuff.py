@@ -282,7 +282,7 @@ def returnObsoletes(headerNevral, rpmNevral, uninstNAlist):
                     else:
                         log(4,'versioned obsolete')
                         log(5, '%s, %s, %s, %s, %s' % (obspkg, obscomp, obe, obv, obr))
-                        (e1, v1, r1) = rpmNevral.evr(name, arch)
+                        (e1, v1, r1) = rpmNevral.evr(obspkg, arch)
                         rc = rpmUtils.compareEVR((e1, v1, r1), (obe, obv, obr))
                         if obscomp == 4:
                             if rc >= 1:
@@ -791,7 +791,7 @@ def clean_up_old_headers(rpmDBInfo, HeaderInfo):
             
 
 def printtime():
-    return time.strftime('%m/%d/%y %H:%M:%S ', time.localtime(time.time()))
+    return time.strftime('%b %d %H:%M:%S ', time.localtime(time.time()))
 
 def get_groups_from_servers(serveridlist):
     """takes a list of serverids - returns a list of servers that either:
