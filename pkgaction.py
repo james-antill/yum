@@ -205,9 +205,8 @@ def installgroups(rpmnevral, nulist, uplist, grouplist):
             return returnlist
         pkglist = GroupInfo.pkgTree(group)
         for pkg in pkglist:
-            print 
             if pkg in nupkglist:
-                print 'adding pkg %s' % pkg
+                log(4, 'Adding %s to groupinstall for %s' % (pkg, group))
                 returnlist.append(pkg)
         
     return returnlist

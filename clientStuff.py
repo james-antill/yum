@@ -788,7 +788,6 @@ def take_action(cmds, nulist, uplist, newlist, obsoleting, tsInfo, HeaderInfo, r
             sys.exit(1)
         instpkglist = pkgaction.installgroups(rpmDBInfo, nulist, uplist, cmds)
         if len(instpkglist) > 0:
-            print instpkglist
             pkgaction.installpkgs(tsInfo, nulist, instpkglist, HeaderInfo, rpmDBInfo, 0)
         
             
