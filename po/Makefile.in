@@ -86,6 +86,7 @@ distfiles:
 	$(srcdir)/Makefile.in \
 	$(srcdir)/pygettext.py\
 	$(srcdir)/ru.po \
+	$(srcdir)/es.po \
 	$(srcdir)/yum.pot \
 	$(top_srcdir)/.disttmp/$$distdir/po
 dailyfiles:
@@ -95,6 +96,7 @@ dailyfiles:
 	$(srcdir)/Makefile.in \
 	$(srcdir)/pygettext.py\
 	$(srcdir)/ru.po \
+	$(srcdir)/es.po \
 	$(srcdir)/yum.pot \
 	$(top_srcdir)/.disttmp/$$distdir/po
 
