@@ -966,7 +966,8 @@ def create_final_ts(tsInfo):
 def diskspacetest(diskcheckts):
     diskcheckts.setFlags(rpm.RPMTRANS_FLAG_TEST)
     diskcheckts.setProbFilter(~rpm.RPMPROB_FILTER_DISKSPACE)
-    tserrors = diskcheckts.run(callback.install_callback, '')
+    cb = callback.RPMInstallCallback()
+    tserrors = diskcheckts.run(cb.callback, '')
     if tserrors:
         diskerrors = []
         othererrors = []
