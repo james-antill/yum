@@ -19,20 +19,34 @@ import sys
 import os
 import urlparse
 import string
+import urllib
 
 class yumconf:
 
     def __init__(self, configfile = '/etc/yum.conf'):
         self.cfg = ConfigParser.ConfigParser()
-        self.cfg.read(configfile)
+        (s,b,p,q,f,o) = urlparse.urlparse(configfile)
+        if s in ('http', 'ftp','file'):
+            configfh = urllib.urlopen(configfile)
+            try:
+                self.cfg.readfp(configfh)
+            except ConfigParser.MissingSectionHeaderError, e:
+                print 'Error accessing URL: %s' % configfile
+                sys.exit(1)
+        else:
+            if os.access(configfile, os.R_OK):
+                self.cfg.read(configfile)
+            else:
+                print 'Error accessing File: %s' % configfile
+                sys.exit(1)
         self.servers = []
         self.servername = {}
         self.serverurl = {}
         self.serverpkgdir = {}
         self.serverhdrdir = {}
         self.servercache = {}
-        self.servergpgcheck={}
-        self.excludes=[]
+        self.servergpgcheck= {}
+        self.excludes= []
         
         #defaults
         self.cachedir='/var/cache/yum'
@@ -79,6 +93,7 @@ class yumconf:
                             self.servergpgcheck[section]=self.cfg.getboolean(section,'gpgcheck')
                         else:
                             self.servergpgcheck[section]=0
+                        
                         (s,b,p,q,f,o) = urlparse.urlparse(self.serverurl[section])
                         # currently only allowing http, ftp and file url types
                         if s not in ['http', 'ftp', 'file']:

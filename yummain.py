@@ -56,11 +56,8 @@ def parseCmdArgs(args):
 
         for o,a in gopts:
             if o == '-c':
-                if os.access(a, os.R_OK):
-                    yumconffile=a
-                else:
-                    errorlog(0, 'Cannot find conf file %s' % a)
-                    usage()
+                yumconffile=a
+
         if yumconffile:
             conf=yumconf(configfile=yumconffile)
         else:
@@ -68,7 +65,6 @@ def parseCmdArgs(args):
             sys.exit(1)
         # who are we:
         conf.uid=os.geteuid()
-            
         # we'd like to have a log object now
         log=Logger(threshold=conf.debuglevel, file_object=sys.stdout)
         # syslog-style log
