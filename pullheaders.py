@@ -146,7 +146,8 @@ def main():
         rpminfo = genhdrs(rpms, tempheaderdir, cmds)
         
         # Write header.info file
-        print _("\nWriting header.info file")
+        if not cmds['quiet']:
+            print _("\nWriting header.info file")
         headerfd = open(tempheaderinfo, "w")
         if cmds['dosrpms']:
             srcheaderfd = open(tempsrcheaderinfo, "w")
