@@ -266,11 +266,11 @@ class Groups_Info:
         """return a list of required groups for this group. Do not recurse 
         through the groups"""
         grplist = []
-        for group in self.subgroups[groupname] + self.mandatory_metapkgs[groupname] + self.default_metapkgs[groupname]:
+        for group in self.sub_groups[groupname] + self.mandatory_metapkgs[groupname] + self.default_metapkgs[groupname]:
             if group not in grplist:
                 grplist.append(group)
          
-        return grouplist
+        return grplist
     
     def allPkgs(self, groupname):
         """duh - return list of all pkgs in group"""
@@ -292,7 +292,7 @@ class Groups_Info:
         """this is soley used to debug stuff"""
         if reqgroup is None:
             groups = self.visible_groups
-        elif reqgroup is "all_installed":
+        elif reqgroup == "all_installed":
             groups = []
             for grp in self.group_installed.keys():
                 if self.group_installed[grp] and grp in self.visible_groups:

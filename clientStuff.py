@@ -286,7 +286,6 @@ def getupdatedhdrlist(headernevral, rpmnevral):
     newlist = []
     simpleupdate = []
     complexupdate = []
-    uplist_archdict = {}
         # this is all hard and goofy to deal with pkgs changing arch
         # if we have the package installed
         # if the pkg isn't installed then it's a new pkg

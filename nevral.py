@@ -319,7 +319,7 @@ class nevral:
                 log(5, 'looping count = %d' % unresolveableloop)
                 if unresolveableloop >= 3:
                     errors.append('identical dependency loop exceeded')
-                    for ((name, version, release), (reqnam, reqversion), flags, suggest, sense) in deps:
+                    for ((name, version, release), (reqname, reqversion), flags, suggest, sense) in deps:
                         errors.append('package %s needs %s (not provided)' % (name, rpmUtils.formatRequire(reqname, reqversion, flags)))
             else:
                 unresolveableloop = 0

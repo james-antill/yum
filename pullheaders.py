@@ -102,7 +102,7 @@ def main():
     if len(rpms) == 0:
         if os.path.exists(headerdir):
             hdrlist = serverStuff.getfilelist(headerdir, '.hdr', [], 0)
-            removeCurrentHeaders(headerdir, hdrlist)
+            removeCurrentHeaders(hdrlist)
             if cmds['dorpms']:
                 removeHeaderInfo(srcheaderinfo)
                 srcheaderfd = open(srcheaderinfo, "w")
@@ -179,7 +179,7 @@ def main():
         
         # looks for a list of .hdr files and the header.info file
         hdrlist = serverStuff.getfilelist(oldheaderdir, '.hdr', [], 0)
-        removeCurrentHeaders(oldheaderdir, hdrlist)
+        removeCurrentHeaders(hdrlist)
         removeHeaderInfo(oldheaderinfo)
         removeHeaderInfo(oldsrcheaderinfo)
         os.rmdir(oldheaderdir)
@@ -211,7 +211,7 @@ def checkandMakeDir(dir):
     return result
             
         
-def removeCurrentHeaders(headerdir, hdrlist):
+def removeCurrentHeaders(hdrlist):
     """remove the headers before building the new ones"""
     for hdr in hdrlist:
         if os.path.exists(hdr):

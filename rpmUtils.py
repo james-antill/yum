@@ -160,7 +160,7 @@ class RPM_Base_Work:
         return self._getTag('version')
         
     def release(self):
-        return self_getTag('release')
+        return self._getTag('release')
         
     def evr(self):
         e = self._getTag('epoch')

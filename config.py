@@ -78,7 +78,6 @@ class yumconf:
         self.distroverpkg = 'redhat-release'
         self.yumvar['basearch'] = archwork.getArch()
         self.yumvar['arch'] = os.uname()[4]
-        releasever = None
         self.bandwidth = None
         self.throttle = None
         self.retries = 3
@@ -118,7 +117,7 @@ class yumconf:
             self.throttle = self._getoption('main','installroot')
 
         # figure out what the releasever really is from the distroverpkg
-        self.yumvar['releasever'] = self._getsysver(self.distroverpkg)
+        self.yumvar['releasever'] = self._getsysver()
         
         if self._getoption('main','commands') != None:
             self.commands = self._getoption('main', 'commands')
@@ -221,7 +220,7 @@ class yumconf:
     def localHeader(self, serverid):
         return os.path.join(self.servercache[serverid], 'header.info')
 
-    def _getsysver(self, verpkg):
+    def _getsysver(self):
         ts = rpm.TransactionSet()
         ts.setVSFlags(~(rpm._RPMVSF_NOSIGNATURES|rpm._RPMVSF_NODIGESTS))
         idx = ts.dbMatch('name', self.distroverpkg)
