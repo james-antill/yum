@@ -658,19 +658,31 @@ def download_headers(HeaderInfo, nulist):
             try:
                 rpmUtils.checkheader(LocalHeaderFile, name, arch)
             except URLGrabError, e:
-                os.unlink(LocalHeaderFile)
+                if conf.cache:
+                    errorlog(1, 'The file %s is damaged.' % LocalHeaderFile)
+                    if conf.uid != 0:
+                        errorlog(1, 'Please ask your sysadmin to update the headers on this system.')
+                    else:
+                        errorlog(1, 'Please run yum in non-caching mode to correct this header.')
+                    sys.exit(1)
+                else:
+                    os.unlink(LocalHeaderFile)
             else:
                 continue
                 
-        log(2, 'getting %s' % LocalHeaderFile)
-        try:
-            hdrfn = retrygrab(RemoteHeaderFile, LocalHeaderFile, copy_local=1,
-                              checkfunc=(rpmUtils.checkheader, (name, arch), {}))
-        except URLGrabError, e:
-            errorlog(0, 'Error getting file %s' % RemoteHeaderFile)
-            errorlog(0, '%s' % e)
+        if not conf.cache:
+            log(2, 'getting %s' % LocalHeaderFile)
+            try:
+                hdrfn = retrygrab(RemoteHeaderFile, LocalHeaderFile, copy_local=1,
+                                  checkfunc=(rpmUtils.checkheader, (name, arch), {}))
+            except URLGrabError, e:
+                errorlog(0, 'Error getting file %s' % RemoteHeaderFile)
+                errorlog(0, '%s' % e)
+                sys.exit(1)
+            HeaderInfo.setlocalhdrpath(name, arch, hdrfn)
+        else:
+            errorlog(1, 'Cannot download %s in caching only mode or when running as non-root user.' % RemoteHeaderFile)
             sys.exit(1)
-        HeaderInfo.setlocalhdrpath(name, arch, hdrfn)
     close_all()
                 
 def take_action(cmds, nulist, uplist, newlist, obsoleting, tsInfo, HeaderInfo, rpmDBInfo, obsoleted):
