@@ -720,7 +720,7 @@ def nasort((n1, a1), (n2, a2)):
     else:
         return -1
         
-def getfilelist(path, ext, list):
+def getfilelist(path, ext, mylist):
     # get all the files matching the 3 letter extension that is ext in path, 
     # recursively
     # append them to list
@@ -729,13 +729,13 @@ def getfilelist(path, ext, list):
     dir_list = os.listdir(path)
     for d in dir_list:
         if os.path.isdir(path + '/' + d):
-            list = getfilelist(path + '/' + d, ext, list)
+            mylist = getfilelist(path + '/' + d, ext, mylist)
         else:
             if string.lower(d[-4:]) == '%s' % (ext):
                 if not os.path.islink( path + '/' + d): 
                     newpath = os.path.normpath(path + '/' + d)
-                    list.append(newpath)
-    return(list)
+                    mylist.append(newpath)
+    return(mylist)
 
 def clean_up_headers():
     serverlist = conf.servers
@@ -1251,7 +1251,7 @@ def tsTest(checkts):
     tserrors = checkts.run(cb.callback, '')
     reserrors = []
     if tserrors:
-        for (descr, (type, mount, need)) in tserrors:
+        for (descr, (etype, mount, need)) in tserrors:
             reserrors.append(descr)
     if len(reserrors) > 0:
         errorlog(0, _('Errors reported doing trial run'))
