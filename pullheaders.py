@@ -20,10 +20,11 @@ import sys
 import rpmUtils
 import serverStuff
 import rpm
+import types
 from logger import Logger
 from i18n import _
 
-log=Logger(threshold=0, default=2, prefix='', preprefix='')
+log=Logger(threshold=2, default=2, prefix='', preprefix='')
 serverStuff.log = log
 rpmUtils.log = log
 rpmUtils.errorlog = log
@@ -185,8 +186,10 @@ def genhdrs(rpms,headerdir,cmds):
                 sys.exit(1)
         hobj = rpmUtils.RPM_Work(rpmfn)
         #check to ignore src.rpms
-        if hobj.isSource():
-            log(2,"ignoring srpm: %s" % rpmfn)
+        if hobj.hdr is None:
+            log(2, "\nignoring bad rpm: %s" % rpmfn)        
+        elif hobj.isSource():
+            log(2, "\nignoring srpm: %s" % rpmfn)
         else:
             (name, epoch, ver, rel, arch) = hobj.nevra()
             if epoch is None:
@@ -226,5 +229,3 @@ def genhdrs(rpms,headerdir,cmds):
 
 if __name__ == "__main__":
     main()
-
-

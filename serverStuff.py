@@ -18,6 +18,7 @@ import os
 import sys
 import rpm
 import string
+import types
 import rpmUtils
 from i18n import _
 
@@ -76,7 +77,11 @@ def depchecktree(rpmlist):
         sys.stdout.write("\rChecking deps %d %% complete" %(percent))
         sys.stdout.flush()
         hobj = rpmUtils.RPM_Work(rpmfn)
-        if not hobj.isSource():
+        if hobj.hdr == None:
+            log(2, "\nignoring bad rpm: %s" % rpmfn)
+        elif hobj.isSource():
+            log(2, "\nignoring srpm: %s" % rpmfn)
+        else:
             _ts.addInstall(hobj.hdr, hobj.name(), 'i')
             log(2, "adding %s" % hobj.name())
     errors = _ts.check()
@@ -93,4 +98,3 @@ def depchecktree(rpmlist):
                 msgs.append("depcheck: package %s conflicts with %s" % (name, reqname))
     print ""    
     return (error,msgs)
-
