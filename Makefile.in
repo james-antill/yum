@@ -53,7 +53,8 @@ MODULES = $(srcdir)/pullheaders.pyc \
 	  $(srcdir)/checkbootloader.pyc \
 	  $(srcdir)/bootloadercfg.pyc \
 	  $(srcdir)/up2datetheft.pyc \
-	  $(srcdir)/keepalive.pyc 
+	  $(srcdir)/keepalive.pyc \
+	  $(srcdir)/rpmUtils.pyc 
 
 .SUFFIXES: .py .pyc
 .py.pyc: 
