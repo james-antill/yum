@@ -56,6 +56,7 @@ MODULES = $(srcdir)/pullheaders.pyc \
 	  $(srcdir)/urlgrabber.pyc \
 	  $(srcdir)/progress_meter.pyc \
 	  $(srcdir)/yumcomps.pyc \
+	  $(srcdir)/failover.pyc \
 	  $(srcdir)/comps.pyc \
 	  $(srcdir)/rpmUtils.pyc 
 
