@@ -887,7 +887,7 @@ def download_headers(HeaderInfo, nulist):
     current = 1
     # open up our comps hdlist and hdlist2 so we can find a header we might need
     compsdict = returnCompsHeaders()
-    
+
     for (name, arch) in nulist:
         LocalHeaderFile = HeaderInfo.localHdrPath(name, arch)
         RemoteHeaderFile = HeaderInfo.remoteHdrUrl(name, arch)
@@ -939,6 +939,8 @@ def download_headers(HeaderInfo, nulist):
             HeaderInfo.delete(name, arch)
             #sys.exit(1)
         current = current + 1
+
+    del compsdict
     close_all()
                 
 def take_action(cmds, nulist, uplist, newlist, obsoleting, tsInfo, HeaderInfo, rpmDBInfo, obsoleted):
@@ -1102,15 +1104,16 @@ def take_action(cmds, nulist, uplist, newlist, obsoleting, tsInfo, HeaderInfo, r
     else:
         usage()
 
-def create_final_ts(tsInfo):
-    # download the pkgs to the local paths and add them to final transaction set
-    tsfin = rpm.TransactionSet(conf.installroot)
+def download_packages(tsInfo):
+    """download and check the packages needed for the transaction"""
+    
     for (name, arch) in tsInfo.NAkeys():
-        pkghdr = tsInfo.getHeader(name, arch)
-        rpmloc = tsInfo.localRpmPath(name, arch)
-        serverid = tsInfo.serverid(name, arch)
         state = tsInfo.state(name, arch)
-        if state in ('u', 'ud', 'iu', 'i'): # inst/update
+        if state in ['u', 'ud', 'iu', 'i']: # inst/update
+            log(4, 'Download start for %s.%s' % (name, arch))
+            pkghdr = tsInfo.getHeader(name, arch)
+            rpmloc = tsInfo.localRpmPath(name, arch)
+            serverid = tsInfo.serverid(name, arch)
             # this should be just like the hdr getting
             # check it out- if it is good, move along
             # otherwise, download, check, wash, rinse, repeat
@@ -1147,9 +1150,10 @@ def create_final_ts(tsInfo):
                     sys.exit(1)
                 else:
                     tsInfo.setlocalrpmpath(name, arch, localrpmpath)
-                    
-            # we now actually have the rpm and we know where it is - so use it
+
+            # get the real location (for file:// repos)
             rpmloc = tsInfo.localRpmPath(name, arch)
+            # gpgcheck
             if conf.servergpgcheck[serverid]:
                 rc = rpmUtils.checkSig(rpmloc)
                 if rc == 1:
@@ -1171,6 +1175,16 @@ def create_final_ts(tsInfo):
                     errorlog(0, _('Error: You may want to run yum clean or remove the file: \n %s') % rpmloc)
                     errorlog(0, _('Error: You may need to disable gpg checking to install this package\n'))
                     sys.exit(1)
+    close_all()                    
+    
+def create_final_ts(tsInfo):
+    # download the pkgs to the local paths and add them to final transaction set
+    tsfin = rpm.TransactionSet(conf.installroot)
+    for (name, arch) in tsInfo.NAkeys():
+        state = tsInfo.state(name, arch)
+        if state in ['u', 'ud', 'iu', 'i']: # inst/update
+            pkghdr = tsInfo.getHeader(name, arch)
+            rpmloc = tsInfo.localRpmPath(name, arch)
             if state == 'i':
                 tsfin.addInstall(pkghdr, (pkghdr, rpmloc), 'i')
             else:
@@ -1179,7 +1193,6 @@ def create_final_ts(tsInfo):
             pass
         elif state == 'e' or state == 'ed':
             tsfin.addErase(name)
-    close_all()
     return tsfin
 
 def tsTest(checkts):

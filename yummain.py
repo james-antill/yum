@@ -49,7 +49,8 @@ def parseCmdArgs(args):
     try:
         gopts, cmds = getopt.getopt(args, 'tCc:hR:e:d:y', ['help', 'version', 
                                                            'installroot=',
-                                                           'exclude='])
+                                                           'exclude=',
+                                                           'download-only'])
     except getopt.error, e:
         errorlog(0, _('Options Error: %s') % e)
         usage()
@@ -106,6 +107,9 @@ def parseCmdArgs(args):
                 conf.installroot=a
             if o == '--exclude':
                 conf.excludes.append(a)
+            if o == '--download-only':
+                conf.downloadonly=1
+                
                 
     except ValueError, e:
         errorlog(0, _('Options Error: %s') % e)
@@ -327,12 +331,19 @@ def main(args):
             sys.exit(1)
     
     # Test run for file conflicts and diskspace check, etc.
+    # download first
+    log(2, _('Downloading Packages'))
+    clientStuff.download_packages(tsInfo)
+    log(3, _('Creating Transaction Set'))
     tstest = clientStuff.create_final_ts(tsInfo)
     log(2, _('Running test transaction:'))
     clientStuff.tsTest(tstest)
     tstest.closeDB()
     del tstest
     log(2, _('Test transaction complete, Success!'))
+    if conf.downloadonly:
+        log(2, _('Completed Download and test, Exiting.'))
+        sys.exit(0)
     
     # FIXME the actual run should probably be elsewhere and this should be
     # inside a try, except set
@@ -389,6 +400,7 @@ def usage():
           --version - output the version of yum
           --exclude=some_pkg_name - packagename to exclude - you can use
             this more than once
+          --download-only - only download packages - do not run the transaction
           -h, --help this screen
     """)
     sys.exit(1)

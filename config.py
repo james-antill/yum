@@ -86,6 +86,7 @@ class yumconf:
         self.hdlist = '/usr/share/comps/i386/hdlist'
         self.hdlist2 = '/usr/share/comps/i386/hdlist2'
         self.usecomps = 1
+        self.downloadonly = 0
         self.bandwidth = None
         self.throttle = None
         self.retries = 6
@@ -135,7 +136,9 @@ class yumconf:
         if self._getoption('main', 'hdlist2') != None:
             self.hdlist2 = self._getoption('main', 'hdlist2')
         if self._getoption('main','usecomps') != None:
-            self.usecomps = self.cfg.getboolean('main', 'uscomps')
+            self.usecomps = self.cfg.getboolean('main', 'usecomps')
+        if self._getoption('main','downloadonly') != None:
+            self.downloadonly = self.cfg.getboolean('main', 'downloadonly')
             
             
         # figure out what the releasever really is from the distroverpkg
