@@ -316,8 +316,9 @@ def main(args):
 
 def usage():
     print _("""
-    Usage:  yum [options] <update | upgrade | install | info | erase | list |
-            clean | provides | check-update>
+    Usage:  yum [options] <update | upgrade | install | info | remove | list |
+            clean | provides | check-update | groupinstall | groupupdate |
+            grouplist >
                 
          Options:
           -c [config file] - specify the config file to use
