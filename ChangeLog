@@ -1,3 +1,34 @@
+2003-02-14 00:10  skvidal
+
+	* config.py, yummain.py: 
+	commands = option in config file now
+	
+	So you can have commands=update stuff
+	
+	and it will run that command - only applies to commands after the -
+	and -- options.
+	
+	so: update, upgrade, install, info, list, erase, clean, remove,
+	provides etc
+	
+	Command line will override config file in all cases.
+
+2003-02-13 17:34  skvidal
+
+	* config.py, yummain.py: 
+	conf files can now be http,ftp or file urls.  now that ConfigParser
+	has file handle reading it's much easier.
+
+2003-02-11 00:44  skvidal
+
+	* TODO: 
+	clean up todo list some
+
+2003-02-11 00:43  skvidal
+
+	* ChangeLog, bin/yum: 
+	make the lockfile make more sense
+
 2003-02-11 00:27  skvidal
 
 	* archwork.py, clientStuff.py, nevral.py: 
