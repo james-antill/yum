@@ -33,7 +33,7 @@ from logger import Logger
 from config import yumconf
 from i18n import _
 
-__version__='2.0.2'
+__version__='2.0.3'
 
 def parseCmdArgs(args):
    
