@@ -255,6 +255,8 @@ class nevral:
                 rpmloc = self.rpmlocation(name, arch)
                 pkghdr = self.getHeader(name, arch)
                 if name in conf.installonlypkgs:
+                    #XXX - this should also check the packge Provides: for kernel-modules - if they are there then mark
+                    #package as install
                     bestarchlist = self.bestArchsByVersion(name)
                     bestarch = archwork.bestarch(bestarchlist)
                     if arch == bestarch:
