@@ -891,17 +891,33 @@ def returnCompsHeaders():
 
     return returndict        
 
-       
+def returnCacheDBHeaders(nulist):
+    returndict = {}
+    if conf.usecachedb and os.path.exists(conf.cachedb):
+        rpm.addMacro("_dbpath", "/")
+        cachedb = rpmUtils.Rpm_Ts_Work(dbPath=conf.cachedb)
+        cachedb.setVSFlags(-1)
+    
+    mi = cachedb.dbMatch()
+    for h in mi:
+        hdrobj = rpmUtils.Header_Work(h)
+        (n,e,v,r,a) = hdrobj.nevra()
+        e = hdrobj.fixedEpoch()
+        if (n, a) in nulist:
+            returndict[(n, a, e, v, r)] = hdrobj
+    del mi
+    del cachedb
+    rpm.delMacro("_dbpath")
+     
+    return returndict
+         
 def download_headers(HeaderInfo, nulist):
     total = len(nulist)
     current = 1
     # open up our comps hdlist and hdlist2 so we can find a header we might need
     compsdict = returnCompsHeaders()
-    if conf.usecachedb and os.path.exists(conf.cachedb):
-        rpm.addMacro("_dbpath", "/")
-        cachedb = rpmUtils.Rpm_Ts_Work(dbPath=conf.cachedb)
-        cachedb.sigChecking('none')
-        
+    cachedbdict = returnCacheDBHeaders(nulist)
+       
     for (n, a) in nulist:
         LocalHeaderFile = HeaderInfo.localHdrPath(n, a)
         RemoteHeaderFile = HeaderInfo.remoteHdrUrl(n, a)
@@ -939,13 +955,11 @@ def download_headers(HeaderInfo, nulist):
             # try the cachedb
             if conf.usecachedb:
                 if hdrfn is None:
-                    hdrlist = cachedb.getHeadersByKeyword(name=n, arch=a, version=v, release=r)
-                    if len(hdrlist) > 0:
-                        for hdrobj in hdrlist: # there should really be only one but <shrug>
-                            if hdrobj.fixedEpoch() == e:
-                             log(4, _('getting %s from cachedb') % (LocalHeaderFile))
-                             hdrfn = hdrobj.writeHeader(basepath, 1)
-
+                    if cachedbdict.has_key((n, a, e, v, r)):
+                       log(4, _('getting %s from cachedb') % (LocalHeaderFile))
+                       hdrobj = cachedbdict[(n, a, e, v, r)]
+                       hdrfn = hdrobj.writeHeader(basepath, 1)
+                    
             # then try comps
             if hdrfn is None:
                 if compsdict.has_key((n, a, e, v, r)):
@@ -972,10 +986,8 @@ def download_headers(HeaderInfo, nulist):
         current = current + 1
 
     del compsdict
-    if conf.usecachedb:
-        del cachedb
-        rpm.delMacro("_dbpath")
-        
+    del cachedbdict
+           
     close_all()
                 
 def take_action(cmds, nulist, uplist, newlist, obsoleting, tsInfo, HeaderInfo, rpmDBInfo, obsoleted):
