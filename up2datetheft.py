@@ -1,6 +1,5 @@
 import os
 import sys
-import rpm
 
     
 # these functions swiped from up2date.py, copyright Red Hat, Inc.
@@ -16,50 +15,35 @@ def install_grub(kernelList):
     return ret
 
 
-#FIXME - db open should not suck - read from clientStuff
-def openrpmdb(option=0, dbpath=None):
-    dbpath = "/var/lib/rpm/"
-    rpm.addMacro("_dbpath", dbpath)
-
-    #log.log_me("Opening rpmdb in %s with option %s" % (dbpath,option))
-    try:
-        db = rpm.opendb(option)
-    except rpm.error, e:
-        raise RpmError(_("Could not open RPM database for reading.  Perhaps it is already in use?"))
-
-    return db
-
-
 # mainly here to make conflicts resolution cleaner
-def findDepLocal(db, dep):
+def findDepLocal(ts, dep):
     header = None
     if dep[0] == '/':
         # Treat it as a file dependency
         try:
-            # FIXME - file dep this needs to be fixed
-            hdr_arry = db.Match(dep)
+            hdr_arry = ts.dbMatch('basenames', dep)
         except:
             hdr_arry = []
             
-        for n in hdr_arry:
-            header = db[n]
+        for h in hdr_arry:
+            header = h
             break
     else:
         # Try it first as a package name
         try:
-            hdr_arry = db.Match('name', 'dep')
+            hdr_arry = ts.dbMatch('name', 'dep')
         except:
             hdr_arry = []
-        for n in hdr_arry:
-            header = db[n]
+        for h in hdr_arry:
+            header = h
             break
         else:
             try:
-                hdr_arry = db.Match('provides',dep)
+                hdr_arry = ts.dbMatch('provides',dep)
             except:
                 hdr_arry = []
-            for n in hdr_arry:
-                header = db[n]
+            for h in hdr_arry:
+                header = h
                 break
             
     if header != None:

@@ -13,7 +13,8 @@ import iutil
 from translate import _, N_, cat
 import time
 import string
-from up2datetheft import findDepLocal,openrpmdb
+from up2datetheft import findDepLocal
+from clientStuff import openrpmdb
 from bootloadercfg import Error, makeInitrd
 
 class GrubbyRuntimeError(Error):

@@ -22,6 +22,7 @@ import gzip
 import archwork
 import fnmatch
 import pkgaction
+import callback
 
 def stripENVRA(foo):
     archIndex = string.rfind(foo, '.')
@@ -124,11 +125,9 @@ def nameInExcludes(name):
             return 1
     return 0
 
-def openrpmdb(option=0, dbpath=None):
-    dbpath = "/var/lib/rpm/"
-    rpm.addMacro("_dbpath", dbpath)
+def openrpmdb():
     try:
-        db = rpm.TransactionSet()
+        db = rpm.TransactionSet('/')
     except rpm.error, e:
         raise RpmError(_("Could not open RPM database for reading. Perhaps it is already in use?"))
     return db
@@ -707,12 +706,10 @@ def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmD
     else:
         usage()
 
-def create_final_ts(tsInfo, rpmdb):
-    import pkgaction
-    import callback
+def create_final_ts(tsInfo):
     # download the pkgs to the local paths and add them to final transaction set
     # might be worth adding the sigchecking in here
-    tsfin = rpm.TransactionSet()
+    tsfin = rpm.TransactionSet('/')
     for (name, arch) in tsInfo.NAkeys():
         pkghdr = tsInfo.getHeader(name, arch)
         rpmloc = tsInfo.localRpmPath(name, arch)
@@ -744,20 +741,8 @@ def create_final_ts(tsInfo, rpmdb):
             pass
         elif tsInfo.state(name, arch) == 'e' or tsInfo.state(name, arch) == 'ed':
             tsfin.addErase(name)
-
-    #one last test run for diskspace
-#    log(2, 'Calculating available disk space - this could take a bit')
-#    tsfin.setFlags(rpm.RPMTRANS_FLAG_TEST)
-#    tsfin.setProbFilter(~rpm.RPMPROB_FILTER_DISKSPACE)
-#    tserrors = tsfin.run(callback.install_callback, '')
-#    tsfin.setFlags(0)
-#    tsfin.setProbFilter(0)
-#    if tserrors:
-#        log(2, 'Error: Disk space Error')
-#        errorlog(0, 'You appear to have insufficient disk space to handle these packages')
-#        sys.exit(1)
     return tsfin
-    
+
 
 def checkGPGInstallation():
     if not os.access("/usr/bin/gpg", os.X_OK):

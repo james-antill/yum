@@ -148,7 +148,7 @@ class nevral:
             return l
         hdrfn = self.hdrfn(name,arch)
         base = conf.serverhdrdir[i]
-        log(6, 'localhdrpath= %s for %s %s' % (base + '/' + hdrfn, name, arch))
+        log(7, 'localhdrpath= %s for %s %s' % (base + '/' + hdrfn, name, arch))
         return base + '/' + hdrfn
         
     def remoteRpmUrl(self, name, arch=None):
@@ -221,11 +221,13 @@ class nevral:
                 elif self.state(name,arch) == 'e' or self.state(name,arch) == 'ed':
                     log(4,'Erasing: %s-%s' % (name,arch))
                     tsfordeps.addErase(name)
-            deps=tsfordeps.check()
+            deps = tsfordeps.check()
+            
             CheckDeps = 0
             if not deps:
                 return (0, 'Success - deps resolved')
-                        
+            log (4, '# of Deps = %d' % len(deps))
+            
             for ((name, version, release), (reqname, reqversion),
                                 flags, suggest, sense) in deps:
                 if sense == rpm.RPMDEP_SENSE_REQUIRES:
@@ -265,7 +267,11 @@ class nevral:
                         else:
                             # this is horribly ugly but I have to find some way to see if what it needed is provided
                             # by what we are removing - if it is then remove it -otherwise its a real dep problem - move along
-                            whatprovides = tsfordeps.dbMatch('provides', reqname)
+                            if reqname[0] == '/':
+                                whatprovides = tsfordeps.dbMatch('basenames', reqname)
+                            else:
+                                whatprovides = tsfordeps.dbMatch('provides', reqname)
+                                
                             if whatprovides:
                                 for provhdr in whatprovides:
                                     if self.state(provhdr[rpm.RPMTAG_NAME],provhdr[rpm.RPMTAG_ARCH]) in ('e','ed'):
@@ -275,6 +281,7 @@ class nevral:
                                         CheckDeps=1
                                     else:
                                         unresolvable = 1
+                                        log(5, 'Got to an unresolvable dep - %s' %s %(name,arch))
                                         if clientStuff.nameInExcludes(reqname):
                                             errors.append('package %s needs %s that has been excluded' % (name, reqname))
                                         else:
@@ -310,6 +317,7 @@ class nevral:
                         errors.append('conflict between %s and %s' % (name, reqname))
                         conflicts=1
             log(4, 'whee dep loop')
+            tsfordeps.closeDB()
             del tsfordeps
             if len(errors) > 0:
                 return(1, errors)

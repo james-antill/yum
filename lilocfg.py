@@ -15,7 +15,8 @@ import lilo, iutil
 from translate import _, N_, cat
 import time
 import string
-from up2datetheft import findDepLocal,openrpmdb
+from up2datetheft import findDepLocal
+from clientStuff import openrpmdb
 
 # this tool is designed to setup lilo properly, including building a initrd,
 # adding a new kernel to lilo.conf, testing lilo, and installing it

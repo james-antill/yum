@@ -105,7 +105,8 @@ def main(args):
     (log, errorlog, filelog, conf, cmds) = parseCmdArgs(args)
 
     if cmds[0] not in ('update', 'upgrade', 'install','info', 'list', 'erase',\
-                       'grouplist','groupupdate','groupinstall','clean','remove', 'provides'):
+                       'grouplist','groupupdate','groupinstall','clean', \
+                       'remove', 'provides'):
         usage()
     process=cmds[0]
     
@@ -155,7 +156,7 @@ def main(args):
     #################################################################################
     # generate all the lists we'll need to quickly iterate through the lists.
     #  uplist == list of updated packages
-    #  newlist == list of uninstall/available NEW packages (ones we don't any copy of)
+    #  newlist == list of uninstall/available NEW packages (ones we don't have at all)
     #  nulist == combination of the two
     #  obslist == packages obsoleting a package we have installed
     ################################################################################
@@ -202,7 +203,7 @@ def main(args):
             if not tsInfo.exists(name, arch):
                 ((e, v, r, a, l, i), s)=HeaderInfo._get_data(name, arch)
                 log(6,'making available: %s' % name)
-                tsInfo.add((name, e, v, r, arch, l, i), 'a')   
+                tsInfo.add((name, e, v, r, arch, l, i), 'a')
 
     log(2, 'Resolving dependencies')
     (code, msgs) = tsInfo.resolvedeps(rpmDBInfo)
@@ -213,7 +214,8 @@ def main(args):
     log(2, 'Dependencies resolved')
     
     # prompt for use permission to do stuff in tsInfo - list all the actions 
-    # (i, u, e, ed, ud,iu(installing, but marking as 'u' in the actual ts, just in case)) confirm w/the user
+    # (i, u, e, ed, ud,iu(installing, but marking as 'u' in the actual ts, just 
+    # in case)) confirm w/the user
     
     (i_list, u_list, e_list, ud_list, ed_list)=clientStuff.actionslists(tsInfo)
     
@@ -223,19 +225,24 @@ def main(args):
             errorlog(1, 'Exiting on user command.')
             sys.exit(1)
     
+    # Test run for disk space checks
+    tstest = clientStuff.create_final_ts(tsInfo)
+    log(2, 'Calculating available disk space - this could take a bit')
+    tstest.setFlags(rpm.RPMTRANS_FLAG_TEST)
+    tstest.setProbFilter(rpm.RPMPROB_FILTER_DISKSPACE)
+    tserrors = tstest.run(callback.install_callback, '')
+    if tserrors:
+        log(2, 'Error: Disk space Error')
+        errorlog(0, 'You appear to have insufficient disk space to handle these packages')
+        sys.exit(1)
+    tstest.closeDB()
+    del tstest
     
-    #FIXME = this is dumb and doesn't have any meaning anymore now that the db 
-    # is meaningless - not sure how to get a read-only connection the rpmdb now, though
-    
-    if conf.uid==0:
-        dbfin = clientStuff.openrpmdb(1, '/')
-    else:
-        dbfin = clientStuff.openrpmdb(0, '/')
-    
-    tsfin = clientStuff.create_final_ts(tsInfo, dbfin)
-    
+    tsfin = clientStuff.create_final_ts(tsInfo)
+
     if conf.uid == 0:
-        # sigh - the magical "order" command - nice of this not to really be documented anywhere.
+        # sigh - the magical "order" command - nice of this not to really be 
+        # documented anywhere.
         tsfin.order()
         errors = tsfin.run(callback.install_callback, '')
         if errors:
@@ -243,8 +250,7 @@ def main(args):
             for error in errors:
                 errorlog(0, error)
             sys.exit(1)
-        
-        del dbfin
+        tsfin.closeDB()
         del tsfin
         
         # Check to see if we've got a new kernel and put it in the right place in grub/lilo
