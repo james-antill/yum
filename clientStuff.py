@@ -879,6 +879,30 @@ def create_final_ts(tsInfo):
     close_all()
     return tsfin
 
+def diskspacetest(diskcheckts):
+        diskcheckts.setFlags(rpm.RPMTRANS_FLAG_TEST)
+        diskcheckts.setProbFilter(~rpm.RPMPROB_FILTER_DISKSPACE)
+        tserrors = diskcheckts.run(callback.install_callback, '')
+    if tserrors:
+        diskerrors = []
+        othererrors = []
+        for (descr, (type, mount, need)) in tserrors:
+            if type == rpm.RPMPROB_DISKSPACE:
+                diskerrors.append(descr)
+            else:
+                othererrors.append(descr)
+        if len(diskerrors) > 0:
+            log(2, 'Error: Disk space Error')
+            errorlog(0, 'You appear to have insufficient disk space to handle these packages')
+            for error in diskerrors:
+                errorlog(1, '%s' % error)
+        if len(othererrors) > 0:
+            log(2, 'Error reported but not a disk space error')
+            errorlog(0, 'Unknown error testing transaction set:')
+            for error in othererrors:
+                errorlog(1, '%s' % error)
+        sys.exit(1)
+
 
 def descfsize(size):
     """The purpose of this function is to accept a file size in bytes,

@@ -69,6 +69,7 @@ class yumconf:
         self.exactarch = 0
         self.overwrite_groups = 0
         self.groups_enabled = 0
+        self.diskspacecheck = 1
         self.yumvar = self._getEnvVar()
         self.distroverpkg = 'redhat-release'
         self.yumvar['basearch'] = archwork.getArch()
@@ -95,6 +96,8 @@ class yumconf:
             self.exactarch = self.cfg.getboolean('main', 'exactarch')
         if self._getoption('main','overwrite_groups') != None:
             self.overwrite_groups = self.cfg.getboolean('main', 'overwrite_groups')
+        if self._getoption('main','diskspacecheck') != None:
+            self.diskspacecheck = self.cfg.getboolean('main', 'diskspacecheck')
         if self._getoption('main', 'distroverpkg') != None:
             self.distroverpkg = self._getoption('main','distroverpkg')
         if self._getoption('main', 'bandwidth') != None:

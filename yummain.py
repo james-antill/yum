@@ -246,8 +246,8 @@ def main(args):
                 tsInfo.add((name, e, v, r, arch, l, i), 'a')
 
     log(2, _('Resolving dependencies'))
-    (code, msgs) = tsInfo.resolvedeps(rpmDBInfo)
-    if code == 1:
+    (errorcode, msgs) = tsInfo.resolvedeps(rpmDBInfo)
+    if errorcode:
         for msg in msgs:
             print msg
         sys.exit(1)
@@ -265,24 +265,25 @@ def main(args):
             errorlog(1, _('Exiting on user command.'))
             sys.exit(1)
 
-    # FIXME this shouldn't be here - should be somewhere else for doing this sort of action
+    
     # Test run for disk space checks
-    tstest = clientStuff.create_final_ts(tsInfo)
-    log(2, _('Calculating available disk space - this could take a bit'))
-    tstest.setFlags(rpm.RPMTRANS_FLAG_TEST)
-    tstest.setProbFilter(~rpm.RPMPROB_FILTER_DISKSPACE)
-    tserrors = tstest.run(callback.install_callback, '')
-    if tserrors:
-        log(2, 'Error: Disk space Error')
-        errorlog(0, _('You appear to have insufficient disk space to handle these packages'))
-        sys.exit(1)
-    tstest.closeDB()
-    del tstest
+    # only run it if diskspacecheck = 1 and if there is anything being installed
+    # or updated - erasures should need more disk space
+    if conf.diskspacecheck:
+        if len(i_list+u_list+ud_list) > 0:
+            tstest = clientStuff.create_final_ts(tsInfo)
+            log(2, _('Calculating available disk space - this could take a bit'))
+            clientStuff.diskspacetest(tstest)
+            tstest.closeDB()
+            del tstest
     
     # FIXME the actual run should probably be elsewhere and this should be
     # inside a try, except set
     tsfin = clientStuff.create_final_ts(tsInfo)
     
+    if conf.diskspacecheck == 0:
+        tsfin.setProbFilter(rpm.RPMPROB_FILTER_DISKSPACE)
+
     if conf.uid == 0:
         # sigh - the magical "order" command - nice of this not to really be 
         # documented anywhere.
