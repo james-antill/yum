@@ -1,43 +1,40 @@
-# Copyright (C) 2002,2003 ASPLinux, LGPL
-#
-# Grigory Bakunov <black@asplinux.ru>, 2002,2003.
-# Vladimir Bormotov <bor@insight.donbass.com>, 2002.
-#
+# 
 msgid ""
 msgstr ""
-"Project-Id-Version: yum\n"
-"PO-Revision-Date: 2003-10-14 15:36+0400\n"
-"Last-Translator: Grigory Bakunov <black@asplinux.ru>\n"
-"Language-Team: Russian <ru@li.org>\n"
+"Project-Id-Version: Yum 0.1\n"
+"Report-Msgid-Bugs-To: (null)\n"
+"POT-Creation-Date: (null)\n"
+"PO-Revision-Date: 2004-03-06 12:15+0100\n"
+"Last-Translator: Kyaneos <kyaneos@ya.com>\n"
+"Language-Team: Spanish/Spain <es@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: pygettext.py 1.1\n"
 
 #: ../yummain.py:322
 #, c-format
 msgid "Dependencies resolved"
-msgstr "Зависимости разрешены"
+msgstr "Dependencias·resueltas"
 
 #: ../pullheaders.py:134
 #, c-format
 msgid "Directory of rpms must exist"
-msgstr "Должен существовать каталог с пакетами"
+msgstr "La·carpeta·de·paquetes·RPM·debe·existir"
 
 #: ../config.py:44
 #, c-format
 msgid "Error accessing URL: %s"
-msgstr "Ошибка при доступе к URL: %s"
+msgstr "Error·accediendo·a·la·dirección:·%s"
 
 #: ../yummain.py:248
 #, c-format
 msgid "Finding updated packages"
-msgstr "Поиск обновленных пакетов"
+msgstr "Encontrando·paquetes·actualizados"
 
 #: ../clientStuff.py:1101
 #, c-format
 msgid "No Packages installed not included in a repository"
-msgstr "Установленных пакетов, не существуюющих в репозитории не обнаружено"
+msgstr "No·se·instalaron·paquetes·no·incluídos·en·el·repositorio"
 
 #: ../pullheaders.py:343
 #, c-format
@@ -48,25 +45,26 @@ msgid ""
 "   Src: %d"
 msgstr ""
 "\n"
-"   Всего: %d\n"
-"   Использовано: %d\n"
-"   SRC: %d"
+"···Total:·%d\n"
+"···Usado:·%d\n"
+"···Fuente:·%d"
 
 #: ../serverStuff.py:89
 #, c-format
 msgid "ignoring srpm: %s"
-msgstr "игнорируется src пакет: %s"
+msgstr "ignorando·el·paquete SRPM:·%s"
 
 #: ../yummain.py:252
 #, c-format
 msgid "Downloading needed headers"
-msgstr "Получение необходимых заголовков"
+msgstr "Descargando·las·cabeceras·necesarias"
 
 #: ../lilocfg.py:49
 #, c-format
 msgid "Error restoring the backup of lilo.conf  The backup was:\n"
 msgstr ""
-"Ошибка восстановления резервной копии lilo.conf. Резервная копия была:\n"
+"·Error·recuperando·la·copia·de·serguridad·de·lilo."
+"conf··La·copia·de·seguridad·era:\n"
 
 #: ../nevral.py:353
 #, c-format
@@ -76,22 +74,22 @@ msgstr ""
 #: ../clientStuff.py:1024 ../clientStuff.py:1036
 #, c-format
 msgid "Looking in available packages for a providing package"
-msgstr "Просмотр доступных пакетов предоставляющих пакет"
+msgstr "Mirando·los·paquetes·disponibles·para·proveer·uno"
 
 #: ../yummain.py:366
 #, c-format
 msgid "Errors installing:"
-msgstr "Ошибки установки:"
+msgstr "Errores·instalando:"
 
 #: ../pullheaders.py:250
 #, c-format
 msgid "%s is not writable"
-msgstr "Файл %s не доступен для записи"
+msgstr "%s·no·es·escribible"
 
 #: ../yummain.py:338
 #, fuzzy, c-format
 msgid "Downloading Packages"
-msgstr "Удаление пакетов"
+msgstr "Limpiando·paquetes"
 
 #: ../clientStuff.py:1336
 #, c-format
@@ -100,26 +98,29 @@ msgid ""
 "  %s%s\n"
 "  Executing failover method"
 msgstr ""
+"retrygrab()·falló·para:\n"
+"··%s%s\n"
+"··Ejecutando·el·método·'failover'"
 
 #: ../clientStuff.py:584
 #, c-format
 msgid "I will install/upgrade these to satisfy the dependencies:"
-msgstr "Необходимо обновить/установить это для разрешения зависимостей:"
+msgstr "Instalaré/actualizaré·esto·para·satisfacer·las·dependencias:"
 
 #: ../pullheaders.py:282
 #, c-format
 msgid "Cannot delete %s - check perms"
-msgstr "Невозможно удалить %s - проверьте права доступа"
+msgstr "No·se·puede·borrar·%s·-·chequea·tus·permisos"
 
 #: ../clientStuff.py:1063
 #, c-format
 msgid "Need to pass a list of pkgs to erase"
-msgstr "Необходимо указать список пакетов для установки"
+msgstr "Necesitas·pasar·una·lista·de·paquetes·para·eliminar"
 
 #: ../clientStuff.py:1021
 #, c-format
 msgid "Need a provides to match"
-msgstr "Необходим еще один параметр"
+msgstr "Necesitas·proporcionar·algo·para·corresponder"
 
 #: ../lilocfg.py:67
 #, c-format
@@ -127,30 +128,31 @@ msgid ""
 "lilo options that are not supported by yum are used in the default lilo."
 "conf. This file will not be modified. The options include:\n"
 msgstr ""
-"параметры lilo не поддерживаются yum. Будет использованы параметры из lilo."
-"conf. Файл lilo.conf останется неизмеренным.  Параметры включают:\n"
+"·las·opciones·de·lilo·que·no·están·soportadas·por·yum·son·usadas·en·el·lilo."
+"conf·por·defecto.·Este·archivo·no·será·modificado."
+"·Las·opciones·incluyen:\n"
 
 #: ../clientStuff.py:606 ../clientStuff.py:645
 #, c-format
 msgid "Installed: "
-msgstr "Установлено: "
+msgstr "Instalado(s):·"
 
 #: ../clientStuff.py:803 ../clientStuff.py:839 ../clientStuff.py:981
 #: ../clientStuff.py:1200
 #, c-format
 msgid "Error getting file %s"
-msgstr "Ошибка получения файла: %s"
+msgstr "Error·obteniendo·el·archivo·%s"
 
 #: ../pullheaders.py:57 ../pullheaders.py:88 ../yummain.py:56
 #: ../yummain.py:118
 #, c-format
 msgid "Options Error: %s"
-msgstr "Ошибка опции: %s"
+msgstr "Error·en·las·opciones:·%s"
 
 #: ../callback.py:88
 #, c-format
 msgid "Completing update for %s  - %d/%d"
-msgstr "Обновление пакетов для - %s - %d/%d"
+msgstr "Completando·actualización·para·%s··-·%d/%d"
 
 #: ../pullheaders.py:331
 #, c-format
@@ -160,48 +162,48 @@ msgid ""
 "%s "
 msgstr ""
 "\n"
-"Уже найден кортеж: %s %s:\n"
-"%s "
+"Tupla·ya·encontrada:·%s·%s:\n"
+"·%s "
 
 #: ../clientStuff.py:607 ../clientStuff.py:646
 #, c-format
 msgid "Dep Installed: "
-msgstr "Установлено по зависимостям: "
+msgstr "Dependencias·instaladas:·"
 
 #: ../serverStuff.py:95
 #, c-format
 msgid "errors found"
-msgstr "найдены ошибки"
+msgstr "errores·encontrados"
 
 #: ../nevral.py:76
 #, c-format
 msgid "Header for pkg %s not found"
-msgstr "Заголовок пакета %s не найден"
+msgstr "Cabecera·para·el·paquete·%s·no·encontrada"
 
 #: ../clientStuff.py:609 ../clientStuff.py:648
 #, c-format
 msgid "Erased: "
-msgstr "Удалено: "
+msgstr "Eliminado(s):·"
 
 #: ../clientStuff.py:964
 #, fuzzy, c-format
 msgid "getting %s from cachedb"
-msgstr "получение %s"
+msgstr "obteniendo·%s"
 
 #: ../checkbootloader.py:167
 #, c-format
 msgid "Unable to determine boot loader."
-msgstr "Невозможно определить загрузчик."
+msgstr "Imposible·de·determinar·un·cargador·de·arranque."
 
 #: ../clientStuff.py:953
 #, c-format
 msgid "getting %s"
-msgstr "получение %s"
+msgstr "obteniendo·%s"
 
 #: ../clientStuff.py:1217
 #, c-format
 msgid "Error Reading Header on %s"
-msgstr "Ошибка чтения заголовка %s"
+msgstr "Error·leyendo·la·cabecera·en·%s"
 
 #: ../clientStuff.py:109
 #, c-format
@@ -213,54 +215,56 @@ msgstr ""
 #: ../config.py:50
 #, c-format
 msgid "Error accessing File: %s"
-msgstr "Ошибка при доступе к файлу: %s"
+msgstr "Error·accediendo·al·archivo:·%s"
 
 #: ../yummain.py:382
 #, c-format
 msgid "You're not root, we can't install things"
-msgstr "У вас нет достаточных прав для установки пакетов"
+msgstr "No·eres·administrador,·no·podemos·instalar·cosas"
 
 #: ../yummain.py:77
 #, c-format
 msgid "Cannot find any conf file."
-msgstr "Не найден файл настроек."
+msgstr "No·se·encuentra·ningún·archivo·de·configuración."
 
 #: ../urlgrabber.py:299
 #, c-format
 msgid "Local file does not exist: %s"
-msgstr "Отсутствует локальный файл: %s"
+msgstr "El·archivo·local·no·existe:·%s"
 
 #: ../config.py:222
-#, fuzzy, c-format
+#, c-format
 msgid "using ftp, http[s], or file for servers, Aborting - %s"
 msgstr ""
-"Используйте только протоколы ftp, http[s], removable или file. Завершение "
-"работы - %s"
+"usando·FTP,·HTTP[S],·o·un·archivo·de·los·servidores,·Abortando·-·%"
+"s"
 
 #: ../checkbootloader.py:165
 #, c-format
 msgid "Found %s."
-msgstr "Найден %s."
+msgstr "Encontrado(s)·%s"
 
 #: ../pullheaders.py:107
 #, fuzzy, c-format
 msgid "excluded: %s"
-msgstr "Релиз  : %s"
+msgstr "Liberar:·%s"
 
 #: ../clientStuff.py:851 ../clientStuff.py:943
 #, c-format
 msgid "Please run yum in non-caching mode to correct this header."
-msgstr "Запустите yum в нормальном режиме чтобы исправить этот заголовок."
+msgstr ""
+"Por·favor,"
+"·ejecute·yum·en·modo·sin·caché·para·corregir·esta·cabecera."
 
 #: ../yummain.py:385
 #, c-format
 msgid "Transaction(s) Complete"
-msgstr "Транзакция Завершена"
+msgstr "Transacción(es)·Completa(s)"
 
 #: ../urlgrabber.py:319 ../urlgrabber.py:352
 #, c-format
 msgid "IOError: %s"
-msgstr "ВВОшибка: %s"
+msgstr "Error·de·entrada/salida:·%s"
 
 #: ../pullheaders.py:113
 #, c-format
@@ -270,13 +274,15 @@ msgstr ""
 #: ../clientStuff.py:1140
 #, c-format
 msgid "Cleaning packages and old headers"
-msgstr "Удаление пакетов и старых заголовков"
+msgstr "Limpiando·paquetes·y·antiguas·cabeceras"
 
 #: ../clientStuff.py:987
 #, c-format
 msgid ""
 "Cannot download %s in caching only mode or when running as non-root user."
-msgstr "Невозможно получить %s используя кэш или не от пользователя root."
+msgstr ""
+"No·se·puede·descargar·%"
+"s·sólo·en·modo·caché·o·cuando·lo·ejecuta·un·usuario·que·no·es·administrador"
 
 #: ../clientStuff.py:1213 ../clientStuff.py:1218 ../clientStuff.py:1222
 #: ../clientStuff.py:1227
@@ -285,38 +291,40 @@ msgid ""
 "Error: You may want to run yum clean or remove the file: \n"
 " %s"
 msgstr ""
-"Ошибка: Попробуйте выполнить команду yum clean или удалить файл:\n"
-" %s"
+"Error:·Quizás·quieras·ejecutar·yum·clean·o·borrar·el·archivo:·\n"
+"··%s"
 
 #: ../pullheaders.py:154
 #, fuzzy, c-format
 msgid "No rpms to work with and no header dir. Creating an empty repository."
-msgstr "Не найдено пакетов и каталога заголовков. Завершение."
+msgstr ""
+"Ningún·paquete·RPM·para·funcionar·y·ningún·directorio·de·cabeceras."
+"·Saliendo."
 
 #: ../lilocfg.py:61
 #, c-format
 msgid "Error reading lilo.conf: The messages was:\n"
-msgstr "Ошибка чтения lilo.conf:\n"
+msgstr "·Error·leyendo·el·archivo·lilo.conf:·Los·mensajes·han·sido:\n"
 
 #: ../yummain.py:277
 #, c-format
 msgid "No groups provided or accessible on any server."
-msgstr "Группы не доступны ни на одном сервере."
+msgstr "Grupos·no·provistos·o·accesibles·en·ningún·servidor."
 
 #: ../pkgaction.py:468
 #, c-format
 msgid "%s results returned"
-msgstr "Возвращено %s результатов"
+msgstr "%s·resultados·devueltos"
 
 #: ../pullheaders.py:220 ../pullheaders.py:226
 #, c-format
 msgid "Error moving %s to %s, fatal"
-msgstr "Фатальная ошибка перемещения %s в %s"
+msgstr "Error·fatal·moviendo·%s·a·%s"
 
 #: ../yummain.py:342
-#, fuzzy, c-format
+#, c-format
 msgid "Running test transaction:"
-msgstr "Неизвестная ошибка в тестой транзакции:"
+msgstr "Corriendo·un·test·de·la·transacción:"
 
 #: ../pullheaders.py:312
 #, c-format
@@ -325,42 +333,42 @@ msgid ""
 "ignoring bad rpm: %s"
 msgstr ""
 "\n"
-"игнорируется пакет: %s"
+"ignorando·el·paquete RPM·defectuoso:·%s"
 
 #: ../clientStuff.py:581
 #, c-format
 msgid "[erase: %s]"
-msgstr "[удалить: %s]"
+msgstr "[eliminar:·%s]"
 
 #: ../pullheaders.py:246
 #, c-format
 msgid "%s is not a dir"
-msgstr "%s это не каталог"
+msgstr "%s·no·es·un·directorio"
 
 #: ../nevral.py:351
 #, c-format
 msgid "bestarch = %s for %s"
-msgstr ""
+msgstr "mejor·arquitectura·=·%s·para·%s"
 
 #: ../clientStuff.py:505 ../nevral.py:235
 #, c-format
 msgid "Best version for %s is %s:%s-%s"
-msgstr "Наилучшая версия для  %s это %s:%s-%s"
+msgstr "Mejor·versión·para·%s·es·%s:%s-%s"
 
 #: ../clientStuff.py:592 ../clientStuff.py:603
 #, c-format
 msgid "[deps: %s]"
-msgstr "[зависимость: %s]"
+msgstr "[dependencias:·%s]"
 
 #: ../pkgaction.py:267
 #, c-format
 msgid "Version"
-msgstr "Версия"
+msgstr "Versión"
 
 #: ../clientStuff.py:1103
 #, c-format
 msgid "Looking in Available Packages:"
-msgstr "Просмотр доступных пакетов"
+msgstr "Mirando·en·los·paquetes·disponibles:"
 
 #: ../pullheaders.py:318
 #, c-format
@@ -369,12 +377,12 @@ msgid ""
 "ignoring srpm: %s"
 msgstr ""
 "\n"
-"игнорируется src пакет: %s"
+"ignorando·el·paquete SRPM:·%s"
 
 #: ../serverStuff.py:84
 #, c-format
 msgid "Checking deps %d/%d complete"
-msgstr "Проверка зависимостей %d/d"
+msgstr "Chequeando·dependencias·%d/%d·completo"
 
 #: ../pkgaction.py:461
 #, c-format
@@ -382,8 +390,8 @@ msgid ""
 "Installed package: %s.%s %s:%s-%s matches with\n"
 " %s"
 msgstr ""
-"Установленный пакет: %s.%s %s:%s-%s предоставляет\n"
-" %s"
+"·Paquete·instalado:·%s.%s·%s:%s-%s·resultados·con\n"
+"··%s"
 
 #: ../pullheaders.py:172
 #, c-format
@@ -391,53 +399,53 @@ msgid ""
 "Errors within the dir(s):\n"
 " %s"
 msgstr ""
-"Ошибка в каталоге(ах):\n"
-" %s"
+"·Errores·dentro·del(los)·directorio(s):\n"
+"··%s"
 
 #: ../pkgaction.py:319
 #, c-format
 msgid "Summary: %s"
-msgstr "Описание: %s"
+msgstr "Resumen:·%s"
 
 #: ../rpmUtils.py:278
 #, c-format
 msgid "Error opening rpm %s - error %s"
-msgstr "Невозможно открыть пакет %s - ошибка %s"
+msgstr "Error·abriendo·el·RPM·%s·-·error·%s"
 
 #: ../urlgrabber.py:321 ../urlgrabber.py:354
 #, c-format
 msgid "OSError: %s"
-msgstr "ВВОшибка: %s"
+msgstr "Error·del·Sistema·Operativo:·%s"
 
 #: ../pullheaders.py:272
 #, c-format
 msgid "Cannot delete file %s"
-msgstr "Невозможно удалить файл %s"
+msgstr "No·se·puede·eliminar·el·archivo·%s"
 
 #: ../urlgrabber.py:287 ../urlgrabber.py:317
 #, c-format
 msgid "Bad URL: %s"
-msgstr "Неверный URL: %s"
+msgstr "Dirección·incorrecta:·%s"
 
 #: ../clientStuff.py:1221
 #, c-format
 msgid "Error: Untrusted GPG key on %s"
-msgstr "Ошибка: Неверный GPG ключ в %s"
+msgstr "Error:·La·llave·GPG·no·es·fiable·en·%s"
 
 #: ../yummain.py:340
-#, fuzzy, c-format
+#, c-format
 msgid "Creating Transaction Set"
-msgstr "Неизвестная ошибка в тестой транзакции:"
+msgstr ""
 
 #: ../clientStuff.py:1105
 #, c-format
 msgid "Looking in Installed Packages:"
-msgstr "Просмотр установленных пакетов:"
+msgstr "Mirando·en·los·paquetes·instalados:"
 
 #: ../clientStuff.py:1153
 #, c-format
 msgid "Invalid clean option %s"
-msgstr "Hеверная опция чистки %s"
+msgstr "Opción·invalida·para·limpiar·%s"
 
 #: ../pullheaders.py:308
 #, c-format
@@ -449,52 +457,55 @@ msgid ""
 msgstr ""
 "\n"
 "\n"
-"Проблема с подписью GPG или md5-суммой в %s\n"
+"Problema·con·la·firma·GPG·o·con·md5sum·en·%s\n"
+"\n"
 
 #: ../pkgaction.py:315
 #, c-format
 msgid "Release: %s"
-msgstr "Релиз  : %s"
+msgstr "Liberar:·%s"
 
 #: ../pkgaction.py:76
 #, c-format
 msgid "No Packages Available for Update or Install"
-msgstr "Нет пакетов доступных для установки или обновления"
+msgstr "Ningún·paquete·disponible·para·actualizar·o·instalar"
 
 #: ../pkgaction.py:56 ../pkgaction.py:67
 #, c-format
 msgid "%s is installed and is the latest version."
-msgstr "%s уже установлен и это последняя версия."
+msgstr "%s·está·instalado·y·en·su·última·versión."
 
 #: ../nevral.py:260
 #, c-format
 msgid "Found best arch for install only pkg %s"
-msgstr "Лучшая архитектура для установки пакета %s"
+msgstr ""
+"Encontrada·una·mejor·arquitectura·para·instalar·sólo·el·paquete·%s"
 
 #: ../clientStuff.py:1026 ../clientStuff.py:1038
 #, c-format
 msgid "Looking in installed packages for a providing package"
-msgstr "Поиск пакета среди установленных пакетов"
+msgstr "Mirando·en·los·paquetes·instalados·para·proveer·uno"
 
 #: ../clientStuff.py:554
 #, c-format
 msgid "I will do the following:"
-msgstr "Необходимо выполнить следующее:"
+msgstr "Haré·lo·siguiente:"
 
 #: ../clientStuff.py:971
 #, fuzzy, c-format
 msgid "getting %s from comps db"
-msgstr "получение групп с сервера: %s"
+msgstr "obteniendo·grupos·del·servidor:·%s"
 
 #: ../lilocfg.py:43
 #, c-format
 msgid "Error installing lilo.conf  The message was:\n"
-msgstr "Ошибка установки lilo.conf:\n"
+msgstr ""
+"·Error·instalando·el·fichero·lilo.conf··El·mensaje·ha·sido:\n"
 
 #: ../clientStuff.py:108
 #, fuzzy, c-format
 msgid "Damaged or Bad header.info from %s"
-msgstr "Плохой заголовок %s"
+msgstr "Cabecera·dañada·%s"
 
 #: ../yummain.py:348
 #, c-format
@@ -504,27 +515,27 @@ msgstr ""
 #: ../clientStuff.py:1186
 #, c-format
 msgid "NonMatching RPM version, %s, removing."
-msgstr "Несовпадающая версия RPM, %s, удаляется."
+msgstr "No·encontrada·la·versión·del·RPM·%s,·borrando."
 
 #: ../clientStuff.py:595
 #, c-format
 msgid "I will erase these to satisfy the dependencies:"
-msgstr "Необходимо удалить эти пакеты для разрешения зависимостей:"
+msgstr "Eliminaré·esto·para·satisfacer·las·dependencias:"
 
 #: ../clientStuff.py:608 ../clientStuff.py:647
 #, c-format
 msgid "Updated: "
-msgstr "Обновлено: "
+msgstr "Actualizado(s):·"
 
 #: ../lilocfg.py:407
 #, c-format
 msgid "Error parsing command line arguments: %s"
-msgstr "Ошибка при разборе параметров командной строки: %s"
+msgstr "Error·en·los·argumentos·de·la·línea·de·comandos:·%s"
 
 #: ../yummain.py:259
 #, c-format
 msgid "Finding obsoleted packages"
-msgstr "Поиск устаревших пакетов"
+msgstr "Encontrando·paquetes·obsoletos"
 
 #: ../serverStuff.py:56
 #, fuzzy, c-format
@@ -544,90 +555,98 @@ msgid ""
 "     -q  = make the display more quiet\n"
 "     -h, --help = this screen"
 msgstr ""
-"Использование:\n"
-"    yum-arch [-v] [-z] [-l] [-c] [-n] [-d] [-q] [-vv] каталог-RPM\n"
-"         -d  = проверять конфликты и зависимости в дереве\n"
-"         -v  = выводить отладочную информацию\n"
-"         -vv = еще больше отладочной информации\n"
-"         -n  = не создавать заголовков\n"
-"         -c  = проверять пакеты с помощью gpg и md5 - невозможно "
-"использовать с -n\n"
-"         -z  = сжимать заголовки с помощью алгоритма gzip [по умолчанию "
-"включено]\n"
-"         -s  = создавать заголовки для src пакетов\n"
-"         -l  = разрешить использование символических ссылок\n"
-"         -q  = \"молчаливый\" режим"
+"·Uso:\n"
+"·yum-arch·[-v] [-z] [-l] [-c] [-n] [-d] [-q] [-vv]·"
+"(camino·al·directorio·de·las·cabeceras/·debe·existir)\n"
+"····-d··=·chequea·dependencias·y·conflictos·en·el·árbol\n"
+"····-v··=·salida·más·verbosa\n"
+"····-vv·=·alana·la·salida·más·verbosa\n"
+"····-n··=·no·genera·cabeceras\n"
+"····-c··=·chequea·paquetes·con·GPG·y·sumas·md5·-"
+"·no·puede·ser·usado·con·-n\n"
+"····-z··=·comprime·las·cabeceras·con·gzip·(por·defecto,"
+"·desaprobado·es·una·opción)\n"
+"····-"
+"s··=·genera·cabeceras·también·para·los·paquetes·de·fuentes\n"
+"····-"
+"s··=·usa·enlaces·simbólicos·como·paquetes·RPM·válidos·cuando·se·están·construyendo·las·cabeceras\n"
+"····-q··=·hace·a·la·pantalla·más·suave"
 
 #: ../clientStuff.py:844
 #, c-format
 msgid "Using cached header.info file"
-msgstr "Используется кэшированный header.info"
+msgstr "Usando·el·archivo·header.info·de·la·caché"
 
 #: ../clientStuff.py:849 ../clientStuff.py:941
 #, c-format
 msgid "Please ask your sysadmin to update the headers on this system."
-msgstr "Попросите администратора обновить заголовки в вашей системе."
+msgstr ""
+"Por·favor,"
+"·pregunta·al·administrador·de·tu·sistema·para·actualizar·las·cabeceras."
 
 #: ../clientStuff.py:1033
 #, c-format
 msgid "Need an item to search"
-msgstr "Необходим параметр для поиска"
+msgstr "Necesitas·un·ítem·para·buscar"
 
 #: ../pkgaction.py:318
 #, c-format
 msgid "Repo   : %s"
-msgstr "Репозиторий: %s"
+msgstr "Repositorio···:·%s"
 
 #: ../clientStuff.py:823
 #, c-format
 msgid "CacheDir: %s"
-msgstr ""
+msgstr "Directorio·de·caché:·%s"
 
 #: ../yummain.py:333
 #, c-format
 msgid "Exiting on user command."
-msgstr "Выход по требованию пользователя"
+msgstr "Saliendo·mediante·un·comando·de·usuario."
 
 #: ../clientStuff.py:1228
 #, c-format
 msgid "Error: You may need to disable gpg checking to install this package\n"
 msgstr ""
-"Ошибка: Возможно необходимо отключить проверку GPG для установки пакета\n"
+"·Error:"
+"·Necesitas·desactivar·el·chequeo·de·la·llave·GPG·para·instalar·este·paquete\n"
 
 #: ../yummain.py:168
 #, c-format
 msgid "Options Error: no commands found"
-msgstr "Ошибка опций: команда не найдена"
+msgstr "Error·en·las·opciones:·comando·no·encontrado"
 
 #: ../serverStuff.py:92
 #, c-format
 msgid "adding %s"
-msgstr "добавление %s"
+msgstr "añadiendo·%s"
 
 #: ../grubcfg.py:22
 #, c-format
 msgid "Unable to run grubby correctly: the message was:\n"
-msgstr "Hевозможно запустить grubby:\n"
+msgstr ""
+"·Imposible·de·correr·la·sucia·corrección:·el·mensaje·ha·sido:\n"
 
 #: ../urlgrabber.py:301
 #, c-format
 msgid "Not a normal file: %s"
-msgstr "Не обычный файл: %s"
+msgstr "Archivo·anormal:·%s"
 
 #: ../bin/yum:42
 #, c-format
 msgid "IOError - # %s - %s"
-msgstr "Ошибка ввода-вывода - # %s - %s"
+msgstr "Error·de·entrada/salida·-·#·%s·-·%s"
 
 #: ../pkgaction.py:514
 #, c-format
 msgid "Kernel Updated/Installed, checking for bootloader"
-msgstr "Ядро обновлено/установлено, обновляется загрузчик"
+msgstr ""
+"Núcleo·actualizado/instalado,·chequeando·el·cargador·de·arranque"
 
 #: ../clientStuff.py:1010
 #, c-format
 msgid "Need to pass a list of pkgs to install"
-msgstr "Необходимо указать список пакетов для установки"
+msgstr "Necesitas·pasar·una·lista·de·paquetes·para·instalar"
 
 #: ../nevral.py:180
 #, c-format
@@ -635,8 +654,8 @@ msgid ""
 "asking for package %s.%s - does not exist in nevral - bailing out - check "
 "rpmdb for errors"
 msgstr ""
-"Запрос на пакет %s.%s - не существует в nevral - выкинут - проверьте ошибки "
-"в rpmdb"
+"preguntando·por·el·paquete·%s.%s·-·no·existe·en·nevral·-"
+"·saliendo·del·apuro·-·chequeando·errores·en·rpmdb·"
 
 #: ../pullheaders.py:306
 #, c-format
@@ -645,12 +664,14 @@ msgid ""
 "Checking sig on %s"
 msgstr ""
 "\n"
-"Проверка сигнатуры %s"
+"Chequeando·firma·en·%s"
 
 #: ../config.py:239
 #, c-format
 msgid "Insufficient server config - no servers found. Aborting."
-msgstr "Не найден файл настроек сервера - репозиторий не найден. Завершение."
+msgstr ""
+"Configuración·del·servidor·insuficiente·-"
+"·ningún·servidor·encontrado.·Abortando."
 
 #: ../pullheaders.py:102
 #, c-format
@@ -660,47 +681,49 @@ msgstr ""
 #: ../yummain.py:316
 #, c-format
 msgid "Resolving dependencies"
-msgstr "Разрешение зависимостей"
+msgstr "Resolviendo·dependencias"
 
 #: ../pkgaction.py:314
 #, c-format
 msgid "Version: %s"
-msgstr "Версия : %s"
+msgstr "Versión:·%s"
 
 #: ../pkgaction.py:259
 #, c-format
 msgid "From %s installing %s"
-msgstr "Из %s устанавливается %s"
+msgstr "Desde·%s·instalando·%s"
 
 #: ../pkgaction.py:542
 #, c-format
 msgid "No bootloader found, Cannot configure kernel, continuing."
-msgstr "Загрузчик не найден, загрузка нового ядра не настроена, продолжаю."
+msgstr ""
+"Ningún·cargador·de·arranque·encontrado,"
+"·no·se·puede·configurar·el·núcleo,·continuando."
 
 #: ../clientStuff.py:774 ../clientStuff.py:781
 #, c-format
 msgid "Attempt to delete a missing file %s - ignoring."
-msgstr "Попытка удалить несуществующий файл %s - игнорируется."
+msgstr "Intento·de·borrar·un·archivo·perdido·%s·-·ignorando."
 
 #: ../rpmUtils.py:26
 #, c-format
 msgid "Header cannot be opened or does not match %s, %s."
-msgstr "Заголовок не открывается или не совпадает %s, %s."
+msgstr "La·cabecera·no·puede·ser·abierta·o·no·encontrada·%s,·%s"
 
 #: ../bin/yum:37
 #, c-format
 msgid "Exiting on User Cancel"
-msgstr "Выход по требованию пользователя"
+msgstr "Saliendo·por·cancelación·del·usuario"
 
 #: ../urlgrabber.py:323 ../urlgrabber.py:356
 #, c-format
 msgid "HTTP Error (%s): %s"
-msgstr "Ошибка HTTP (%s): %s"
+msgstr "Error·en·el·protocolo·HTTP·(%s):·%s"
 
 #: ../clientStuff.py:1194
 #, c-format
 msgid "Getting %s"
-msgstr "Получение %s"
+msgstr "Obteniendo·%s"
 
 #: ../pullheaders.py:200
 #, c-format
@@ -709,52 +732,58 @@ msgid ""
 "Writing header.info file"
 msgstr ""
 "\n"
-"Получение файла header.info"
+"Escribiendo·el·archivo·header.info"
 
 #: ../pullheaders.py:258
 #, c-format
 msgid "Error creating dir %s: %s"
-msgstr "Ошибка создания каталога %s: %s"
+msgstr "Error·creando·directorio·%s:·%s"
 
 #: ../pkgaction.py:267
 #, c-format
 msgid "Arch"
-msgstr "Арх."
+msgstr "Arquitectura"
 
 #: ../clientStuff.py:817
 #, c-format
 msgid "Gathering header information file(s) from server(s)"
-msgstr "Получение файлов заголовков с серверов"
+msgstr ""
+"Recogiendo·la·información·del·archivo(s)·de·cabecera·del·servidor"
+"(es)"
 
 #: ../serverStuff.py:103
 #, c-format
 msgid "depcheck: package %s conflicts with %s"
-msgstr "зависимости: пакет %s конфликтует с %s"
+msgstr ""
+"chequeo·de·dependencias:·el·paquete·%s·entra·en·conflicto·con·%s"
 
 #: ../pkgaction.py:302
 #, c-format
 msgid "No Packages Available to List"
-msgstr "Нет доступных для просмотра пакетов"
+msgstr "Paquetes·no·disponibles·para·listar"
 
 #: ../pkgaction.py:465
 #, c-format
 msgid "localrpmdb not defined"
-msgstr "localrpmdb не задана"
+msgstr "localrpmdb·no·definida"
 
 #: ../lilocfg.py:55
 #, c-format
 msgid "Error installing the new bootloader: \n"
-msgstr "Ошибка установки нового загрузчика: \n"
+msgstr "·Error·instalando·el·nuevo·cargador·de·arranque:·\n"
 
 #: ../clientStuff.py:1212
 #, c-format
 msgid "Error: Could not find the GPG Key necessary to validate pkg %s"
-msgstr "Ошибка: Невозможно найти GPG ключ необходимый для проверки пакета %s"
+msgstr ""
+"Error:"
+"·No·se·ha·podido·encontrar·la·llave·GPG·necesaria·para·validar·el·paquete·"
+"%s"
 
 #: ../yummain.py:304
 #, c-format
 msgid "No actions to take"
-msgstr "Hикаких действий не нужно"
+msgstr "Ninguna·acción·que·ejecutar"
 
 #: ../pkgaction.py:435
 #, c-format
@@ -762,13 +791,13 @@ msgid ""
 "Available package: %s.%s %s:%s-%s from %s matches with\n"
 " %s"
 msgstr ""
-"Доступный пакет: %s.%s %s:%s-%s из %s предоставляет\n"
-" %s"
+"·Paquete·disponible:·%s.%s %s:%s-%s·desde·%s·alcanzados·con\n"
+"··%s"
 
 #: ../rpmUtils.py:174
 #, c-format
 msgid "Got an empty Header, something has gone wrong"
-msgstr "Получен пустой заголовок, что-то не так"
+msgstr "Obtenida·una·cabecera·vacía,·algo·está·corriendo·equivocado"
 
 #: ../pullheaders.py:174
 #, c-format
@@ -778,27 +807,29 @@ msgstr "   "
 #: ../config.py:237
 #, c-format
 msgid "Error: Cannot find baseurl or name for server '%s'. Skipping"
-msgstr "Ошибка: Невозможно определить URL или имя для сервера '%s'. Пропущено"
+msgstr ""
+"Error:·No·se·puede·encontrar·baseurl·o·el·nombre·del·servidor·'%"
+"s'. Saltando"
 
 #: ../pullheaders.py:274
 #, c-format
 msgid "Odd header %s suddenly disappeared"
-msgstr "Непарный заголовок %s внезапно исчез"
+msgstr "La·rara·cabecera·%s·ha·desaparecido·de·repente"
 
 #: ../pullheaders.py:177
 #, c-format
 msgid "All dependencies resolved and no conflicts detected"
-msgstr "Все зависимости проверены, конфликтов не обнаружено"
+msgstr "Todas·las·dependencias·resueltas·y·ningún·conflicto·detectado"
 
 #: ../yummain.py:148
 #, c-format
 msgid "Unable to check if PID %s is active"
-msgstr "Невозможно проверить активен ли процесс %s"
+msgstr "Imposible·de·chequear·si·el·PID·%s·está·activo"
 
 #: ../clientStuff.py:1150
 #, c-format
 msgid "Cleaning old headers"
-msgstr "Удаление старых заголовков"
+msgstr "Limpiando·las·cabeceras·antiguas"
 
 #: ../pkgaction.py:320
 #, c-format
@@ -806,43 +837,43 @@ msgid ""
 "Description:\n"
 " %s"
 msgstr ""
-"Описание:\n"
-" %s"
+"·Descripción:\n"
+"··%s"
 
 #: ../clientStuff.py:1115 ../clientStuff.py:1131
 #, c-format
 msgid "Need a list of groups to update"
-msgstr "Необходимо указать список пакетов для установки"
+msgstr "Necesito·una·lista·de·grupos·para·actualizar"
 
 #: ../clientStuff.py:807
 #, c-format
 msgid "using cached groups from server: %s"
-msgstr "использование кэшированных групп с сервера: %s"
+msgstr "usando·grupos·de·la·caché·del·servidor:·%s"
 
 #: ../pullheaders.py:228
 #, c-format
 msgid "Putting back old headers"
-msgstr "Возврат старых заголовков"
+msgstr "Devolviendo·a·su·sitio·las·antiguas·cabeceras"
 
 #: ../clientStuff.py:799
 #, c-format
 msgid "getting groups from server: %s"
-msgstr "получение групп с сервера: %s"
+msgstr "obteniendo·grupos·del·servidor:·%s"
 
 #: ../clientStuff.py:1005
 #, c-format
 msgid "You need to be root to perform these commands"
-msgstr "Hеобходимы привилегии суперпользователя для выполнения этой команды"
+msgstr "Necesitas·ser·superusuario·para·llevar·a·cabo·estos·comandos"
 
 #: ../pkgaction.py:470
 #, c-format
 msgid "No packages found"
-msgstr "Пакеты не найдены"
+msgstr "Paquetes·no·encontrados"
 
 #: ../yummain.py:278
 #, c-format
 msgid "Exiting."
-msgstr "Завершение."
+msgstr "Saliendo."
 
 #: ../yummain.py:390
 #, fuzzy, c-format
@@ -873,100 +904,108 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"    Usage:  yum [options] <update | upgrade | install | info | remove | list "
-"|\n"
-"            clean | provides |search | check-update | groupinstall | "
-"groupupdate |\n"
-"            grouplist >\n"
-"                \n"
-"         Options:\n"
-"          -c [config file] - указать файл конфигурации\n"
-"          -e [error level] - установить подробность ошибок\n"
-"          -d [debug level] - установить подробность сообщений\n"
-"          -y отвечать \"да\" на все вопросы\n"
-"          -t пропускать ошибки при установке пакетов\n"
-"          -R [time in minutes] - установить время случайной задержки\n"
-"          -C работать только с кэшем, не обновляя его\n"
-"          --installroot=[path] - установить install root (по умолчанию '/')\n"
-"          --version - показать версию yum\n"
-"          -h, --help - показать это сообщение\n"
+"····Modo·de·uso:··yum·[opciones]·<update·|·upgrade·|·install·|"
+"·info·|·remove·|·list·|\n"
+"············clean·|·provides·|·search·|·check-update·|"
+"·groupinstall·|·groupupdate·|\n"
+"············grouplist·>\n"
+"················\n"
+"·········Opciones:\n"
+"··········-c·[fichero·de·configuración]·-"
+"·especifica·el·fichero·de·configuración·para·usar\n"
+"··········-e·[nivel·de·error]·-·fija·el·nivel·de·error\n"
+"          -d [nivel·de·depuración] - fija·el·nivel·de·depuración\n"
+"          -y responde·'yes'·a·todas·las·preguntas\n"
+"          -t es·tolerante·con·los·errores·de·comandos·del·paquete\n"
+"          -R [tiempo·en·minutos] - fija·la·cantidad·máxima·de·tiempo "
+"para·correr·aleatoriamente.\n"
+"          -C corre·sólo·sobre·caché - no·actualiza·la·caché\n"
+"          --installroot=[camino] - fija·la·instalación·raíz "
+"(por·defecto '/')\n"
+"          --version - saca·la·versión·de·yum\n"
+"          -h, --help esta·pantalla\n"
 "    "
 
 #: ../clientStuff.py:944 ../clientStuff.py:988
 #, c-format
 msgid "Deleting entry from Available packages"
-msgstr "Удаление записи из списка доступных пакетов"
+msgstr "Borrando·la·entrada·en·paquetes·disponibles"
 
 #: ../clientStuff.py:1261
 #, c-format
 msgid "Errors reported doing trial run"
-msgstr ""
+msgstr "Errores·reportados·haciendo·la·prueba"
 
 #: ../pullheaders.py:300
 #, c-format
 msgid "Digesting rpm - %s - %d/%d"
-msgstr "Подшивка пакетов - %s - %d/%d"
+msgstr "Asimilando·el·paquete·RPM·-·%s·-·%d/%d"
 
 #: ../pkgaction.py:522
 #, c-format
 msgid "Lilo found - adding kernel to lilo and making it the default"
-msgstr "Найден Lilo - новое ядро будет загружено по умолчанию"
+msgstr ""
+"Lilo·encontrado·-·a�"
+"�adiendo·el·núcleo·a·lilo·y·poniéndolo·por·defecto"
 
 #: ../pkgaction.py:312
 #, c-format
 msgid "Name   : %s"
-msgstr "Имя    : %s"
+msgstr "Nombre···:·%s"
 
 #: ../rpmUtils.py:144
 #, c-format
 msgid "Could not open RPM database for reading. Perhaps it is already in use?"
 msgstr ""
-"Невозможно открыть базу RPM для чтения. Возможно база уже используется."
+"No·se·puede·abrir·la·base·de·datos·RPM·para·leerla."
+"·¿Puede·que·ya·esté·en·uso?"
 
 #: ../clientStuff.py:572
 #, c-format
 msgid "[update: %s]"
-msgstr "[обновить: %s]"
+msgstr "[actualizar:·%s]"
 
 #: ../clientStuff.py:939
 #, c-format
 msgid "The file %s is damaged."
-msgstr "Файл %s поврежден."
+msgstr "El·archivo·%s·está·dañado."
 
 #: ../urlgrabber.py:333
 #, c-format
 msgid "ERROR: Url Return no Content-Length  - something is wrong"
-msgstr "ОШИБКА: URL не возвращает параметр Content-Length  - что-то не так"
+msgstr ""
+"ERROR:·La·dirección·devuelta·no·es·suficientemente·larga··-"
+"·algo·está·equivocado"
 
 #: ../clientStuff.py:809
 #, c-format
 msgid "Got a file - yay"
-msgstr "Найден файл - ой"
+msgstr "Obtenido·el·archivo·-·yay"
 
 #: ../pkgaction.py:257
 #, c-format
 msgid "From %s updating %s"
-msgstr "Из %s обновить %s"
+msgstr "Desde·%s·actualizando·%s"
 
 #: ../yummain.py:346
-#, fuzzy, c-format
+#, c-format
 msgid "Test transaction complete, Success!"
-msgstr "Транзакция Завершена"
+msgstr "Test·de·transacción·completo,·¡éxito!"
 
 #: ../pkgaction.py:71
 #, c-format
 msgid "Cannot find a package matching %s"
-msgstr "Hе удается найти пакет совпадающий с %s"
+msgstr "No·se·puede·encontrar·el·paquete·competente·%s"
 
 #: ../pkgaction.py:267
 #, c-format
 msgid "Repo"
-msgstr "Репозиторий"
+msgstr "Repositorio"
 
 #: ../yummain.py:152
 #, c-format
 msgid "Existing lock %s: another copy is running. Aborting."
-msgstr "Файл %s существует, другая копия yum запущена. Выход."
+msgstr "Bloqueo·existente·%s:·otra·copia·está·corriendo.·Abortando."
 
 #: ../yummain.py:143
 #, c-format
@@ -977,191 +1016,160 @@ msgstr ""
 #: ../rpmUtils.py:257 ../rpmUtils.py:260 ../rpmUtils.py:263
 #, c-format
 msgid "Damaged Header %s"
-msgstr "Плохой заголовок %s"
+msgstr "Cabecera·dañada·%s"
 
 #: ../clientStuff.py:1144
 #, c-format
 msgid "Cleaning packages"
-msgstr "Удаление пакетов"
+msgstr "Limpiando·paquetes"
 
 #: ../pkgaction.py:317
 #, c-format
 msgid "Group  : %s"
-msgstr "Группа: %s"
+msgstr "Grupo··:·%s"
 
 #: ../clientStuff.py:822
 #, c-format
 msgid "Server: %s"
-msgstr "Сервер: %s"
+msgstr "Servidor:·%s"
 
 #: ../pkgaction.py:543
 #, c-format
 msgid "No bootloader found, Cannot configure kernel."
-msgstr "Загрузчик не найден, загрузка нового ядра не настроена."
+msgstr ""
+"Ningún·cargador·de·arranque·encontrado,"
+"·no·se·puede·configurar·el·núcleo."
 
 #: ../pkgaction.py:267
 #, c-format
 msgid "Name"
-msgstr "Название"
+msgstr "Nombre"
 
 #: ../clientStuff.py:563
 #, c-format
 msgid "[install: %s]"
-msgstr "[установить: %s]"
+msgstr "[instalar:·%s]"
 
 #: ../pkgaction.py:201
 #, c-format
 msgid "Erase: No matches for %s"
-msgstr "Удалить: Нет совпадений с %s"
+msgstr "Eliminar:·Ningún·resultado·para·%s"
 
 #: ../pkgaction.py:316
 #, c-format
 msgid "Size   : %s"
-msgstr "Размер: %s"
+msgstr "Tamaño···:·%s"
 
 #: ../callback.py:55
 #, c-format
 msgid "No header - huh?"
-msgstr "Нет заголовка - блин?"
+msgstr "Ninguna·cabecera·-·huh?"
 
 #: ../clientStuff.py:1147
 #, c-format
 msgid "Cleaning all headers"
-msgstr "Удаление всех заголовков"
+msgstr "Limpiando·todas·las·cabeceras"
 
 #: ../serverStuff.py:100
 #, c-format
 msgid "depcheck: package %s needs %s"
-msgstr "зависимости: пакету %s необходим %s"
+msgstr "chequeo·de·dependencias:·el·paquete·%s·necesita·%s"
 
 #: ../clientStuff.py:847
 #, c-format
 msgid "Error - %s cannot be found"
-msgstr "Ошибка - %s не найден"
+msgstr "Error·-·%s·no·puede·ser·encontrado"
 
 #: ../rpmUtils.py:46
 #, c-format
 msgid "RPM %s fails md5 check"
-msgstr "Ошибка проверки md5-суммы пакета %s "
+msgstr "Falla·el·chequeo·md5·para·el·paquete·RPM·%s"
 
 #: ../callback.py:85
 #, c-format
 msgid "Erasing: %s %d/%d"
-msgstr "Удаление: - %s - %d/%d"
+msgstr "Eliminando:·%s·%d/%d"
 
 #: ../pkgaction.py:261
 #, c-format
 msgid "Nothing in any group to update or install"
-msgstr "Нечего обновлять или устанавливать"
+msgstr "Nada·en·ningún·grupo·para·actualizar·o·instalar"
 
 #: ../pkgaction.py:313
 #, c-format
 msgid "Arch   : %s"
-msgstr "Арх.   : %s"
+msgstr "Arquitectura···:·%s"
 
 #: ../nevral.py:56
 #, c-format
 msgid "No Package %s, %s"
-msgstr "Нет пакета %s, %s"
+msgstr "Ningún·paquete·%s,·%s"
 
 #: ../pkgaction.py:84
 #, c-format
 msgid "No Packages Available for Update"
-msgstr "Нет пакетов доступных для обновления"
+msgstr "Ningún·paquete·disponible·para·actualizar"
 
 #: ../pkgaction.py:539
 #, c-format
 msgid "Grub found - making this kernel the default"
-msgstr "Обнаружен Grub - ядро устанавливается выбранным по умолчанию"
+msgstr "Grub·encontrado·-·poniendo·por·defecto·este·núcleo"
 
 #: ../clientStuff.py:1226
 #, c-format
 msgid "Error: Unsigned Package %s"
-msgstr "Ошибка: Не подписанный пакет %s"
+msgstr "Error:·Paquete·no·firmado·%s"
 
 #: ../clientStuff.py:1177
 #, c-format
 msgid "Damaged RPM %s, removing."
-msgstr "Поврежденный пакет %s, удаление."
+msgstr "Paquete·RPM·dañado·%s,·borrando."
 
 #: ../nevral.py:90
 #, c-format
 msgid "Bad Header for pkg %s.%s trying to get headers for the nevral - exiting"
-msgstr "Поврежден заголовок пакет %s.%s завершает работу"
+msgstr ""
+"Cabecera·defectuosa·para·el·paquete·%s.%"
+"s·intentando·obtener·cabeceras·para·el·nevral·-·saliendo"
 
 #: ../clientStuff.py:1214 ../clientStuff.py:1223
 #, c-format
 msgid "Error: You may also check that you have the correct GPG keys installed"
-msgstr "Ошибка: Необходимо убедиться в том что вы имеете подходящий gpg ключ"
+msgstr ""
+"Error:"
+"·Tienes·que·chequear·también·que·tienes·las·llaves·GPG·correctas·instaladas"
 
 #: ../pkgaction.py:215
 #, c-format
 msgid "Group %s does not exist"
-msgstr "Группа %s не существует"
+msgstr "El·grupo·%s·no·existe"
 
 #: ../config.py:246
 #, c-format
 msgid "Failed to find section: %s"
-msgstr "Не найдена секция: %s"
+msgstr "Falló·la·búsqueda·de·la·sección:·%s"
 
 #: ../serverStuff.py:87
 #, c-format
 msgid "ignoring bad rpm: %s"
-msgstr "игнорируется пакет: %s"
+msgstr "ignorando·el·paquete·RPM·defectuoso:·%s"
 
 #: ../pullheaders.py:137
 #, c-format
 msgid "Directory of rpms must be a directory."
-msgstr "Каталог с пакетами должен быть КАТАЛОГОМ!"
+msgstr "El·directorio·de·paquetes·RPM·debe·ser·un·directorio."
 
 #: ../clientStuff.py:1345
 #, c-format
 msgid "failover: out of servers to try"
-msgstr ""
+msgstr "failover:·ningún·servidor·para·intentar"
 
 #: ../clientStuff.py:834
 #, c-format
 msgid "Getting header.info from server"
-msgstr "Получение файла header.info"
+msgstr "Obteniendo·header.info·desde·el·servidor"
 
 #: ../nevral.py:54
 #, c-format
 msgid "No Package %s"
-msgstr "Пакет %s не найден"
-
-#~ msgid "Getting groups from servers"
-#~ msgstr "Получение групп с серверов"
-
-#~ msgid "Is this ok [y/N]: "
-#~ msgstr "Выполнить [y/N]: "
-
-#~ msgid "Error reported but not a disk space error"
-#~ msgstr "Получена ошибка отлична от ошибки \"недостаточно места на диске\""
-
-#~ msgid "You appear to have insufficient disk space to handle these packages"
-#~ msgstr ""
-#~ "Не найдено достаточно дискового пространства для выполнения действий над "
-#~ "пакетами"
-
-#~ msgid "Error: Disk space Error"
-#~ msgstr "Ошибка: Недостаточно места на диске"
-
-#~ msgid "Mount error: %s"
-#~ msgstr "Ошибка присоединения: %s"
-
-#~ msgid "Calculating available disk space - this could take a bit"
-#~ msgstr ""
-#~ "Проверка доступности необходимого места на диске.\n"
-#~ "Это может занять некоторое время."
-
-#~ msgid "Wrong disk!"
-#~ msgstr "Не тот диск!"
-
-#~ msgid "Removing dumb arch for install only pkg: %s"
-#~ msgstr "Удаление пустой архитектуры для установки пакета: %s"
-
-#~ msgid "Insert disk \"%s\" and press enter\n"
-#~ msgstr "Вставьте диск \"%s\" и нажмите 'Enter'\n"
-
-#~ msgid "%s dirs you want to check"
-#~ msgstr "%s каталоги, которые вы хотите проверить"
+msgstr "Ningún·paquete·%s"
