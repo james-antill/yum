@@ -296,7 +296,7 @@ class nevral:
         del deps
         del _ts
         log(5, 'Long Check')
-    	depscopy = []
+        depscopy = []
         unresolveableloop = 0
         while CheckDeps==1 or conflicts != 1 or unresolvable != 1:
             errors=[]
