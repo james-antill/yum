@@ -5,6 +5,8 @@ Release: 1
 License: GPL
 Group: System Environment/Base
 Source: %{name}-%{version}.tar.gz
+#Source1: yum.conf
+#Source2: yum.cron
 URL: http://www.dulug.duke.edu/yum/
 BuildRoot: %{_tmppath}/%{name}-%{version}root
 BuildArchitectures: noarch
@@ -30,6 +32,8 @@ make
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 make DESTDIR=$RPM_BUILD_ROOT install
+# install -m 644 %{SOURCE1} $RPM_BUILD_ROOT/etc/yum.conf
+# install -m 644 %{SOURCE2} $RPM_BUILD_ROOT/etc/cron.daily/yum.cron
 
 %find_lang %{name}
 
@@ -68,6 +72,10 @@ exit 0
 %{_mandir}/man*/*
 
 %changelog
+* Sat Jun  7 2003 Seth Vidal <skvidal@phy.duke.edu>
+- add stubs to spec file for rebuilding easily with custom yum.conf and
+- yum.cron files
+
 * Sat May 31 2003 Seth Vidal <skvidal@phy.duke.edu>
 - bump to 1.98
 
