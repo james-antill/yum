@@ -224,7 +224,8 @@ def upgradepkgs(tsnevral, hinevral, rpmnevral, nulist, uplist, obsoleted, obsole
                 else:
                     log(4,"Updating: %s" % name)
                     ((e, v, r, a, l, i), s)=hinevral._get_data(name, arch)
-                     tsnevral.add((name,e,v,r,a,l,i),'u')
+                    tsnevral.add((name,e,v,r,a,l,i),'u')
+                    
         if not pkgfound:
             if rpmnevral.exists(n):
                 errorlog(1,"No Upgrades available for %s." % (n))
