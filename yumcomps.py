@@ -261,6 +261,17 @@ class Groups_Info:
                 pkglist.append(pkg)
                 
         return pkglist
+        
+    def requiredGroups(self, groupname):
+        """return a list of required groups for this group. Do not recurse 
+        through the groups"""
+        grplist = []
+        for group in self.subgroups[groupname] + self.mandatory_metapkgs[groupname] + self.default_metapkgs[groupname]:
+            if group not in grplist:
+                grplist.append(group)
+         
+         return grouplist
+    
     def allPkgs(self, groupname):
         """duh - return list of all pkgs in group"""
         pkglist = self.requiredPkgs(groupname) + self.optional_pkgs[groupname]
