@@ -600,7 +600,7 @@ def get_groups_from_servers(serveridlist):
         if not conf.cache:
             log(3, 'getting groups from server: %s' % serverid)
             try:
-                localgroupfile = grab(serverid, remotegroupfile, localgroupfile, copy_local=1)
+                localgroupfile = grab(serverid, remotegroupfile, localgroupfile, nofail=1, copy_local=1)
             except URLGrabError, e:
                 log(3, 'Error getting file %s' % remotegroupfile)
                 log(3, '%s' % e)
@@ -713,8 +713,11 @@ def take_action(cmds, nulist, uplist, newlist, obsoleting, tsInfo, HeaderInfo, r
             errorlog(0, _('Need to pass a list of pkgs to install'))
             usage()
         else:
-            pkgaction.installpkgs(tsInfo, nulist, cmds, HeaderInfo, rpmDBInfo, 1)
-    
+            if conf.tolerant:
+                pkgaction.installpkgs(tsInfo, nulist, cmds, HeaderInfo, rpmDBInfo, 0)
+            else: 
+                pkgaction.installpkgs(tsInfo, nulist, cmds, HeaderInfo, rpmDBInfo, 1)
+                
     elif basecmd == 'provides':
         if len(cmds) == 0:
             errorlog(0, _('Need a provides to match'))
@@ -728,22 +731,31 @@ def take_action(cmds, nulist, uplist, newlist, obsoleting, tsInfo, HeaderInfo, r
     
     elif basecmd == 'update':
         if len(cmds) == 0:
-            pkgaction.updatepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, 'all', 1)
+            pkgaction.updatepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, 'all', 0)
         else:
-            pkgaction.updatepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, cmds, 1)
+            if conf.tolerant:
+                pkgaction.updatepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, cmds, 0)
+            else:
+                pkgaction.updatepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, cmds, 1)
             
     elif basecmd == 'upgrade':
         if len(cmds) == 0:
-            pkgaction.upgradepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, obsoleted, obsoleting, 'all')
+            pkgaction.upgradepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, obsoleted, obsoleting, 'all', 0)
         else:
-            pkgaction.upgradepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, obsoleted, obsoleting, cmds)
+            if conf.tolerant:
+                pkgaction.upgradepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, obsoleted, obsoleting, cmds, 1)
+            else:
+                pkgaction.upgradepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, obsoleted, obsoleting, cmds, 0)
     
     elif basecmd in ('erase', 'remove'):
         if len(cmds) == 0:
-            errorlog (0, _('Need to pass a list of pkgs to erase'))
             usage()
+            errorlog (0, _('Need to pass a list of pkgs to erase'))
         else:
-            pkgaction.erasepkgs(tsInfo, rpmDBInfo, cmds)
+            if conf.tolerant:
+                pkgaction.erasepkgs(tsInfo, rpmDBInfo, cmds, 0)
+            else:
+                pkgaction.erasepkgs(tsInfo, rpmDBInfo, cmds, 1)
     
     elif basecmd == 'check-update':
         if len(uplist) > 0:
@@ -940,18 +952,25 @@ def descfsize(size):
         size = size / 1000000000.0
         return "%.2f GB" % size
 
-def grab(serverID, url, filename=None, copy_local=0, close_connection=0,
+def grab(serverID, url, filename=None, nofail=0, copy_local=0, 
+          close_connection=0,
           progress_obj=None, throttle=None, bandwidth=None,
           numtries=3, retrycodes=[-1,2,4,5,6,7], checkfunc=None):
 
     """Wrap retry grab and add in failover stuff.  This needs access to
     the conf class as well as the serverID.
 
+    nofail -- Set to true to go through the failover object without
+       incrimenting the failures counter.  (Actually this just resets
+       the failures counter.)  Usefull in the yumgroups.xml special case.
+
     We do look at retrycodes here to see if we should return or failover.
     On fail we will raise the last exception that we got."""
 
     fc = conf.get_failClass(serverID)
     base = ''
+    findex = fc.get_index()
+    
     for root in conf.serverurl[serverID]:
         if string.find(url, root) == 0:
             # We found the current base this url is made of
@@ -965,6 +984,7 @@ def grab(serverID, url, filename=None, copy_local=0, close_connection=0,
     log(3, "failover: path = " + filepath)
 
     # don't trust the base that the user supplied
+    # this call will return the same thing as fc.get_serverurl(findex)
     base = fc.get_serverurl()
     while base != None:
         # Loop over baseURLs until one works or all are dead
@@ -978,11 +998,16 @@ def grab(serverID, url, filename=None, copy_local=0, close_connection=0,
             # What?  We were successful?
         except URLGrabError, e:
             if e.errno in retrycodes:
-                errorlog(1, "retrygrab() failed for %s -- executing failover method" % base)
-                fc.server_failed()
-                base = fc.get_serverurl()
+                errorlog(1, "retrygrab() failed for:\n  %s%s\n  Executing failover method" % (base, filepath))
+                if nofail:
+                    findex = findex + 1
+                    base = fc.get_serverurl(findex)
+                else:
+                    fc.server_failed()
+                    base = fc.get_serverurl()
                 if base == None:
-                    errorlog(1, "failover: out of servers to try")
+                    if not nofail:
+                        errorlog(1, "failover: out of servers to try")
                     raise
             else:
                 raise

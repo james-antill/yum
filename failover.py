@@ -29,17 +29,33 @@ class baseFailOverMethod:
         self.serverID = serverID
         self.failures = 0
     
-    def get_serverurl(self):
-        "Returns a serverurl based on this failover method or None if complete failure."
+    def get_serverurl(self, i=None):
+        """Returns a serverurl based on this failover method or None 
+           if complete failure.  If i is given it is a direct index
+           to pull a server URL from instead of using the failures 
+           counter."""
         return None
         
     def server_failed(self):
         "Tells the failover method that the current server is failed."
         self.failures = self.failures + 1
         
-    def reset(self):
-        "Reset the failures counter."
-        self.failures = 0
+    def reset(self, i=0):
+        "Reset the failures counter to a given index."
+        self.failures = i
+
+    def get_index(self):
+        """Returns the current number of failures which is also the
+           index into the list this object represents.  ger_serverurl()
+           should always be used to translate an index into a URL
+           as this object may change how indexs map.  (See RoundRobin)"""
+
+        return self.failures
+   
+    def len(self):
+        """Returns the how many URLs we've got to cycle through."""
+
+        return len(self.conf.serverurl[self.serverID])
         
             
 
@@ -47,13 +63,18 @@ class priority(baseFailOverMethod):
 
     """Chooses server based on the first success in the list."""
     
-    def get_serverurl(self):
+    def get_serverurl(self, i=None):
         "Returns a serverurl based on this failover method or None if complete failure."
         
-        if self.failures >= len(self.conf.serverurl[self.serverID]):
+        if i == None:
+            index = self.failures
+        else:
+            index = i
+        
+        if index >= len(self.conf.serverurl[self.serverID]):
             return None
         
-        return self.conf.serverurl[self.serverID][self.failures]
+        return self.conf.serverurl[self.serverID][index]
         
         
     
@@ -66,11 +87,18 @@ class roundRobin(baseFailOverMethod):
         random.seed()
         self.offset = random.randint(0, 37)
     
-    def get_serverurl(self):
+    def get_serverurl(self, i=None):
         "Returns a serverurl based on this failover method or None if complete failure."
+
+        if i == None:
+            index = self.failures
+        else:
+            index = i
         
-        if self.failures >= len(self.conf.serverurl[self.serverID]):
+        if index >= len(self.conf.serverurl[self.serverID]):
             return None
         
-        i = (self.failures + self.offset) % len(self.conf.serverurl[self.serverID])
-        return self.conf.serverurl[self.serverID][i]    
+        rr = (index + self.offset) % len(self.conf.serverurl[self.serverID])
+        return self.conf.serverurl[self.serverID][rr]   
+
+# SDG

@@ -35,6 +35,12 @@ full directory and file name for where yum should write its log file.
 1 or 0 - tells yum whether or not to prompt you for confirmation of actions.
 Same as -y on the command line. Default to 0.
 
+.IP \fBtolerant\fR
+1 or 0 - Tells yum to be tolerant of errors on the command line with regard to 
+packages. For example: if you request to install foo, bar and baz and baz is 
+installed; yum won't error out complaining that baz is already installed.
+same as -t on the command line. Default to 0(not tolerant)
+
 .IP \fBpkgpolicy=\fI[newest|last]\fR
 Default: \fInewest\fR.  Package sorting order.  When a package is available from 
 multiple servers, \fInewest\fR will install the most recent version of the package 

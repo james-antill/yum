@@ -68,7 +68,8 @@ def installpkgs(tsnevral, nulist, userlist, hinevral, rpmnevral, exitoninstalled
                         sys.exit(1)
                 else:
                     errorlog(0, _("Cannot find a package matching %s") % (n))
-                    sys.exit(1)
+                    if exitoninstalled:
+                        sys.exit(1)
             
     else:
         errorlog(1, _("No Packages Available for Update or Install"))
@@ -115,9 +116,10 @@ def updatepkgs(tsnevral, hinevral, rpmnevral, nulist, uplist, userlist, exitonin
                     sys.exit(1)
             else:
                 errorlog(0,"Cannot find any package matching %s available to be updated." % (n))
-                sys.exit(1)
+                if exitoninstalled:
+                    sys.exit(1)
             
-def upgradepkgs(tsnevral, hinevral, rpmnevral, nulist, uplist, obsoleted, obsoleting, userlist):
+def upgradepkgs(tsnevral, hinevral, rpmnevral, nulist, uplist, obsoleted, obsoleting, userlist, exitoninstalled):
     # must take user arguments
     # this is just like update except it must check for obsoleting pkgs first
     # so if foobar = 1.0 and you have foobar-1.1 in the repo and bazquux1.2 
@@ -175,9 +177,11 @@ def upgradepkgs(tsnevral, hinevral, rpmnevral, nulist, uplist, obsoleted, obsole
                     errorlog(0,"No Upgrades available.")
                 else:
                     errorlog(0,"Cannot find any package matching %s available to be upgraded." % (n))
-            sys.exit(1)
+            if exitoninstalled:
+                sys.exit(1)
+            
 
-def erasepkgs(tsnevral,rpmnevral,userlist):
+def erasepkgs(tsnevral,rpmnevral,userlist, exitoninstalled):
     #mark for erase iff the userlist item exists in the rpmnevral
     # one thing this should do - it should look at the name of each item and see
     # if it is specifying a certain version of a pkg
@@ -194,7 +198,8 @@ def erasepkgs(tsnevral,rpmnevral,userlist):
                 tsnevral.add((name,e,v,r,a,l,i),'e')
         if foundit == 0:
             errorlog(0, _("Erase: No matches for %s") % n)
-            sys.exit(1)
+            if exitoninstalled:
+                sys.exit(1)
 
 def installgroups(rpmnevral, nulist, uplist, grouplist):
     """for each group requested attempt to install all pkgs/metapkgs of default
@@ -229,23 +234,26 @@ def updategroups(rpmnevral, nulist, uplist, userlist):
         for item in userlist:
             if group == item or fnmatch.fnmatch(group, item):
                 groupsmatch.append(group)
-        
+    uplist_names = []
     groupsmatch.sort()
     updatepkgs = []
     installpkgs = []
+    for (name, arch) in uplist:
+        uplist_names.append(name)
+
         
     for group in groupsmatch:
         required = GroupInfo.requiredPkgs(group)
         all = GroupInfo.pkgTree(group)
         for pkg in all:
             if rpmnevral.exists(pkg):
-                if pkg in uplist:
+                if pkg in uplist_names:
                     updatepkgs.append((group, pkg))
             else:
                 if pkg in required:
                     installpkgs.append((group, pkg))
     for (group, pkg) in updatepkgs:
-        log(2, ' From %s updating %s' % (group, pkg))
+        log(2, 'From %s updating %s' % (group, pkg))
     for (group, pkg) in installpkgs:
         log(2, 'From %s installing %s' % (group, pkg))
     if len(installpkgs) + len(updatepkgs) == 0:
