@@ -922,7 +922,7 @@ def download_headers(HeaderInfo, nulist):
                 log(4, _('getting %s from comps db') % (LocalHeaderFile))
                 hdrobj = compsdict[(name, arch, e, v, r)]
                 serverid = HeaderInfo.serverid(name, arch)
-                basepath = conf.serverhdrdir[i]
+                basepath = conf.serverhdrdir[serverid]
                 hdrfn = hdrobj.writeHeader(basepath, 1)
             else:                
                 try:
