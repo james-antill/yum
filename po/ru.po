@@ -258,7 +258,6 @@ msgid ""
 "   -l  = use symlinks as valid rpms when building headers\n"
 "   -q  = make the display more quiet"
 msgstr ""
-"\n"
 "Использование:\n"
 "    yum-arch [-v] [-z] [-l] [-c] [-n] [-d] [-q] [-vv] каталог-RPM\n"
 "         -d  = проверять конфликты и зависимости в дереве\n"
@@ -271,7 +270,7 @@ msgstr ""
 "         -z  = сжимать заголовки с помощью алгоритма gzip [по умолчанию "
 "включено]\n"
 "         -l  = разрешить использование символических ссылок\n"
-"         -q  = \"молчаливый\" режим\n"
+"         -q  = \"молчаливый\" режим"
 
 #: ../yummain.py:271
 msgid "Transaction(s) Complete"
@@ -470,7 +469,7 @@ msgstr "У вас нет достаточных прав для установки пакетов"
 
 #: ../pkgaction.py:346
 msgid "Error: MD5 Signature check failed for %s"
-msgstr "Ошибка: Некорректная сигнатура MD5 в пакете %s\n"
+msgstr "Ошибка: Некорректная сигнатура MD5 в пакете %s"
 
 #: ../pkgaction.py:65
 msgid "Cannot find a package matching %s"
