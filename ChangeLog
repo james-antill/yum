@@ -1,3 +1,52 @@
+2003-04-16 00:50  skvidal
+
+	* Makefile.in, checkbootloader.py, yum.spec, bin/yum, bin/yum-arch:
+	
+	fixed some tabs in checkbootloader.py changed Makefile.in, yum and
+	yum-arch to reflect fhs compliance Thanks to Ville SkyttÃ¤
+
+2003-04-14 01:42  skvidal
+
+	* rpmUtils.py, yummain.py: 
+	this won't solve the rpmdb locking problem need more info
+
+2003-04-13 22:49  skvidal
+
+	* etc/yum.conf: 
+	fix $release -> $releasever
+
+2003-04-09 11:13  mstenner
+
+	* urlgrabber.py: moved the content-length check in urlgrab, now
+	local files are not created if that error is encountered
+
+2003-04-09 07:54  skvidal
+
+	* yum.spec: 
+	fixes to spec file from fedora project
+
+2003-04-09 02:18  skvidal
+
+	* yumcomps.py: 
+	"fix" for empty file traceback in libxml2 from comps.py
+
+2003-04-08 00:10  skvidal
+
+	* nevral.py: 
+	oh look, I named a variable wrong twice in a row within 2 lines of
+	the right one.
+
+2003-04-07 01:24  skvidal
+
+	* clientStuff.py, yummain.py: 
+	<sigh> last minute stupidity with log levels and which log I used
+	for group download errors
+
+2003-04-07 01:14  skvidal
+
+	* ChangeLog, Makefile.in: 
+	updates to Makefile to remove old stuff
+
 2003-04-07 01:07  skvidal
 
 	* ChangeLog, Makefile.in, configure.in, yum.spec, docs/yum.8,
