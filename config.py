@@ -246,7 +246,7 @@ class yumconf:
     def _getsysver(self):
         ts = rpm.TransactionSet()
         ts.setVSFlags(~(rpm._RPMVSF_NOSIGNATURES|rpm._RPMVSF_NODIGESTS))
-        idx = ts.dbMatch('name', self.distroverpkg)
+        idx = ts.dbMatch('provides', self.distroverpkg)
         # we're going to take the first one - if there is more than one of these
         # then the user needs a beating
         if idx.count() == 0:
