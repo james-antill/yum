@@ -33,13 +33,28 @@ if uid == 0:
         pass
     else:
         fd = open(lockfile, 'r')
-        oldpid = fd.readline()
-        if not os.path.exists('/proc/' + oldpid):
+        try: oldpid = int(fd.readline())
+        except ValueError:
+            # bogus data in the pid file. Throw away.
             os.unlink(lockfile)
-            yumlock.lock(lockfile, mypid, 0644)
         else:
-            print _('Existing lock %s. Aborting, running program.') % lockfile
-            sys.exit(1)
+            try: os.kill(oldpid, 0)
+            except OSError, e:
+                import errno
+                if e[0] == errno.ESRCH:
+                    # The pid doesn't exist
+                    os.unlink(lockfile)
+                else:
+                    # Whoa. What the heck happened?
+                    print _('Unable to check if PID %s is active') % oldpid
+                    sys.exit(1)
+            else:
+                # Another copy seems to be running.
+                msg = _('Existing lock %s: another copy is running. Aborting.')
+                print msg % lockfile
+                sys.exit(1)
+        # lock again.
+        yumlock.lock(lockfile, mypid, 0644)
 
 try:
     yummain.main(sys.argv[1:])
