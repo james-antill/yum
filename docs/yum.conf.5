@@ -107,7 +107,9 @@ baseurl=url://server1/path/to/repository/
 .br
         url://server3/path/to/repository/
 .br
-
+If you list more than one baseurl= statement in a repository you will find
+yum will ignore the earlier ones and probably act bizarrely. Don't do this,
+you've been warned.
 
 .IP \fBname\fR
 a human readable string describing the repository.
