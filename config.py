@@ -83,8 +83,8 @@ class yumconf:
         # this is ugly and dirty like Zebra - but I'd like for a lot of users
         # of fedora to hush about the header download until I get the
         # new metadata work done.
-        self.hdlist = '/usr/share/comps/i386/hdlist'
-        self.hdlist2 = '/usr/share/comps/i386/hdlist2'
+        self.hdlist = '/usr/share/comps/%s/hdlist' % self.yumvar['basearch']
+        self.hdlist2 = '/usr/share/comps/%s/hdlist2' % self.yumvar['basearch']
         self.usecomps = 1
         self.downloadonly = 0
         self.bandwidth = None

@@ -859,14 +859,21 @@ def returnCompsHeaders():
     if conf.usecomps:
         fd = None
         fd2 = None
+        hdrlist = []
         if os.path.exists(conf.hdlist):
             fd = os.open(conf.hdlist, os.O_RDONLY)
             if os.path.exists(conf.hdlist2): # only open this one if the other one exists
                 fd2 = os.open(conf.hdlist2, os.O_RDONLY)
         if fd:
-            hdrlist = rpm.readHeaderListFromFD(fd)
+            try:
+                hdrlist = rpm.readHeaderListFromFD(fd)
+            except rpm.error:
+                pass
         if fd2:
-            rpm.mergeHeaderListFromFD(hdrlist, fd, 1000004)
+            try:
+                rpm.mergeHeaderListFromFD(hdrlist, fd, 1000004)
+            except rpm.error:
+                pass
 
         del fd
         del fd2
