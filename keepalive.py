@@ -55,7 +55,7 @@ import urllib2
 import httplib
 import socket
 
-VERSION = (0, 1)
+VERSION = (0, 2)
 #STRING_VERSION = '.'.join(map(str, VERSION))
 DEBUG = 0
 HANDLE_ERRORS = 1
@@ -119,11 +119,10 @@ class HTTPHandler(urllib2.HTTPHandler):
             if not h is None:
                 try:
                     self._start_connection(h, req)
-                except socket.error, e:
+                    r = h.getresponse()
+                except (socket.error, httplib.ResponseNotReady,
+                        httplib.BadStatusLine):
                     r = None
-                else:
-                    try: r = h.getresponse()
-                    except httplib.ResponseNotReady, e: r = None
                     
                 if r is None or r.version == 9:
                     # httplib falls back to assuming HTTP 0.9 if it gets a
@@ -151,7 +150,7 @@ class HTTPHandler(urllib2.HTTPHandler):
             print "STATUS: %s, %s" % (r.status, r.reason)
         r._handler = self
         r._host = host
-        r._url = req.get_full_url
+        r._url = req.get_full_url()
 
         if r.status == 200 or not HANDLE_ERRORS:
             return r
