@@ -167,7 +167,7 @@ class yumconf:
         if idx.count() == 0:
             releasever = 'Null'
         else:
-            hdr = idx.first()
+            hdr = idx.next()
             releasever = hdr['version']
 
         return releasever

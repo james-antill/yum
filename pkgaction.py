@@ -217,9 +217,12 @@ def updategroups(rpmnevral, nulist, uplist, userlist):
                 if pkg in required:
                     installpkgs.append((group, pkg))
     for (group, pkg) in updatepkgs:
-        print ' From %s updating %s' % (group, pkg)
+        log(2, ' From %s updating %s' % (group, pkg))
     for (group, pkg) in installpkgs:
-        print 'From %s installing %s' % (group, pkg)
+        log(2, 'From %s installing %s' % (group, pkg))
+    if len(installpkgs) + len(updatepkgs) == 0:
+        log(2,'Nothing in any group to update or install')
+    return installpkgs, updatepkgs
              
 def listpkginfo(pkglist, userlist, nevral, short):
     if len(pkglist) > 0:
@@ -234,9 +237,7 @@ def listpkginfo(pkglist, userlist, nevral, short):
                         (e,v,r)=nevral.evr(name,arch)
                         print "%-40s %-10s %s-%s" %(name, arch, v, r)
                     else:
-                        hdr=nevral.getHeader(name,arch)
-                        displayinfo(hdr)
-                        del hdr
+                        displayinfo(name, arch, nevral)
                 print ' '
         else:    
             for (name,arch) in pkglist:
@@ -246,20 +247,26 @@ def listpkginfo(pkglist, userlist, nevral, short):
                             (e,v,r)=nevral.evr(name,arch)
                             print "%-40s %-10s %s-%s" %(name, arch, v, r)
                         else:
-                            hdr=nevral.getHeader(name,arch)
-                            displayinfo(hdr)
-                            del hdr
+                            displayinfo(name, arch, nevral)
             print ' '
     else:
         print _("No Packages Available to List")
 
-def displayinfo(hdr):
+def displayinfo(name, arch, nevral):
+    hdr = nevral.getHeader(name, arch)
+    id = nevral.serverid(name, arch)
+    if id == 'db':
+        repo = 'Locally Installed'
+    else:
+        repo = conf.servername[id]
+        
     print _("Name   : %s") % hdr[rpm.RPMTAG_NAME]
     print _("Arch   : %s") % hdr[rpm.RPMTAG_ARCH]
     print _("Version: %s") % hdr[rpm.RPMTAG_VERSION]
     print _("Release: %s") % hdr[rpm.RPMTAG_RELEASE]
     print _("Size   : %s") % clientStuff.descfsize(hdr[rpm.RPMTAG_SIZE])
     print _("Group  : %s") % hdr[rpm.RPMTAG_GROUP]
+    print _("Repo   : %s") % repo
     print _("Summary: %s") % hdr[rpm.RPMTAG_SUMMARY]
     print _("Description:\n %s") % hdr[rpm.RPMTAG_DESCRIPTION]
     print ""

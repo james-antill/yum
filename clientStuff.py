@@ -857,7 +857,17 @@ def take_action(cmds, nulist, uplist, newlist, obsoleting, tsInfo, HeaderInfo, r
         if len(cmds) == 0:
             errorlog(0, _('Need a list of groups to update'))
             sys.exit(1)
-        pkgaction.updategroups(rpmDBInfo, nulist, uplist, cmds)
+        installs, updates = pkgaction.updategroups(rpmDBInfo, nulist, uplist, cmds)
+        if len(updates) > 0:
+            pkglist = []
+            for (group, pkg) in updates:
+                pkglist.append(pkg)
+            pkgaction.updatepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, pkglist, 0)
+        if len(installs) > 0:
+            pkglist = []
+            for (group, pkg) in installs:
+                pkglist.append(pkg)
+            pkgaction.installpkgs(tsInfo, nulist, pkglist, HeaderInfo, rpmDBInfo, 0)
         
             
     elif basecmd == 'clean':
