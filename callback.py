@@ -21,54 +21,62 @@ import sys
 
 from i18n import _
 
-callbackfilehandles = {}
-def install_callback(what, bytes, total, h, user):
-    if what == rpm.RPMCALLBACK_TRANS_PROGRESS:
-        current=bytes+1
-#        sys.stdout.write('[%s/%s]' % (current, total))
-        pass
+class RPMInstallCallback:
+    def __init__(self):
+        self.callbackfilehandles = {}
+        self.total_actions = 0
+        self.total_installed = 0
+        self.total_removed = 0
+    def callback(self, what, bytes, total, h, user):
+        if what == rpm.RPMCALLBACK_TRANS_START:
+            if bytes == 6:
+                self.total_actions = total
         
-    elif what == rpm.RPMCALLBACK_TRANS_STOP:
-        pass
+        elif what == rpm.RPMCALLBACK_TRANS_PROGRESS:
+            pass
         
-    elif what == rpm.RPMCALLBACK_TRANS_START:
-        pass
+        elif what == rpm.RPMCALLBACK_TRANS_STOP:
+            pass
         
-    elif what == rpm.RPMCALLBACK_INST_OPEN_FILE:
-        hdr = None
-        if h != None:
-            hdr, rpmloc = h
-            handle = '%s:%s.%s-%s-%s' % (hdr[rpm.RPMTAG_EPOCH],
-              hdr[rpm.RPMTAG_NAME], hdr[rpm.RPMTAG_VERSION],
-              hdr[rpm.RPMTAG_RELEASE], hdr[rpm.RPMTAG_ARCH])
-            fd = os.open(rpmloc, os.O_RDONLY)
-            callbackfilehandles[handle]=fd
-            return fd
-        else:
-            print _("No header - huh?")
-  
-    elif what == rpm.RPMCALLBACK_INST_CLOSE_FILE:
-        hdr = None
-        if h != None:
-            hdr, rpmloc = h
-            handle = '%s:%s.%s-%s-%s' % (hdr[rpm.RPMTAG_EPOCH],
-              hdr[rpm.RPMTAG_NAME], hdr[rpm.RPMTAG_VERSION],
-              hdr[rpm.RPMTAG_RELEASE], hdr[rpm.RPMTAG_ARCH])
-        os.close(callbackfilehandles[handle])
-        fd = 0
-
-    elif what == rpm.RPMCALLBACK_INST_PROGRESS:
-        if h != None:
-            pkg, rpmloc = h
-            if total == 0:
-                percent = 0
+        elif what == rpm.RPMCALLBACK_INST_OPEN_FILE:
+            hdr = None
+            if h != None:
+                hdr, rpmloc = h
+                handle = '%s:%s.%s-%s-%s' % (hdr[rpm.RPMTAG_EPOCH],
+                    hdr[rpm.RPMTAG_NAME], hdr[rpm.RPMTAG_VERSION],
+                    hdr[rpm.RPMTAG_RELEASE], hdr[rpm.RPMTAG_ARCH])
+                fd = os.open(rpmloc, os.O_RDONLY)
+                self.callbackfilehandles[handle]=fd
+                self.total_installed += 1
+                return fd
             else:
-                percent = (bytes*100L)/total
-            if conf.debuglevel >= 2:
-                sys.stdout.write("\r%s %d %% done" % (pkg[rpm.RPMTAG_NAME], percent))
-                if bytes == total:
-                    print " "
-            
+                print _("No header - huh?")
+  
+        elif what == rpm.RPMCALLBACK_INST_CLOSE_FILE:
+            hdr = None
+            if h != None:
+                hdr, rpmloc = h
+                handle = '%s:%s.%s-%s-%s' % (hdr[rpm.RPMTAG_EPOCH],
+                  hdr[rpm.RPMTAG_NAME], hdr[rpm.RPMTAG_VERSION],
+                  hdr[rpm.RPMTAG_RELEASE], hdr[rpm.RPMTAG_ARCH])
+            os.close(self.callbackfilehandles[handle])
+            fd = 0
 
-        
-    
+        elif what == rpm.RPMCALLBACK_INST_PROGRESS:
+            if h != None:
+                pkg, rpmloc = h
+                if total == 0:
+                    percent = 0
+                else:
+                    percent = (bytes*100L)/total
+                if conf.debuglevel >= 2:
+                    sys.stdout.write("\r%s %d %% done %s/%s" % (pkg[rpm.RPMTAG_NAME], 
+                      percent, self.total_installed, self.total_actions))
+                    if bytes == total:
+                        print " "
+        elif what == rpm.RPMCALLBACK_UNINST_START:
+            pass
+        elif what == rpm.RPMCALLBACK_UNINST_STOP:
+            self.total_removed += 1
+            if conf.debuglevel >= 2:
+                print '%s %s/%s' % (h, self.total_removed, self.total_actions)

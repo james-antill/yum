@@ -301,7 +301,8 @@ def main(args):
         # documented anywhere.
         tsfin.check()
         tsfin.order()
-        errors = tsfin.run(callback.install_callback, '')
+        cb = callback.RPMInstallCallback()
+        errors = tsfin.run(cb.callback, '')
         if errors:
             errorlog(0, _('Errors installing:'))
             for error in errors:
