@@ -147,22 +147,23 @@ def main(args):
     # some quick checks - we know we don't have ANY rpms - so, umm what do we
     # do? - if we have a headers dir then maybe we already had some and its
     # a now-empty repo - well, lets clean it up
+    # If nothing there, create an empty repository and make a warning.
     # kill the hdrs, kill the header.info - write an empty one
     if len(rpms) == 0:
-        if os.path.exists(headerdir):
-            hdrlist = serverStuff.getfilelist(headerdir, '.hdr', [], 0)
-            removeCurrentHeaders(hdrlist)
-            if cmds['dosrpms']:
-                removeHeaderInfo(srcheaderinfo)
-                srcheaderfd = open(srcheaderinfo, "w")
-                srcheaderfd.close()
-            removeHeaderInfo(headerinfo)
-            headerfd = open(headerinfo, "w")
-            headerfd.close()
-            sys.exit(0)
-        else:
-            print _('No rpms to work with and no header dir. Exiting.')
-            sys.exit(1)
+        if not os.path.exists(headerdir):
+            print >> sys.stderr, _('No rpms to work with and no header dir. Creating an empty repository.')
+            os.makedirs(headerdir)
+
+        hdrlist = serverStuff.getfilelist(headerdir, '.hdr', [], 0)
+        removeCurrentHeaders(hdrlist)
+        if cmds['dosrpms']:
+            removeHeaderInfo(srcheaderinfo)
+            srcheaderfd = open(srcheaderinfo, "w")
+            srcheaderfd.close()
+        removeHeaderInfo(headerinfo)
+        headerfd = open(headerinfo, "w")
+        headerfd.close()
+        sys.exit(0)
             
     # depcheck if requested
     if cmds['checkdeps']:
