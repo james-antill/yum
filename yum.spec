@@ -1,6 +1,6 @@
 Summary: RPM installer/updater
 Name: yum
-Version: 1.96
+Version: 1.97
 Release: 1
 License: GPL
 Group: System Environment/Base
@@ -68,6 +68,9 @@ exit 0
 %{_mandir}/man*/*
 
 %changelog
+* Mon Apr 21 2003 Seth Vidal <skvidal@phy.duke.edu>
+- bump to 1.97
+
 * Wed Apr 16 2003 Seth Vidal <skvidal@phy.duke.edu>
 - moved to fhs compliance
 - ver to 1.96
