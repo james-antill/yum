@@ -268,7 +268,7 @@ def main(args):
     
     # Test run for disk space checks
     # only run it if diskspacecheck = 1 and if there is anything being installed
-    # or updated - erasures should need more disk space
+    # or updated - erasures shouldn't need more disk space
     if conf.diskspacecheck:
         if len(i_list+u_list+ud_list) > 0:
             tstest = clientStuff.create_final_ts(tsInfo)
