@@ -80,7 +80,8 @@ class yumconf:
         releasever = None
         self.bandwidth = None
         self.throttle = None
-        
+        self.installroot = '/'
+      
         if self._getoption('main','cachedir') != None:
             self.cachedir = self._getoption('main','cachedir')
         if self._getoption('main','debuglevel') != None:
@@ -109,6 +110,8 @@ class yumconf:
             self.bandwidth = self._getoption('main','bandwidth')
         if self._getoption('main', 'throttle') != None:
             self.throttle = self._getoption('main','throttle')
+        if self._getoption('main', 'installroot') != None:
+            self.throttle = self._getoption('main','installroot')
 
         # figure out what the releasever really is from the distroverpkg
         self.yumvar['releasever'] = self._getsysver(self.distroverpkg)

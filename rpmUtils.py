@@ -103,7 +103,7 @@ def formatRequire (name, version, flags):
 
 def openrpmdb():
     try:
-        db = rpm.TransactionSet('/')
+        db = rpm.TransactionSet(conf.installroot)
     except rpm.error, e:
         errorlog(0, _("Could not open RPM database for reading. Perhaps it is already in use?"))
     return db
@@ -217,6 +217,10 @@ class Rpm_Ts_Work:
     operate with a list of the Base objects above, so I can refer to any one object there
     not sure the best way to do this yet, more thinking involved"""
     def __init__(self, dbPath='/'):
+        if conf.installroot:
+            if conf.installroot != '/':
+                dbPath = conf.installroot
+
         self.ts = rpm.TransactionSet(dbPath)
         
         self.methods = ['addInstall', 'addErase', 'run', 'check', 'order', 'hdrFromFdno',

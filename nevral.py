@@ -229,8 +229,8 @@ class nevral:
     def populateTs(self, addavailable = 1):
         installonlypkgs = ['kernel', 'kernel-bigmem', 'kernel-enterprise',
                            'kernel-smp', 'kernel-debug']
-                           
-        _ts = rpmUtils.Rpm_Ts_Work('/')
+                     
+        _ts = rpmUtils.Rpm_Ts_Work(conf.installroot)
         for (name, arch) in self.NAkeys(): 
             if self.state(name, arch) in ('u','ud','iu'):
                 log(4,'Updating: %s, %s' % (name, arch))

@@ -35,7 +35,7 @@ from i18n import _
 
 
 def parseCmdArgs(args):
-    
+   
     # setup our errorlog object 
     errorlog=Logger(threshold=2, file_object=sys.stderr)
 
@@ -45,12 +45,17 @@ def parseCmdArgs(args):
         yumconffile="/etc/yum.conf"
         
     try:
-        gopts, cmds = getopt.getopt(args, 'tCc:hR:e:d:y', ['help'])
+        gopts, cmds = getopt.getopt(args, 'tCc:hR:e:d:y', ['help','installroot='])
     except getopt.error, e:
         errorlog(0, _('Options Error: %s') % e)
         usage()
    
     try: 
+        for o,a in gopts:
+            if o == '--installroot':
+                if os.access(a + "/etc/yum.conf", os.R_OK):
+                    yumconffile = a + '/etc/yum.conf'
+
         for o,a in gopts:
             if o == '-R':
                 sleeptime=random.randrange(int(a)*60)
@@ -78,20 +83,23 @@ def parseCmdArgs(args):
             filelog=Logger(threshold=10, file_object=None,preprefix=clientStuff.printtime())
 
         for o,a in gopts:
-            if o =='-d':
+            if o == '-d':
                 log.threshold=int(a)
                 conf.debuglevel=int(a)
-            if o =='-e':
+            if o == '-e':
                 errorlog.threshold=int(a)
                 conf.errorlevel=int(a)
-            if o =='-y':
+            if o == '-y':
                 conf.assumeyes=1
             if o in ('-h', '--help'):
                 usage()
-            if o =='-C':
+            if o == '-C':
                 conf.cache=1
             if o == '-t':
                 conf.tolerant=1
+            if o == '--installroot':
+                conf.installroot=a
+                
     except ValueError, e:
         errorlog(0, _('Options Error: %s') % e)
         usage()
@@ -331,6 +339,7 @@ def usage():
           -t be tolerant about errors in package commands
           -R [time in minutes] - set the max amount of time to randonly run in.
           -C run from cache only - do not update the cache
+          --installroot=[path] - set the install root (default '/')
           -h, --help this screen
     """)
     sys.exit(1)

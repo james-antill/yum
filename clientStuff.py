@@ -848,7 +848,7 @@ def take_action(cmds, nulist, uplist, newlist, obsoleting, tsInfo, HeaderInfo, r
 
 def create_final_ts(tsInfo):
     # download the pkgs to the local paths and add them to final transaction set
-    tsfin = rpm.TransactionSet('/')
+    tsfin = rpm.TransactionSet(conf.installroot)
     for (name, arch) in tsInfo.NAkeys():
         pkghdr = tsInfo.getHeader(name, arch)
         rpmloc = tsInfo.localRpmPath(name, arch)
