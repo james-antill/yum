@@ -1,6 +1,6 @@
 Summary: RPM installer/updater
 Name: yum
-Version: 1.98
+Version: 2.0
 Release: 1
 License: GPL
 Group: System Environment/Base
@@ -72,6 +72,9 @@ exit 0
 %{_mandir}/man*/*
 
 %changelog
+* Sun Jul 13 2003 Seth Vidal <skvidal@phy.duke.edu>
+- bump to 2.0
+
 * Sat Jul 12 2003 Seth Vidal <skvidal@phy.duke.edu>
 - made yum.cron config(noreplace)
 
