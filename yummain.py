@@ -33,6 +33,7 @@ from logger import Logger
 from config import yumconf
 from i18n import _
 
+__version__='2.0'
 
 def parseCmdArgs(args):
    
@@ -45,24 +46,23 @@ def parseCmdArgs(args):
         yumconffile="/etc/yum.conf"
         
     try:
-        gopts, cmds = getopt.getopt(args, 'tCc:hR:e:d:y', ['help','installroot='])
+        gopts, cmds = getopt.getopt(args, 'tCc:hR:e:d:y', ['help', 'version', 'installroot='])
     except getopt.error, e:
         errorlog(0, _('Options Error: %s') % e)
         usage()
    
     try: 
         for o,a in gopts:
+            if o == '--version':
+                print __version__
+                sys.exit()
             if o == '--installroot':
                 if os.access(a + "/etc/yum.conf", os.R_OK):
                     yumconffile = a + '/etc/yum.conf'
-
-        for o,a in gopts:
             if o == '-R':
                 sleeptime=random.randrange(int(a)*60)
                 # debug print sleeptime
                 time.sleep(sleeptime)
-
-        for o,a in gopts:
             if o == '-c':
                 yumconffile=a
 
@@ -340,6 +340,7 @@ def usage():
           -R [time in minutes] - set the max amount of time to randonly run in.
           -C run from cache only - do not update the cache
           --installroot=[path] - set the install root (default '/')
+          --version - output the version of yum
           -h, --help this screen
     """)
     sys.exit(1)
