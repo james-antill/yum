@@ -188,11 +188,10 @@ def main(args):
     clientStuff.download_headers(HeaderInfo, nulist)
     if process in ['upgrade', 'groupupgrade']:
         log(2, _('Finding obsoleted packages'))
-        obsdict = clientStuff.returnObsoletes(HeaderInfo, rpmDBInfo, nulist)
-        obslist = obsdict.keys()
+        obsoleting, obsoleted = clientStuff.returnObsoletes(HeaderInfo, rpmDBInfo, nulist)
     else:
-        obsdict = {}
-        obslist = []
+        obsoleting = {}
+        obsoleted = {}
 
     if process in ['groupupdate', 'groupinstall', 'grouplist', 'groupupgrade']:
         servers_with_groups = clientStuff.get_groups_from_servers(serverlist)
@@ -214,7 +213,9 @@ def main(args):
     log(3, 'nulist = %s' % len(nulist))
     log(3, 'uplist = %s' % len(uplist))
     log(3, 'newlist = %s' % len(newlist))
-    log(3, 'obslist = %s' % len(obslist))
+    log(3, 'obsoleting = %s' % len(obsoleting.keys()))
+    log(3, 'obsoleted = %s' % len(obsoleted.keys()))
+
     
     ##################################################################
     # at this point we have all the prereq info we could ask for. we 

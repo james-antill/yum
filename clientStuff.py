@@ -188,14 +188,14 @@ def readHeader(rpmfn):
     return h
 
 def returnObsoletes(headerNevral, rpmNevral, uninstNAlist):
-    obsdict = {} # obsdict[obseletinglist]=packageitobsoletes
+    obsoleting = {} # obsoleting[pkgobsoleting]=[list of pkgs it obsoletes]
+    obsoleted = {} # obsoleted[pkgobsoleted]=[list of pkgs obsoleting it]
     for (name, arch) in uninstNAlist:
         # DEBUG print '%s, %s' % (name, arch)
         header = headerNevral.getHeader(name, arch)
         obs = header[rpm.RPMTAG_OBSOLETES]
         del header
-        if obs:
-        # DEBUG print "%s, %s obs something" % (name, arch)
+
         # if there is one its a nonversioned obsolete
         # if there are 3 its a versioned obsolete
         # nonversioned are obvious - check the rpmdb if it exists
@@ -207,52 +207,80 @@ def returnObsoletes(headerNevral, rpmNevral, uninstNAlist):
         # get the return value - then run through
         # an if/elif statement regarding obvalue[1] and determine
         # if the pkg obsoletes something in the rpmdb
+        if obs:
             for ob in obs:
                 obvalue = string.split(ob)
-                if rpmNevral.exists(obvalue[0]):
-                    if len(obvalue) == 1:
-                        obsdict[(name, arch)]=obvalue[0]
-                        log(4, '%s obsoleting %s' % (name, ob))
+                obspkg = obvalue[0]
+                if rpmNevral.exists(obspkg):
+                    if len(obvalue) == 1: #unversioned obsolete
+                        if not obsoleting.has_key((name, arch)):
+                            obsoleting[(name, arch)] = []
+                        obsoleting[(name, arch)].append(obspkg)
+                        if not obsoleted.has_key(obspkg):
+                            obsoleted[obspkg] = []
+                        obsoleted[obspkg].append((name, arch))
+                        log(4, '%s obsoleting %s' % (name, obspkg))
                     elif len(obvalue) == 3:
+                        obscomp = obvalue[1]
+                        obsver = obsvalue[2]
                         (e1, v1, r1) = rpmNevral.evr(name, arch)
-                        (e2, v2, r2) = str_to_version(obvalue[3])
+                        (e2, v2, r2) = str_to_version(obsver)
                         rc = rpmUtils.compareEVR((e1, v1, r1), (e2, v2, r2))
-                        if obvalue[2] == '>':
+                        if obscomp == '>':
                             if rc >= 1:
-                                obsdict[(name, arch)]=obvalue[0]
-                            elif rc == 0:
-                                pass
-                            elif rc <= -1:
-                                pass
-                        elif obvalue[2] == '>=':
+                                if not obsoleting.has_key((name, arch)):
+                                    obsoleting[(name, arch)] = []
+                                obsoleting[(name, arch)].append(obspkg)
+                                if not obsoleted.has_key(obspkg):
+                                    obsoleted[obspkg] = []
+                                obsoleted[obspkg].append((name, arch))
+                        elif obscomp == '>=':
                             if rc >= 1:
-                                obsdict[(name, arch)]=obvalue[0]
+                                if not obsoleting.has_key((name, arch)):
+                                    obsoleting[(name, arch)] = []
+                                obsoleting[(name, arch)].append(obspkg)
+                                if not obsoleted.has_key(obspkg):
+                                    obsoleted[obspkg] = []
+                                obsoleted[obspkg].append((name, arch))
                             elif rc == 0:
-                                obsdict[(name, arch)]=obvalue[0]
+                                if not obsoleting.has_key((name, arch)):
+                                    obsoleting[(name, arch)] = []
+                                obsoleting[(name, arch)].append(obspkg)
+                                if not obsoleted.has_key(obspkg):
+                                    obsoleted[obspkg] = []
+                                obsoleted[obspkg].append((name, arch))
+                        elif obscomp == '=':
+                            if rc == 0:
+                                if not obsoleting.has_key((name, arch)):
+                                    obsoleting[(name, arch)] = []
+                                obsoleting[(name, arch)].append(obspkg)
+                                if not obsoleted.has_key(obspkg):
+                                    obsoleted[obspkg] = []
+                                obsoleted[obspkg].append((name, arch))
+                        elif obscomp == '<=':
+                            if rc == 0:
+                                if not obsoleting.has_key((name, arch)):
+                                    obsoleting[(name, arch)] = []
+                                obsoleting[(name, arch)].append(obspkg)
+                                if not obsoleted.has_key(obspkg):
+                                    obsoleted[obspkg] = []
+                                obsoleted[obspkg].append((name, arch))
                             elif rc <= -1:
-                                pass
-                        elif obvalue[2] == '=':
-                            if rc >= 1:
-                                pass
-                            elif rc == 0:
-                                obsdict[(name, arch)]=obvalue[0]
-                            elif rc <= -1:
-                                pass
-                        elif obvalue[2] == '<=':
-                            if rc >= 1:
-                                pass
-                            elif rc == 0:
-                                obsdict[(name, arch)]=obvalue[0]
-                            elif rc <= -1:
-                                obsdict[(name, arch)]=obvalue[0]
-                        elif obvalue[2] == '<':
-                            if rc >= 1:
-                                pass
-                            elif rc == 0:
-                                pass
-                            elif rc <= -1:
-                                obsdict[(name, arch)]=obvalue[0]
-    return obsdict
+                                if not obsoleting.has_key((name, arch)):
+                                    obsoleting[(name, arch)] = []
+                                obsoleting[(name, arch)].append(obspkg)
+                                if not obsoleted.has_key(obspkg):
+                                    obsoleted[obspkg] = []
+                                obsoleted[obspkg].append((name, arch))
+                        elif obscomp == '<':
+                            if rc <= -1:
+                                if not obsoleting.has_key((name, arch)):
+                                    obsoleting[(name, arch)] = []
+                                obsoleting[(name, arch)].append(obspkg)
+                                if not obsoleted.has_key(obspkg):
+                                    obsoleted[obspkg] = []
+                                obsoleted[obspkg].append((name, arch))
+    return obsoleting, obsoleted
 
 def progresshook(blocks, blocksize, total):
     totalblocks = total/blocksize
