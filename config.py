@@ -49,16 +49,17 @@ class yumconf:
         self.excludes= []
         
         #defaults
-        self.cachedir='/var/cache/yum'
-        self.debuglevel=2
-        self.logfile='/var/log/yum.log'
-        self.pkgpolicy='newest'
-        self.gpghome='/root/.gnupg'
-        self.gpgkeyring=None
-        self.assumeyes=0
-        self.errorlevel=2
-        self.cache=0
-        self.uid=0
+        self.cachedir = '/var/cache/yum'
+        self.debuglevel = 2
+        self.logfile = '/var/log/yum.log'
+        self.pkgpolicy = 'newest'
+        self.gpghome = '/root/.gnupg'
+        self.gpgkeyring = None
+        self.assumeyes = 0
+        self.errorlevel = 2
+        self.cache = 0
+        self.uid = 0
+        self.commands = None
         
         if self._getoption('main','cachedir') != None:
             self.cachedir=self._getoption('main','cachedir')
@@ -71,14 +72,15 @@ class yumconf:
         if self._getoption('main','exclude') != None:
             self.excludes=string.split(self._getoption('main','exclude'), ' ')
         if self._getoption('main','assumeyes') != None:
-            self.assumeyes=self.cfg.getboolean('main','assumeyes')
+            self.assumeyes=self.cfg.getboolean('main', 'assumeyes')
         if self._getoption('main','errorlevel') != None:
-            self.errorlevel=self._getoption('main','errorlevel')
+            self.errorlevel=self._getoption('main', 'errorlevel')
         if self._getoption('main','gpghome') != None:
-            self.gpghome=self._getoption('main','gpghome')
+            self.gpghome=self._getoption('main', 'gpghome')
         if self._getoption('main','gpgkeyring') != None:
-            self.gpgkeyring=self._getoption('main','gpgkeyring')
-            
+            self.gpgkeyring=self._getoption('main', 'gpgkeyring')
+        if self._getoption('main','commands') != None:
+            self.commands=string.split(self._getoption('main', 'commands'),' ')
             
         if len(self.cfg.sections()) > 1:
             for section in self.cfg.sections(): # loop through the list of sections

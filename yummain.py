@@ -40,9 +40,6 @@ def parseCmdArgs(args):
         
     try:
         gopts, cmds = getopt.getopt(args, 'Cc:hR:e:d:y', ['help'])
-        if len (cmds) < 1:
-            errorlog(0, 'Options Error: no commands found')
-            usage()
     except getopt.error, e:
         errorlog(0, 'Options Error: %s' % e)
         usage()
@@ -99,6 +96,12 @@ def main(args):
     if len(args) < 1:
         usage()
     (log, errorlog, filelog, conf, cmds) = parseCmdArgs(args)
+    if conf.commands != None and len(cmds) < 1:
+        cmds = conf.commands
+
+    if len (cmds) < 1:
+        errorlog(0, 'Options Error: no commands found')
+        usage()
 
     if cmds[0] not in ('update', 'upgrade', 'install','info', 'list', 'erase',\
                        'grouplist','groupupdate','groupinstall','clean', \
