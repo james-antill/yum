@@ -61,8 +61,10 @@ def availablearchs(hinevral, name):
     archdict['i386']=['i386','i486','i586','i686','athlon','noarch']
     archdict['alpha']=['alpha','alphaev6','noarch']
     archdict['sparc']=['sparc','sparc64','noarch']
-    archdict['ppc']=['ppc','noarch']
+    archdict['ppc']=['ppc','noarch','ppc64','powerpc','powerppc']
     archdict['ia64']=['ia64','noarch']
+    archdict['s390']=['noarch','s390']
+    archdict['s390x']=['noarch','s390','s390x']
     myarch=getArch()
     archlist = []
     
