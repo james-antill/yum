@@ -270,7 +270,7 @@ class nevral:
                     _ts.addInstall(pkghdr,(pkghdr,rpmloc),'u')
                     
             elif self.state(name,arch) == 'i':
-                log(4, 'Installing: %s, %s' % (name, arch))
+                log(4, 'Installing: %s.%s' % (name, arch))
                 rpmloc = self.rpmlocation(name, arch)
                 pkghdr = self.getHeader(name, arch)
                 _ts.addInstall(pkghdr,(pkghdr,rpmloc),'i')
@@ -285,7 +285,7 @@ class nevral:
             elif self.state(name,arch) == 'e' or self.state(name,arch) == 'ed':
             # no no no - this should get ver-rel and mark that as what should
             # be removed - not just name. so name-ver-rel
-                log(4, 'Erasing: %s-%s' % (name,arch))
+                log(4, 'Erasing: %s' % name)
                 _ts.addErase(name)
         return _ts
         

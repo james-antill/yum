@@ -35,13 +35,27 @@ def installpkgs(tsnevral, nulist, userlist, hinevral, rpmnevral, exitoninstalled
     #if they are not a pkg and you can't find it at all error and exit
     if len(nulist) > 0:
         for n in userlist:
+            myarch=None
+            myname=None
             foundit=0
+            if n.find('.') != -1:
+                newN, a = n.split('.')
+                if (newN, a) in nulist or rpmnevral.exists(newN, a):
+                    log(3, "Found a specified arch: %s, %s" % (newN, a))
+                    myarch = a
+                    myname = newN       
             for (name,arch) in nulist:
+                if myname is not None:
+                    n = myname
                 if n == name or fnmatch.fnmatch(name, n):
                     #found it
                     foundit=1
-                    archlist = archwork.availablearchs(hinevral,name)
-                    bestarch = archwork.bestarch(archlist)
+                    if myarch is None:
+                        archlist = archwork.availablearchs(hinevral,name)
+                        bestarch = archwork.bestarch(archlist)
+                    else:
+                        bestarch = myarch
+                        
                     if rpmnevral.exists(name,bestarch):
                         (e1,v1,r1)=rpmnevral.evr(name,bestarch)
                         (e2,v2,r2)=hinevral.evr(name,bestarch)
@@ -100,6 +114,16 @@ def updatepkgs(tsnevral, hinevral, rpmnevral, nulist, uplist, userlist, exitonin
         # check if we can't find it b/c it's not there
         # or if it's the most updated version available
         pkgfound = 0
+        # check for a name.arch specification in the userlist
+        if n.find('.') != -1:
+            name, arch = n.split('.')
+            if (name, arch) in uplist:
+                log(3, "Found a specified arch: %s, %s" % (name, arch))
+                pkgfound = 1
+                ((e, v, r, a, l, i), s) = hinevral._get_data(name, arch)
+                tsnevral.add((name,e,v,r,a,l,i),'u')
+                continue
+                        
         for (name, arch) in uplist:
             if n == name or fnmatch.fnmatch(name, n):
                 pkgfound = 1
@@ -157,6 +181,23 @@ def upgradepkgs(tsnevral, hinevral, rpmnevral, nulist, uplist, obsoleted, obsole
     for n in userlist:
         log(5, 'userlist entry %s' % n)
         pkgfound = 0
+        # check for a name.arch specification in the userlist
+        if n.find('.') != -1:
+            name, arch = n.split('.')
+            if (name, arch) in oulist:
+                log(3, "Found a specified arch: %s, %s" % (name, arch))
+                pkgfound = 1
+                if obsoleted.has_key(name):
+                    for (obsname, obsarch) in obsoleted[name]:
+                        log(4, '%s obsoleted by %s' % (name, obsname))
+                        ((e, v, r, a, l, i), s) = hinevral._get_data(obsname, obsarch)
+                        tsnevral.add((obsname,e,v,r,a,l,i),'u')
+                else:
+                    log(4,"Updating: %s.%s" % (name, arch))
+                    ((e, v, r, a, l, i), s)=hinevral._get_data(name, arch)
+                    tsnevral.add((name,e,v,r,a,l,i),'u')
+                continue
+        
         for (name, arch) in oulist:
             if n == name or fnmatch.fnmatch(name, n):
                 pkgfound = 1
@@ -191,12 +232,23 @@ def erasepkgs(tsnevral,rpmnevral,userlist, exitoninstalled):
     
     for n in userlist:
         foundit = 0
+# if rpm ever lets us do this....
+#        if n.find('.') != -1:
+#            myname, myarch = n.split('.')
+#            if rpmnevral.exists(myname, myarch):
+#                foundit = 1
+#                log(4,"Erasing %s.%s" % (myname, myarch))
+#                ((e, v, r, a, l, i), s)=rpmnevral._get_data(myname, myarch)
+#                tsnevral.add((myname,e,v,r,myarch,l,i),'e')
+#                continue
+             
         for (name,arch) in rpmnevral.NAkeys():
             if n == name or fnmatch.fnmatch(name, n):
                 foundit = 1
                 log(4,"Erasing %s" % (name))
                 ((e, v, r, a, l, i), s)=rpmnevral._get_data(name,arch)
                 tsnevral.add((name,e,v,r,a,l,i),'e')
+
         if foundit == 0:
             errorlog(0, _("Erase: No matches for %s") % n)
             if exitoninstalled:
