@@ -61,6 +61,10 @@ none of the short options (-y, -e, -d, etc) will be taken in the field.
 package to use to determine the "version" of the distribution - can be any
 package you have installed - defaults to redhat-release.
 
+.IP \fBdiskspacecheck\fR
+set this to 0 to disable the checking for sufficient diskspace before the
+rpm transaction is run. default is 1 (to perform the check)
+
 
 .SH "[server] options"
 .LP 
@@ -81,12 +85,37 @@ must be a unique name for each server, one word.
 .IP \fBbaseurl\fR
 must be a url to the directory where the yum repository's 'headers' directory lives.
 Can be an http://, ftp:// or file:// url.
+You can specify multiple urls in one baseurl statement. The best way to do
+this is like this:
+.br
+[serverid]
+.br
+name=Some name for this server
+.br
+baseurl=url://server1/path/to/repository/
+.br
+        url://server2/path/to/repository/
+.br
+        url://server3/path/to/repository/
+.br
+
 
 .IP \fBname\fR
 a human readable string describing the repository.
 
 .IP \fBgpgcheck\fR
 either '1' or '0'. This tells yum whether or not it should perform a gpg signature check on the packages gotten from this server
+
+.IP \fBfailovermethod\fR
+can be either 'roundrobin' or 'priority'.
+roundrobin randomly selects a url out of the list of urls to start with and
+proceeds through each of them as it encounters a failure contacting the
+host.
+.br
+priority starts from the first baseurl listed and reads through them
+sequentially.
+.br
+failovermethod defaults to roundrobin if not specified.
 
 .SH "VARIABLES"
 .LP
