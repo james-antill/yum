@@ -20,6 +20,8 @@ import rpmUtils
 #           and pkgs in default or better
 # update - if pkg in group installed (any class of pkg) check for update, 
 #          all mandatory pkgs and metapkgs will be updated/installed if possible
+#           ???? Ask - should update recurse the pkg group list so you could run
+#           yum groupupdate "Workstation Common"
 # erase - only pkgs in group - not subgroups nor metapkgs
 # 
 
@@ -45,7 +47,6 @@ class Groups_Info:
         self.optional_pkgs = {}
         self.mandatory_pkgs = {}
         self.default_pkgs = {}
-        self.pkgs_needed = {}
         self.grouplist = []
         self.optional_metapkgs = {}
         self.default_metapkgs = {}
@@ -90,7 +91,6 @@ class Groups_Info:
                 self.sub_groups[groupname] = []
                 self.optional_pkgs[groupname] = []
                 self.default_pkgs[groupname] = []
-                self.pkgs_needed[groupname] = []
                 self.mandatory_metapkgs[groupname] = []
                 self.default_metapkgs[groupname] = []
                 self.optional_metapkgs[groupname] = []
@@ -102,7 +102,6 @@ class Groups_Info:
                 self.sub_groups[groupname] = []
                 self.optional_pkgs[groupname] = []
                 self.default_pkgs[groupname] = []
-                self.pkgs_needed[groupname] = []
                 self.mandatory_metapkgs[groupname] = []
                 self.optional_metapkgs[groupname] = []
                 self.default_metapkgs[groupname] = []
@@ -246,6 +245,18 @@ class Groups_Info:
         
         return pkglist
                 
+    def requiredPkgs(self, groupname):
+        """return a list of all required pkgs and pkgs _ONLY_ to install this group"""
+        pkglist = []
+        for pkg in self.default_pkgs[groupname] + self.mandatory_pkgs[groupname]:
+            if pkg not in pkglist:
+                pkglist.append(pkg)
+                
+        return pkglist
+    def allPkgs(self, groupname):
+        """duh - return list of all pkgs in group"""
+        pkglist = self.requiredPkgs(groupname) + self.optional_pkgs[groupname]
+        return pkglist
         
     def _pkgs_per_group(self):
         """ populate the pkgs_per_group dict - produces list of pkgs installed 

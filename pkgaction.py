@@ -25,7 +25,7 @@ import rpmUtils
 from i18n import _
 
 
-def installpkgs(tsnevral,nulist,userlist,hinevral,rpmnevral):
+def installpkgs(tsnevral, nulist, userlist, hinevral, rpmnevral, exitoninstalled):
     #get the list of pkgs you want to install from userlist
     #check to see if they are already installed - if they are try to upgrade them
     #if they are the latest version then error and exit
@@ -47,13 +47,15 @@ def installpkgs(tsnevral,nulist,userlist,hinevral,rpmnevral):
                         rc = rpmUtils.compareEVR((e1,v1,r1),(e2,v2,r2))
                         if rc < 0:
                             #we should be upgrading this
-                            log(4,"Switching to upgrading %s" % (name))
+                            log(4,"Switching to updating %s" % (name))
                             ((e, v, r, a, l, i), s)=hinevral._get_data(name,bestarch)
                             tsnevral.add((name,e,v,r,a,l,i),'u')            
                         else:
                             #this is the best there is :(
                             errorlog(1, _("%s is installed and is the latest version.") % (name))
-                            sys.exit(1)
+                            if exitoninstalled:
+                                sys.exit(1)
+                                
                     else:
                         #we should install this
                         ((e, v, r, a, l, i), s)=hinevral._get_data(name,bestarch)
@@ -62,14 +64,16 @@ def installpkgs(tsnevral,nulist,userlist,hinevral,rpmnevral):
             if foundit==0:
                 if rpmnevral.exists(n):
                     errorlog(1, _("%s is installed and is the latest version.") % (n))
+                    if exitoninstalled:
+                        sys.exit(1)
                 else:
                     errorlog(0, _("Cannot find a package matching %s") % (n))
-                sys.exit(1)
+                    sys.exit(1)
             
     else:
         errorlog(1, _("No Packages Available for Update or Install"))
     
-def updatepkgs(tsnevral,hinevral,rpmnevral,nulist,uplist,obslist,userlist):
+def updatepkgs(tsnevral, hinevral, rpmnevral, nulist, uplist, obslist, userlist, exitoninstalled):
     #get the list of what people want updated, match like in install.
     #add as 'u' to the tsnevral if its already there, if its not then add as 'i' and warn
     #if its all then take obslist and uplist and iterate through the tsinfo'u'
@@ -110,9 +114,11 @@ def updatepkgs(tsnevral,hinevral,rpmnevral,nulist,uplist,obslist,userlist):
                 if foundit==0:
                     if rpmnevral.exists(n):
                         errorlog(1, _("%s is installed and the latest version.") % (n))
+                        if exitoninstalled:
+                            sys.exit(1)
                     else:
                         errorlog(0, _("Cannot find any package matching %s available to be updated.") % (n))
-                    sys.exit(1)
+                        sys.exit(1)
     else:
         errorlog(1, _("No Packages Available for Update or Install"))
             
@@ -152,6 +158,36 @@ def erasepkgs(tsnevral,rpmnevral,userlist):
             errorlog(0, _("Erase: No matches for %s") % n)
             sys.exit(1)
 
+def updategroups(rpmnevral, nulist, uplist, userlist):
+    """get list of any pkg in group that is installed, check to update it
+       get list of any mandatory or default pkg attempt to update it if it is installed
+       or install it if it is not installed"""
+    groups = GroupInfo.grouplist
+    groupsmatch = []
+    for group in groups:
+        for item in userlist:
+            if group == item or fnmatch.fnmatch(group, item):
+                groupsmatch.append(group)
+        
+    groupsmatch.sort()
+    updatepkgs = []
+    installpkgs = []
+        
+    for group in groupsmatch:
+        required = GroupInfo.requiredPkgs(group)
+        all = GroupInfo.pkgTree(group)
+        for pkg in all:
+            if rpmnevral.exists(pkg):
+                if pkg in uplist:
+                    updatepkgs.append((group, pkg))
+            else:
+                if pkg in required:
+                    installpkgs.append((group, pkg))
+    for (group, pkg) in updatepkgs:
+        print ' From %s updating %s' % (group, pkg)
+    for (group, pkg) in installpkgs:
+        print 'From %s installing %s' % (group, pkg)
+             
 def listpkginfo(pkglist, userlist, nevral, short):
     if len(pkglist) > 0:
         if short:
@@ -206,14 +242,43 @@ def listgroups(userlist):
     groups = GroupInfo.visible_groups
     groups.sort()
     if len(userlist) == 0:
-        userlist == ['_all_']
+        userlist = ['_all_']
     for item in userlist:
         if item == 'installed':
-            if GroupInfo.isGroupInstalled(group):
-                print '%s - %s' % (grpid, group)
+            print 'Installed Groups'
+            for group in groups:
+                if GroupInfo.isGroupInstalled(group):
+                    grpid = GroupInfo.group_by_name[group]
+                    log(4, '%s - %s' % (grpid, group))
+                    print '   %s' % group
         elif item == 'available':
-            if not GroupInfo.isGroupInstalled(group):
-                print '%s - %s' % (grpid, group)
+            print 'Available Groups'
+            for group in groups:
+                if not GroupInfo.isGroupInstalled(group):
+                    grpid = GroupInfo.group_by_name[group]
+                    log(4, '%s - %s' % (grpid, group))
+                    print '   %s' % group
+        elif item == '_all_':
+            print 'Installed Groups'
+            for group in groups:
+                if GroupInfo.isGroupInstalled(group):
+                    grpid = GroupInfo.group_by_name[group]
+                    log(4, '%s - %s' % (grpid, group))
+                    print '   %s' % group
+                    
+            print 'Available Groups'
+            for group in groups:
+                if not GroupInfo.isGroupInstalled(group):
+                    grpid = GroupInfo.group_by_name[group]
+                    log(4, '%s - %s' % (grpid, group))
+                    print '   %s' % group
+        else:
+            for group in groups:
+                if group == item or fnmatch.fnmatch(group, item):
+                    grpid = GroupInfo.group_by_name[group]
+                    log(4, '%s - %s' % (grpid, group))
+                    print '   %s' % group
+
                 
 def whatprovides(usereq, nulist, nevral, localrpmdb):
     # figure out what the user wants, traverse all the provides and file lists 

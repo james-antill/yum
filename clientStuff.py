@@ -747,7 +747,7 @@ def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmD
             errorlog(0, _('Need to pass a list of pkgs to install'))
             usage()
         else:
-            pkgaction.installpkgs(tsInfo, nulist, cmds, HeaderInfo, rpmDBInfo)
+            pkgaction.installpkgs(tsInfo, nulist, cmds, HeaderInfo, rpmDBInfo, 1)
     
     elif basecmd == 'provides':
         if len(cmds) == 0:
@@ -762,9 +762,9 @@ def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmD
     
     elif basecmd == 'update':
         if len(cmds) == 0:
-            pkgaction.updatepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, obslist, 'all')
+            pkgaction.updatepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, obslist, 'all', 1)
         else:
-            pkgaction.updatepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, obslist, cmds)
+            pkgaction.updatepkgs(tsInfo, HeaderInfo, rpmDBInfo, nulist, uplist, obslist, cmds, 1)
     
     elif basecmd == 'upgrade':
         if len(cmds) == 0:
@@ -819,6 +819,14 @@ def take_action(cmds, nulist, uplist, newlist, obslist, tsInfo, HeaderInfo, rpmD
     elif basecmd == 'grouplist':
         pkgaction.listgroups(cmds)
         sys.exit(0)
+    
+    elif basecmd == 'groupupdate':
+        if len(cmds) == 0:
+            errorlog(0, _('Need a list of groups to update'))
+            sys.exit(1)
+        pkgaction.updategroups(rpmDBInfo, nulist, uplist, cmds)
+        
+            
     elif basecmd == 'clean':
         if len(cmds) == 0 or cmds[0] == 'all':
             log(2, _('Cleaning packages and old headers'))
