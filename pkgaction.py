@@ -263,15 +263,20 @@ def updategroups(rpmnevral, nulist, uplist, userlist):
 def listpkginfo(pkglist, userlist, nevral, short):
     if len(pkglist) > 0:
         if short:
-            log(2, "%-40s %-10s %s" %(_('Name'),_('Arch'),_('Version')))
+            log(2, "%-36s %-6s %-15s %-17s" %(_('Name'),_('Arch'),_('Version'), _('Repo')))
             log(2, "-" * 80)
         pkglist.sort(clientStuff.nasort)
         if type(userlist) is types.StringType:
             if userlist=='all' or userlist =='updates':
                 for (name, arch) in pkglist:
                     if short:
-                        (e,v,r)=nevral.evr(name,arch)
-                        print "%-40s %-10s %s-%s" %(name, arch, v, r)
+                        (e,v,r) = nevral.evr(name,arch)
+                        id = nevral.serverid(name, arch)
+                        if e == '0':
+                            ver = '%s-%s' % (v, r)
+                        else:
+                            ver = '%s:%s-%s' % (e, v, r)
+                        print "%-36s %-6s %-15s %s" %(name, arch, ver, id)
                     else:
                         displayinfo(name, arch, nevral)
                 print ' '
@@ -281,7 +286,12 @@ def listpkginfo(pkglist, userlist, nevral, short):
                     if n == name or fnmatch.fnmatch(name, n):
                         if short:
                             (e,v,r)=nevral.evr(name,arch)
-                            print "%-40s %-10s %s-%s" %(name, arch, v, r)
+                            id = nevral.serverid(name, arch)
+                            if e == '0':
+                                ver = '%s-%s' % (v, r)
+                            else:
+                                ver = '%s:%s-%s' % (e, v, r)
+                            print "%-36s %-6s %-15s %s" %(name, arch, ver, id)
                         else:
                             displayinfo(name, arch, nevral)
             print ' '
