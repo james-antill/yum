@@ -23,7 +23,7 @@ def getArch():
     arch = os.uname()[4]
     if re.search('86', arch):
         arch = 'i386'
-    if re.search('sparc', arch):
+    if re.search('sparc', arch) or re.search('sun', arch):
         arch = 'sparc'
     if re.search('alpha', arch):
         arch = 'alpha'
