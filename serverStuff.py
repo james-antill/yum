@@ -71,20 +71,18 @@ def depchecktree(rpmlist):
     msgs=[]
     currpm=0
     numrpms=len(rpmlist)
+    log(1, "Checking dependencies")
     for rpmfn in rpmlist:
         currpm=currpm + 1
-        percent = (currpm*100)/numrpms
-        sys.stdout.write('\r' + ' ' * 80)
-        sys.stdout.write("\rChecking deps %d %% complete" %(percent))
-        sys.stdout.flush()
+        log(2, "Checking deps %d/%d complete" %(currpm, numrpms))
         hobj = rpmUtils.RPM_Work(rpmfn)
         if hobj.hdr == None:
-            log(1, "\nignoring bad rpm: %s" % rpmfn)
+            log(1, "ignoring bad rpm: %s" % rpmfn)
         elif hobj.isSource():
-            log(2, "\nignoring srpm: %s" % rpmfn)
+            log(2, "ignoring srpm: %s" % rpmfn)
         else:
             _ts.addInstall(hobj.hdr, hobj.name(), 'i')
-            log(2, "adding %s" % hobj.name())
+            log(3, "adding %s" % hobj.name())
     errors = _ts.check()
     if errors:
         print 'errors found'
