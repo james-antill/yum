@@ -21,6 +21,8 @@ import string
 import sys
 import archwork
 import rpmUtils
+import types
+
 from i18n import _
 
 
@@ -254,9 +256,15 @@ class nevral:
                 log(4,'Updating: %s, %s' % (name, arch))
                 rpmloc = self.rpmlocation(name, arch)
                 pkghdr = self.getHeader(name, arch)
-                if name in conf.installonlypkgs:
-                    #XXX - this should also check the packge Provides: for kernel-modules - if they are there then mark
-                    #package as install
+                provnames = []
+                provides = pkghdr[rpm.RPMTAG_PROVIDENAME]
+                if provides is None:
+                    pass
+                if type(provides) is types.ListType:
+                    provnames.extend(provides)
+                else:
+                    provnames.append(provides)
+                if name in conf.installonlypkgs or 'kernel-modules' in provides:
                     bestarchlist = self.bestArchsByVersion(name)
                     bestarch = archwork.bestarch(bestarchlist)
                     if arch == bestarch:
