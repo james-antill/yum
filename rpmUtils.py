@@ -21,13 +21,11 @@ def checkRpmMD5(package):
     ts.setVSFlags(~(rpm.RPMVSF_NOMD5|rpm.RPMVSF_NEEDPAYLOAD))
     fdno = os.open(package, os.O_RDONLY)
     try:
-        h = ts.hdrFromFdno(fdno)
+        ts.hdrFromFdno(fdno)
     except rpm.error, e:
         os.close(fdno)
-        del h
         return 0
     os.close(fdno)
-    del h
     return 1
 
 def checkSig(package, serverid=None):
