@@ -51,7 +51,7 @@ class nevral:
                 del self.rpmbynamearch[(name, arch)]
         else:
             if arch is None:
-                errolog(2, _('No Package %s') % (name))
+                errorlog(2, _('No Package %s') % (name))
             else:
                 errorlog(2, _('No Package %s, %s') %(name, arch))
                 

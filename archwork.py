@@ -71,7 +71,7 @@ def compatArchList():
     archdict['alpha']=['alpha','alphaev6','noarch']
     archdict['sparc']=['sparc','sparc64','noarch','sun4c','sun4u','sun4d','sun4m','sparcv9']
     archdict['ppc']=['ppc','noarch','ppc64','powerpc','powerppc','osfmach3_ppc','ppciseries','ppcpseries','rs6000']
-    archdict['ia64']=['ia64','noarch', 'i686']
+    archdict['ia64']=['ia64','noarch', 'i686', 'i386', 'i486', 'i586']
     archdict['s390']=['noarch','s390']
     archdict['s390x']=['noarch','s390','s390x']
     archdict['x86_64']=['noarch','x86_64','athlon','i386','i486','i586','i686']
