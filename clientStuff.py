@@ -900,7 +900,6 @@ def download_headers(HeaderInfo, nulist):
     if conf.usecachedb and os.path.exists(conf.cachedb):
         rpm.addMacro("_dbpath", "/")
         cachedb = rpmUtils.Rpm_Ts_Work(dbPath=conf.cachedb)
-        rpm.delMacro("_dbpath")
         cachedb.sigChecking('none')
         
     for (n, a) in nulist:
@@ -938,14 +937,14 @@ def download_headers(HeaderInfo, nulist):
 
 
             # try the cachedb
-            if hdrfn is None:
-                hdrlist = cachedb.getHeadersByKeyword(name=n, arch=a, version=v, release=r)
-                print hdrlist
-                if len(hdrlist) > 0:
-                    for hdrobj in hdrlist: # there should really be only one but <shrug>
-                        if hdrobj.fixedEpoch() == e:
-                            log(4, _('getting %s from cachedb') % (LocalHeaderFile))
-                            hdrfn = hdrobj.writeHeader(basepath, 1)
+            if conf.usecachedb:
+                if hdrfn is None:
+                    hdrlist = cachedb.getHeadersByKeyword(name=n, arch=a, version=v, release=r)
+                    if len(hdrlist) > 0:
+                        for hdrobj in hdrlist: # there should really be only one but <shrug>
+                            if hdrobj.fixedEpoch() == e:
+                             log(4, _('getting %s from cachedb') % (LocalHeaderFile))
+                             hdrfn = hdrobj.writeHeader(basepath, 1)
 
             # then try comps
             if hdrfn is None:
@@ -975,6 +974,7 @@ def download_headers(HeaderInfo, nulist):
     del compsdict
     if conf.usecachedb:
         del cachedb
+        rpm.delMacro("_dbpath")
         
     close_all()
                 
