@@ -338,7 +338,7 @@ def main(args):
     log(2, _('Downloading Packages'))
     clientStuff.download_packages(tsInfo)
     log(3, _('Creating Transaction Set'))
-    tstest = clientStuff.create_final_ts(tsInfo)
+    tstest = tsInfo.populateTs(addavailable = 0, localrpm = 1)
     log(2, _('Running test transaction:'))
     clientStuff.tsTest(tstest)
     tstest.closeDB()
@@ -350,7 +350,7 @@ def main(args):
     
     # FIXME the actual run should probably be elsewhere and this should be
     # inside a try, except set
-    tsfin = clientStuff.create_final_ts(tsInfo)
+    tsfin = tsInfo.populateTs(addavailable = 0, localrpm = 1)
 
     if conf.diskspacecheck == 0:
         tsfin.setProbFilter(rpm.RPMPROB_FILTER_DISKSPACE)

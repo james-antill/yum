@@ -1243,24 +1243,6 @@ def download_packages(tsInfo):
                     sys.exit(1)
     close_all()                    
     
-def create_final_ts(tsInfo):
-    # download the pkgs to the local paths and add them to final transaction set
-    tsfin = rpm.TransactionSet(conf.installroot)
-    for (name, arch) in tsInfo.NAkeys():
-        state = tsInfo.state(name, arch)
-        if state in ['u', 'ud', 'iu', 'i']: # inst/update
-            pkghdr = tsInfo.getHeader(name, arch)
-            rpmloc = tsInfo.localRpmPath(name, arch)
-            if state == 'i':
-                tsfin.addInstall(pkghdr, (pkghdr, rpmloc), 'i')
-            else:
-                tsfin.addInstall(pkghdr, (pkghdr, rpmloc), 'u')
-        elif state == 'a':
-            pass
-        elif state == 'e' or state == 'ed':
-            tsfin.addErase(name)
-    return tsfin
-
 def tsTest(checkts):
     checkts.setFlags(rpm.RPMTRANS_FLAG_TEST)
     if conf.diskspacecheck == 0:

@@ -234,15 +234,15 @@ def erasepkgs(tsnevral,rpmnevral,userlist, exitoninstalled):
     
     for n in userlist:
         foundit = 0
-# if rpm ever lets us do this....
-#        if n.find('.') != -1:
-#            myname, myarch = n.split('.')
-#            if rpmnevral.exists(myname, myarch):
-#                foundit = 1
-#                log(4,"Erasing %s.%s" % (myname, myarch))
-#                ((e, v, r, a, l, i), s)=rpmnevral._get_data(myname, myarch)
-#                tsnevral.add((myname,e,v,r,myarch,l,i),'e')
-#                continue
+
+        if n.find('.') != -1:
+            myname, myarch = n.split('.')
+            if rpmnevral.exists(myname, myarch):
+                foundit = 1
+                log(4,"Erasing %s.%s" % (myname, myarch))
+                ((e, v, r, a, l, i), s)=rpmnevral._get_data(myname, myarch)
+                tsnevral.add((myname,e,v,r,myarch,l,i),'e')
+                continue
              
         for (name,arch) in rpmnevral.NAkeys():
             if n == name or fnmatch.fnmatch(name, n):

@@ -244,13 +244,17 @@ class nevral:
         log(7, returnarchs)
         return returnarchs
     
-    def populateTs(self, addavailable = 1):
-                     
+    def populateTs(self, addavailable = 1, localrpm=0):
+        if localrpm:
+            rpmlocationMethod = self.localRpmPath
+        else:
+            rpmlocationMethod = self.rpmlocation
+            
         _ts = rpmUtils.Rpm_Ts_Work(conf.installroot)
         for (name, arch) in self.NAkeys(): 
-            if self.state(name, arch) in ('u','ud','iu'):
+            if self.state(name, arch) in ['u','ud','iu']:
                 log(4,'Updating: %s, %s' % (name, arch))
-                rpmloc = self.rpmlocation(name, arch)
+                rpmloc = rpmlocationMethod(name, arch)
                 pkghdr = self.getHeader(name, arch)
                 provides = rpmUtils.getProvides(pkghdr)
                 if name in conf.installonlypkgs or 'kernel-modules' in provides:
@@ -271,22 +275,24 @@ class nevral:
                     
             elif self.state(name,arch) == 'i':
                 log(4, 'Installing: %s.%s' % (name, arch))
-                rpmloc = self.rpmlocation(name, arch)
+                rpmloc = rpmlocationMethod(name, arch)
                 pkghdr = self.getHeader(name, arch)
                 _ts.addInstall(pkghdr,(pkghdr,rpmloc),'i')
             elif self.state(name,arch) == 'a':
                 if addavailable:
                     log(7, 'Adding %s into \'a\' state' % name)
-                    rpmloc = self.rpmlocation(name, arch)
+                    rpmloc = rpmlocationMethod(name, arch)
                     pkghdr = self.getHeader(name, arch)
                     _ts.addInstall(pkghdr,(pkghdr,rpmloc),'a')
                 else:
                     pass
             elif self.state(name,arch) == 'e' or self.state(name,arch) == 'ed':
-            # no no no - this should get ver-rel and mark that as what should
-            # be removed - not just name. so name-ver-rel
-                log(4, 'Erasing: %s' % name)
-                _ts.addErase(name)
+                log(4, 'Erasing: %s.%s' % (name,arch))
+                mi = _ts.dbMatch(rpm.RPMTAG_NAME, name)
+                mi.pattern(rpm.RPMTAG_ARCH, rpm.RPMMIRE_DEFAULT, arch)
+                for idx in mi:
+                    instance = mi.instance()
+                    _ts.addErase(instance)
         return _ts
         
     def resolvedeps(self, rpmDBInfo):
