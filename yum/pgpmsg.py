@@ -389,7 +389,7 @@ class public_key(pgp_packet) :
             s.update(self.pkttag)
             s.update(struct.pack(">H", pkt_len))
             s.update(msg[idx_save:idx_save+pkt_len])
-            self.fingerprint = int(s.hexdigest(), 16)
+            self.fingerprint = long(s.hexdigest(), 16)
             self.key_id = self.fingerprint & 0xffffffffffffffffL
 
     def __str__(self) :
