@@ -1,3 +1,102 @@
+2005-06-27 00:10  skvidal
+
+	* cli.py, yum-daily.spec, yum.spec: 
+	mark as 2.2.2
+
+2005-06-20 00:18  skvidal
+
+	* rpmUtils/__init__.py: 
+	make the header-by-index check work properly for older rpm versions
+
+2005-06-19 20:26  skvidal
+
+	* yum-daily.spec, yum.spec: 
+	evidently check in some very old spec files, whoops.
+
+2005-06-19 20:26  skvidal
+
+	* rpmUtils/__init__.py: 
+	- fix header-by-index check in rpmUtils
+
+2005-06-07 21:29  mjs
+
+	* yum/pgpmsg.py: Fix for bug #426
+
+2005-04-26 04:28  gijs
+
+	* docs/yum.8: Fixed a layout issue in the generate-rss section of
+	the yum.8 manual page, reported by Goran Uddeborg.
+
+2005-04-25 09:10  gijs
+
+	* rpmUtils/__init__.py: Backported fix to allow unversioned
+	provides to fulfill versioned requires from HEAD.
+
+2005-03-26 12:43  skvidal
+
+	* rpmUtils/updates.py: 
+	check in adam greenfield's patch for yum bug 410
+
+2005-03-15 02:30  skvidal
+
+	* yum/__init__.py: 
+	make the lockfile dir if it not there -used for installroots
+
+2005-03-15 02:15  skvidal
+
+	* cli.py: 
+	neglected to delete a line from the patching
+
+2005-03-15 02:06  skvidal
+
+	* cli.py: 
+	increment version number - you know, just for fun. :)
+
+2005-03-15 01:56  skvidal
+
+	* cli.py, output.py, urlgrabber/__init__.py,
+	urlgrabber/byterange.py, urlgrabber/grabber.py,
+	urlgrabber/keepalive.py, urlgrabber/mirror.py,
+	urlgrabber/progress.py, yum/__init__.py, yum/config.py,
+	yum/repos.py: 
+	backport bugfixes/features:  - make lockfile local to installroot 
+	- install by dep (yum install "foo > 1.1")  - gpgkey has
+	variableReplace() run on it now  - updated urlgrabber to current  -
+	repo globbing patch included  - display obsoletes in transaction
+	list  - make sure removal deps are listed as deps.
+
+2005-03-07 01:28  skvidal
+
+	* yum/repos.py: 
+	fix for bug 407
+
+2005-03-06 23:49  skvidal
+
+	* yum/config.py: 
+	remove dumb catch for zero-enabled repos in config file. Handle
+	this in the yum doRepoSetup() method rather than in the config
+	class.
+
+2005-02-26 04:14  skvidal
+
+	* cli.py, yum/misc.py: 
+	make sure keyInstalled check is occuring in the right rpmdb root.
+
+2005-02-23 13:23  skvidal
+
+	* rpmUtils/transaction.py: 
+	don't turn off nosignatures, turn it on.
+
+2005-02-21 00:35  skvidal
+
+	* yum-daily.spec, yum.spec: 
+	modify spec files
+
+2005-02-21 00:32  skvidal
+
+	* ChangeLog: 
+	changelog updates for 2.2.0
+
 2005-02-21 00:06  skvidal
 
 	* urlgrabber/: LICENSE, README, __init__.py, byterange.py,
