@@ -201,7 +201,7 @@ class yumconf(object):
                       ('errorlevel', 2), 
                       ('retries', 10),
                       ('recent', 7),
-                      ('metadata_expire', 28800]
+                      ('metadata_expire', 28800)]
                       
                       
         #defaults -either get them or set them
@@ -483,7 +483,10 @@ def cfgParserRepo(section, yumconfig, cfgparser):
             HTTP_CACHING_VALS
             )
         )
-
+    thisrepo.set('metadata_expire', cfgparser._getint(
+           section, 'metadata_expire',
+           yumconfig.getConfigOption('metadata_expire')))
+           
     # Parse and check gpgkey URLs
     gpgkeys = cfgparser._getoption(section, 'gpgkey', '')
     gpgkeys = variableReplace(yumconfig.yumvar, gpgkeys)
@@ -515,7 +518,7 @@ def cfgParserRepo(section, yumconfig, cfgparser):
     thisrepo.set('includepkgs', includelist)
 
     thisrepo.set('basecachedir', yumconfig.getConfigOption('cachedir'))
-    thisrepo.set('metadata_expire', yumconfig.getConfigOption('metadata_expire'))
+
     
     return thisrepo
 

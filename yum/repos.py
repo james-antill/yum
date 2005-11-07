@@ -20,6 +20,7 @@ import re
 import fnmatch
 import urlparse
 import types
+import time
 
 import Errors
 from urlgrabber.grabber import URLGrabber
