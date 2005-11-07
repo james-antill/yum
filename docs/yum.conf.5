@@ -211,6 +211,11 @@ for more information on installing yum plugins.
 A list of directories where yum should look for plugin modules. Default is
 `/usr/lib/yum-plugins'.
 
+.IP \fBmetadata_expire \fR
+Time (in seconds) after which the metadata will expire. So that if the
+current metadata downloaded is less than this many seconds old then yum will
+not update the metadata against the repository.
+
 .SH "[repository] OPTIONS"
 .LP 
 The repository section(s) take the following form:
@@ -318,6 +323,11 @@ repository.
 Overrides the \fBbandwidth\fR option from the [main] section for this
 repository.
 
+.IP \fBmetadata_expire \fR
+Overrides the \fBmetadata_expire\fR option from the [main] section for this
+repository.
+
+
 .IP \fBproxy \fR
 url to the proxy server for this repository. Set to '_none_' to disable the 
 global proxy setting for this repository. If this is unset it 
@@ -360,8 +370,8 @@ This will be replaced with your architecture as listed by os.uname()[4] in
 Python.
 
 .IP \fB$basearch\fR
-This will be replaced with your base architecture in yum. For example, if
-your $arch is i686 your $basearch will be i386.
+This will be replaced with your base architecture as listed in archwork.py in
+yum. For example, if your $arch is i686 your $basearch will be i386.
 
 .IP \fB$YUM0-$YUM9\fR
 These will be replaced with the value of the shell environment variable of

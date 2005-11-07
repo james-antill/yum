@@ -30,7 +30,6 @@ from repomd import mdErrors
 from repomd import packageSack
 from packages import YumAvailablePackage
 import mdcache
-import parser
 
 _is_fnmatch_pattern = re.compile(r"[*?[]").search
 
@@ -333,14 +332,15 @@ class Repository:
         self.cache = 0
         self.callback = None # callback for the grabber
         self.failure_obj = None
-        self.mirrorlist = None # filename/url of mirrorlist file
+        self.mirrorlistfn = None # filename/url of mirrorlist file
         self.mirrorlistparsed = 0
-        self.baseurl = [] # baseurls from the config file
+        self.baseurls = [] # baseurls from the config file
         self.yumvar = {} # empty dict of yumvariables for $string replacement
         self.proxy_password = None
         self.proxy_username = None
         self.proxy = None
         self.proxy_dict = {}
+        self.metadata_cookie_fn = 'cachecookie'
         
         # throw in some stubs for things that will be set by the config class
         self.basecachedir = ""
@@ -402,8 +402,8 @@ class Repository:
         output = '[%s]\n' % self.id
         vars = ['name', 'bandwidth', 'enabled', 'enablegroups', 
                  'gpgcheck', 'includepkgs', 'keepalive', 'proxy',
-                 'proxy_password', 'proxy_username', 'exclude', 
-                 'retries', 'throttle', 'timeout', 'mirrorlist', 
+                 'proxy_password', 'proxy_username', 'excludes', 
+                 'retries', 'throttle', 'timeout', 'mirrorlistfn', 
                  'cachedir', 'gpgkey', 'pkgdir', 'hdrdir']
         vars.sort()
         for attr in vars:
@@ -505,6 +505,9 @@ class Repository:
         self.set('pkgdir', pkgdir)
         self.set('hdrdir', hdrdir)
         
+        cookie = self.cachedir + '/' + self.metadata_cookie_fn
+        self.set('metadata_cookie', cookie)        
+        
         for dir in [self.cachedir, self.hdrdir, self.pkgdir]:
             if self.cache == 0:
                 if os.path.exists(dir) and os.path.isdir(dir):
@@ -525,15 +528,15 @@ class Repository:
            with valid ones, run  self.check() at the end to make sure it worked"""
 
         goodurls = []
-        if self.mirrorlist and not self.mirrorlistparsed:
-            mirrorurls = getMirrorList(self.mirrorlist)
+        if self.mirrorlistfn and not self.mirrorlistparsed:
+            mirrorurls = getMirrorList(self.mirrorlistfn)
             self.mirrorlistparsed = 1
             for url in mirrorurls:
-                url = parser.varReplace(url, self.yumvar)
-                self.baseurl.append(url)
-       
-        for url in self.baseurl:
-            url = parser.varReplace(url, self.yumvar)
+                url = variableReplace(self.yumvar, url)
+                self.baseurls.append(url)
+        
+        for url in self.baseurls:
+            url = variableReplace(self.yumvar, url)
             (s,b,p,q,f,o) = urlparse.urlparse(url)
             if s not in ['http', 'ftp', 'file', 'https']:
                 print 'not using ftp, http[s], or file for repos, skipping - %s' % (url)
@@ -624,7 +627,34 @@ class Repository:
                 
         return result
            
+
+    def metadataCurrent(self):
+        """Check if there is a metadata_cookie and check its age. If the 
+        age of the cookie is less than metadata_expire time then return true
+        else return False"""
         
+        val = False
+        if os.path.exists(self.metadata_cookie):
+            cookie_info = os.stat(self.metadata_cookie)
+            if cookie_info[8] + self.metadata_expire > time.time():
+                val = True
+        
+        return val
+
+    
+    def setMetadataCookie(self):
+        """if possible, set touch the metadata_cookie file"""
+        
+        check = self.metadata_cookie
+        if not os.path.exists(self.metadata_cookie):
+            check = self.cachedir
+        
+        if os.access(check, os.W_OK):
+            fo = open(self.metadata_cookie, 'w+')
+            fo.close()
+            del fo
+            
+            
     def getRepoXML(self, text=None):
         """retrieve/check/read in repomd.xml from the repository"""
 
@@ -633,7 +663,7 @@ class Repository:
         if self.repoXML is not None:
             return
             
-        if self.cache == 1:
+        if self.cache or self.metadataCurrent():
             if not os.path.exists(local):
                 raise Errors.RepoError, 'Cannot find repomd.xml file for %s' % (self)
             else:
@@ -651,7 +681,9 @@ class Repository:
 
             except URLGrabError, e:
                 raise Errors.RepoError, 'Error downloading file %s: %s' % (local, e)
-        
+            # if we have a 'fresh' repomd.xml then update the cookie
+            self.setMetadataCookie()        
+            
         try:
             self.repoXML = repoMDObject.RepoMD(self.id, result)
         except mdErrors.RepoMDError, e:
@@ -815,3 +847,46 @@ def getMirrorList(mirrorlist):
     
     return returnlist
 
+def variableReplace(yumvar, thing):
+    """ do the replacement of $ variables, releasever, arch and basearch on any 
+        string or list  passed to it - returns whatever you passed"""
+    
+    if thing is None:
+        return thing
+
+    elif type(thing) is types.ListType:
+        shortlist = thing
+
+    elif type(thing) is types.StringType:
+        shortlist = []
+        shortlist.append(thing)
+        
+    else:
+        # not a list or string, screw it
+        return thing
+    
+    basearch_reg = re.compile('\$basearch', re.I)
+    arch_reg = re.compile('\$arch', re.I)
+    releasever_reg = re.compile('\$releasever', re.I)
+    yumvar_reg = {}
+
+    for num in range(0,10):
+        env = '\$YUM%s' % num
+        yumvar_reg[num] = re.compile(env, re.I)
+
+    returnlist = []        
+    for string in shortlist:
+        (string, count) = basearch_reg.subn(yumvar['basearch'], string)
+        (string, count) = arch_reg.subn(yumvar['arch'], string)
+        (string, count) = releasever_reg.subn(yumvar['releasever'], string)
+        for num in range(0,10):
+            (string, count) = yumvar_reg[num].subn(yumvar[num], string)
+        returnlist.append(string)
+        
+    if type(thing) is types.StringType:
+        thing = returnlist[0]
+    
+    if type(thing) is types.ListType:
+        thing = returnlist
+        
+    return thing

@@ -200,7 +200,8 @@ class yumconf(object):
         optionints = [('debuglevel', 2),
                       ('errorlevel', 2), 
                       ('retries', 10),
-                      ('recent', 7)]
+                      ('recent', 7),
+                      ('metadata_expire', 28800]
                       
                       
         #defaults -either get them or set them
@@ -514,6 +515,7 @@ def cfgParserRepo(section, yumconfig, cfgparser):
     thisrepo.set('includepkgs', includelist)
 
     thisrepo.set('basecachedir', yumconfig.getConfigOption('cachedir'))
+    thisrepo.set('metadata_expire', yumconfig.getConfigOption('metadata_expire'))
     
     return thisrepo
 
