@@ -32,9 +32,8 @@ import Errors
 import rpmUtils
 import rpmUtils.updates
 import rpmUtils.arch
-import comps
+import groups
 import config
-import parser
 import repos
 import misc
 import transactioninfo
@@ -48,7 +47,7 @@ from repomd import mdErrors
 from constants import *
 from repomd.packageSack import ListPackageSack
 
-__version__ = '2.5.0'
+__version__ = '2.4.0'
 
 class YumBase(depsolve.Depsolve):
     """This is a primary structure and base class. It houses the objects and
@@ -80,51 +79,55 @@ class YumBase(depsolve.Depsolve):
     def doConfigSetup(self, fn='/etc/yum.conf', root='/'):
         """basic stub function for doing configuration setup"""
        
-        self.conf = config.readMainConfig(fn, root)
-        self.yumvar = self.conf.yumvar
+        self.conf = config.yumconf(configfile=fn, root=root)
         self.getReposFromConfig()
 
     def getReposFromConfig(self):
         """read in repositories from config main and .repo files"""
-
+        
         reposlist = []
+        # look through our repositories.
+        for section in self.conf.cfg.sections(): # loop through the list of sections
+            if section != 'main': # must be a repoid
+                try:
+                    thisrepo = config.cfgParserRepo(section, self.conf, self.conf.cfg)
+                except (Errors.RepoError, Errors.ConfigError), e:
+                    self.errorlog(2, e)
+                    continue
+                else:
+                    reposlist.append(thisrepo)
 
-        # Check yum.conf for repositories
-        for section in self.conf.cfg.sections():
-            # All sections except [main] are repositories
-            if section == 'main': 
-                continue
-
-            try:
-                thisrepo = config.readRepoConfig(self.conf.cfg, section, self.conf)
-            except (Errors.RepoError, Errors.ConfigError), e:
-                self.errorlog(2, e)
-            else:
-                reposlist.append(thisrepo)
-
-        # Read .repo files from directories specified by the reposdir option
-        # (typically /etc/yum.repos.d and /etc/yum/repos.d)
-        parser = config.IncludedDirConfigParser(vars=self.yumvar)
+        # reads through each reposdir for *.repo
+        # does not read recursively
+        # read each of them in using confpp, then parse them same as any other repo
+        # section - as above.
         for reposdir in self.conf.reposdir:
-            if os.path.exists(self.conf.installroot+'/'+reposdir):
+            if os.path.exists(self.conf.installroot + '/' + reposdir):
                 reposdir = self.conf.installroot + '/' + reposdir
-
+            
             if os.path.isdir(reposdir):
-                #XXX: why can't we just pass the list of files?
-                files = ' '.join(glob.glob('%s/*.repo' % reposdir))
-                #XXX: error catching here
-                parser.read(files)
+                repofn = glob.glob(reposdir+'/*.repo')
+                repofn.sort()
+                
+                for fn in repofn:
+                    if not os.path.isfile(fn):
+                        continue
+                    try:
+                        cfg, sections = config.parseDotRepo(fn)
+                    except Errors.ConfigError, e:
+                        self.errorlog(2, e)
+                        continue
 
-        # Check sections in the .repo files that were just slurped up
-        for section in parser.sections():
-            try:
-                thisrepo = config.readRepoConfig(parser, section, self.conf)
-            except (Errors.RepoError, Errors.ConfigError), e:
-                self.errorlog(2, e)
-            else:
-                reposlist.append(thisrepo)
+                    for section in sections:
+                        try:
+                            thisrepo = config.cfgParserRepo(section, self.conf, 
+                                    cfg)
+                            reposlist.append(thisrepo)
+                        except (Errors.RepoError, Errors.ConfigError), e:
+                            self.errorlog(2, e)
+                            continue
 
-        # Got our list of repo objects, add them to the repos collection
+        # got our list of repo objects
         for thisrepo in reposlist:
             try:
                 self.repos.add(thisrepo)
@@ -167,10 +170,10 @@ class YumBase(depsolve.Depsolve):
         if hasattr(self, 'read_ts'):
             return
             
-        if not self.conf.installroot:
+        if not self.conf.getConfigOption('installroot'):
             raise Errors.YumBaseError, 'Setting up TransactionSets before config class is up'
         
-        installroot = self.conf.installroot
+        installroot = self.conf.getConfigOption('installroot')
         self.read_ts = rpmUtils.transaction.initReadOnlyTransaction(root=installroot)
         self.tsInfo = transactioninfo.TransactionData()
         self.rpmdb = rpmUtils.RpmDBHolder()
@@ -197,14 +200,12 @@ class YumBase(depsolve.Depsolve):
             del self.read_ts
         if hasattr(self, 'up'):
             del self.up
-        if hasattr(self, 'comps'):
-            self.comps.compiled = False
-            
 
     def doRepoSetup(self, thisrepo=None):
         """grabs the repomd.xml for each enabled repository and sets up 
            the basics of the repository"""
 
+        
         self.plugins.run('prereposetup')
         
         repos = []
@@ -220,7 +221,7 @@ class YumBase(depsolve.Depsolve):
             if repo.repoXML is not None and len(repo.urls) > 0:
                 continue
             try:
-                repo.cache = self.conf.cache
+                repo.cache = self.conf.getConfigOption('cache')
                 repo.baseurlSetup()
                 repo.dirSetup()
                 self.log(3, 'Baseurl(s) for repo: %s' % repo.urls)
@@ -276,19 +277,23 @@ class YumBase(depsolve.Depsolve):
         self.log(3, 'Building updates object')
         #FIXME - add checks for the other pkglists to see if we should
         # raise an error
+        if not hasattr(self, pkgSack):
+            self.doRepoSetup()
+            self.doSackSetup()
+
         self.up = rpmUtils.updates.Updates(self.rpmdb.getPkgList(),
                                            self.pkgSack.simplePkgList())
-        if self.conf.debuglevel >= 6:
+        if self.conf.getConfigOption('debuglevel') >= 6:
             self.up.debug = 1
             
-        if self.conf.obsoletes:
+        if self.conf.getConfigOption('obsoletes'):
             self.up.rawobsoletes = self.pkgSack.returnObsoletes()
             
-        self.up.exactarch = self.conf.exactarch
-        self.up.exactarchlist = self.conf.exactarchlist
+        self.up.exactarch = self.conf.getConfigOption('exactarch')
+        self.up.exactarchlist = self.conf.getConfigOption('exactarchlist')
         self.up.doUpdates()
 
-        if self.conf.obsoletes:
+        if self.conf.getConfigOption('obsoletes'):
             self.up.doObsoletes()
 
         self.up.condenseUpdates()
@@ -310,26 +315,26 @@ class YumBase(depsolve.Depsolve):
                 pass
             else:
                 reposWithGroups.append(repo)
-                
         # now we know which repos actually have groups files.
-        overwrite = self.conf.overwrite_groups
-        self.comps = comps.Comps(overwrite_groups = overwrite)
+
+        self.doRpmDBSetup()
+        pkgtuples = self.rpmdb.getPkgList()
+        overwrite = self.conf.getConfigOption('overwrite_groups')
+        self.groupInfo = groups.Groups_Info(pkgtuples, overwrite_groups = overwrite)
 
         for repo in reposWithGroups:
             self.log(4, 'Adding group file from repository: %s' % repo)
             groupfile = repo.getGroups()
             try:
-                self.comps.add(groupfile)
+                self.groupInfo.add(groupfile)
             except Errors.GroupsError, e:
                 self.errorlog(0, 'Failed to add groups file for repository: %s' % repo)
 
-        if self.comps.compscount == 0:
+        if self.groupInfo.compscount == 0:
             raise Errors.GroupsError, 'No Groups Available in any repository'
-        
-        self.doRpmDBSetup()
-        pkglist = self.rpmdb.getPkgList()
-        self.comps.compile(pkglist)
-        
+
+        self.groupInfo.compileGroups()
+
 
     def buildTransaction(self):
         """go through the packages in the transaction set, find them in the
@@ -363,10 +368,10 @@ class YumBase(depsolve.Depsolve):
         # if repo: then do only that repos' packages and excludes
         
         if not repo: # global only
-            excludelist = self.conf.exclude
+            excludelist = self.conf.getConfigOption('exclude')
             repoid = None
         else:
-            excludelist = repo.exclude
+            excludelist = repo.excludes
             repoid = repo.id
 
         if len(excludelist) == 0:
@@ -431,7 +436,7 @@ class YumBase(depsolve.Depsolve):
         """perform the yum locking, raise yum-based exceptions, not OSErrors"""
         
         # if we're not root then we don't lock - just return nicely
-        if self.conf.uid != 0:
+        if self.conf.getConfigOption('uid') != 0:
             return
             
         root = self.conf.installroot
@@ -464,7 +469,7 @@ class YumBase(depsolve.Depsolve):
         """do the unlock for yum"""
         
         # if we're not root then we don't lock - just return nicely
-        if self.conf.uid != 0:
+        if self.conf.getConfigOption('uid') != 0:
             return
         
         root = self.conf.installroot
@@ -584,6 +589,7 @@ class YumBase(depsolve.Depsolve):
             if (self.conf.cache or repo_cached) and errors:
                 return errors
                 
+
 
         i = 0
         for po in remote_pkgs:
@@ -947,7 +953,7 @@ class YumBase(depsolve.Depsolve):
         elif pkgnarrow == 'obsoletes':
             self.doRepoSetup()
             self.doRpmDBSetup()
-            self.conf.obsoletes = 1
+            self.conf.setConfigOption('obsoletes', 1)
             self.doUpdateSetup()
 
             for (pkgtup, instTup) in self.up.getObsoletesTuples():
@@ -1205,102 +1211,27 @@ class YumBase(depsolve.Depsolve):
            optional 'uservisible' bool to tell it whether or not to return
            only groups marked as uservisible"""
         
+        if uservisible:
+            availgroups = self.groupInfo.visible_groups
+        else:
+            availgroups = self.groupInfo.grouplist
         
         installed = []
         available = []
         
-        for grp in self.comps.groups.values():
-            if grp.installed:
-                if uservisible:
-                    if grp.user_visible:
-                        installed.append(grp)
-                else:
-                    installed.append(grp)
+        for id in availgroups:
+            grp = self.groupInfo.group_by_id[id]
+            if self.groupInfo.isGroupInstalled(grp.name):
+                installed.append(grp.name)
             else:
-                if uservisible:
-                    if grp.user_visible:
-                        available.append(grp)
-                else:
-                    available.append(grp)
-            
+                available.append(grp.name)
+
+        installed = misc.unique(installed)
+        available = misc.unique(available)
+        installed.sort()
+        available.sort()
+        
         return installed, available
-    
-    
-    def groupRemove(self, grpid):
-        """mark all the packages in this group to be removed"""
-        
-        if not self.comps:
-            self.doGroupSetup()
-        
-        if not self.comps.groups.has_key(grpid):
-            raise Errors.GroupsError, "No Group named %s exists" % grpid
-            
-        thisgroup = self.comps.groups[grpid]
-        pkgs = thisgroup.packages
-        for pkg in thisgroup.packages:
-            p = self.rpmdb.installed(name=pkg)
-            for po in p:
-                txmbr = self.tsInfo.addErase(po)
-            
-        
-    def selectGroup(self, grpid):
-        """mark all the packages in the group to be installed"""
-        
-        if not self.comps:
-            self.doGroupSetup()
-        
-        if not self.comps.groups.has_key(grpid):
-            raise Errors.GroupsError, "No Group named %s exists" % grpid
-            
-        thisgroup = self.comps.groups[grpid]
-        if thisgroup.selected:
-            return 
-        
-        thisgroup.selected = True
-        
-        pkgs = thisgroup.mandatory_packages.keys() + thisgroup.default_packages.keys()
-        for pkg in pkgs:
-            try:
-                p = self.pkgSack.returnNewestByName(pkg)
-            except repomd.mdErrors.PackageSackError:
-                self.log(4, "no such package %s from group %s" %(pkg, thisgroup))
-                continue
-            thispkg = p[0]
-            txmbr = self.tsInfo.addInstall(thispkg)
-            txmbr.group.append(thisgroup.grpid)
-
-    def deselectGroup(self, grpid):
-        """de-mark all the packages in the group for install"""
-        if not self.comps:
-            self.doGroupSetup()
-        
-        if not self.comps.groups.has_key(grpid):
-            raise Errors.GroupsError, "No Group named %s exists" % grpid
-            
-        thisgroup = self.comps.groups[grpid]
-        thisgroup.selected = False
-        
-        for pkg in thisgroup.packages:
-            try:
-                p = self.pkgSack.returnNewestByName(pkg)
-            except repomd.mdErrors.PackageSackError:
-                self.log(4, "no such package %s from group %s" %(pkg, thisgroup))
-                continue
-            
-            thispkg = p[0]
-            txmbrs = self.tsInfo.getMembers(pkgtuple = thispkg.pkgtup)
-            for txmbr in txmbrs:
-                try: 
-                    txmbr.group.remove(grpid)
-                except ValueError:
-                    self.log(4, "package %s was not marked in group %s" % (thispkg, grpid))
-                    continue
-                
-                # if there aren't any other groups mentioned then remove the pkg
-                if len(txmbr.group) == 0:
-                    self.tsInfo.remove(thispkg.pkgtup)
-
-                    
         
     def getPackageObject(self, pkgtup):
         """retrieves a packageObject from a pkgtuple - if we need
@@ -1475,25 +1406,3 @@ class YumBase(depsolve.Depsolve):
         
         return results
 
-    def install(self, po=None, **kwargs):
-        """try to mark for install the input
-         - input can be a pkg object or string"""
-        # convert 'input'
-        # try to install 'best version of input'
-        # if nothing can be installed raise an exception
-        # if any pkgs can be installed then return a list of the
-        # transaction members for those.
-        pass
-    
-    def update(self, input):
-        """try to find and mark for update the input
-           - input can be a pkg object or string"""
-        pass
-        
-    def erase(self, input):
-        """try to find and mark for erase the input -
-           - input can be a pkg object or string"""
-        pass
-        
-         
-         

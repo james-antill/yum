@@ -28,7 +28,6 @@ import rpm
 from repomd.packageSack import ListPackageSack
 from repomd.mdErrors import PackageSackError
 from Errors import DepError, RepoError
-from constants import *
 import packages
 
 class Depsolve:
@@ -177,7 +176,7 @@ class Depsolve:
                     if self.allowedMultipleInstalls(txmbr.po):
                         self.log(5, '%s converted to install' % (txmbr.po))
                         txmbr.ts_state = 'i'
-                        txmbr.output_state = TS_INSTALL
+                        txmbr.output_state = 'installing'
 
                 
                 self.ts.addInstall(hdr, (hdr, rpmfile), txmbr.ts_state)
@@ -249,6 +248,7 @@ class Depsolve:
                     # if our packageSacks aren't here, then set them up
                     if not hasattr(self, 'pkgSack'):
                         self.doRepoSetup()
+                        self.doSackSetup()
                     (checkdep, missing, conflict, errormsgs) = self._processReq(dep)
                     
                 elif sense == rpm.RPMDEP_SENSE_CONFLICTS: # conflicts - this is gonna be short :)
@@ -486,14 +486,14 @@ class Depsolve:
             if len(uplist) > 0:
                 if name not in self.conf.exactarchlist:
                     pkgs = self.pkgSack.returnNewestByName(name)
-                    archs = {}
+                    archs = []
                     for pkg in pkgs:
                         (n,a,e,v,r) = pkg.pkgtup
-                        archs[a] = pkg
-                    a = rpmUtils.arch.getBestArchFromList(archs.keys())
-                    po = archs[a]
+                        archs.append(a)
+                    a = rpmUtils.arch.getBestArchFromList(archs)
+                    po = self.pkgSack.returnNewestByNameArch((n,a))
                 else:
-                    po = self.pkgSack.returnNewestByNameArch((name,arch))[0]
+                    po = self.pkgSack.returnNewestByNameArch((name,arch))
                 if po.pkgtup not in uplist:
                     po = None
 
@@ -692,14 +692,14 @@ class Depsolve:
             if len(uplist) > 0:
                 if confname not in self.conf.exactarchlist:
                     pkgs = self.pkgSack.returnNewestByName(confname)
-                    archs = {}
+                    archs = []
                     for pkg in pkgs:
                         (n,a,e,v,r) = pkg.pkgtup
-                        archs[a] = pkg
-                    a = rpmUtils.arch.getBestArchFromList(archs.keys())
-                    po = archs[a]
+                        archs.append(a)
+                    a = rpmUtils.arch.getBestArchFromList(archs)
+                    po = self.pkgSack.returnNewestByNameArch((n,a))
                 else:
-                    po = self.pkgSack.returnNewestByNameArch((confname,confarch))[0]
+                    po = self.pkgSack.returnNewestByNameArch((confname,confarch))
                 if po.pkgtup not in uplist:
                     po = None
 
