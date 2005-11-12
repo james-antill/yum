@@ -277,7 +277,7 @@ class YumBase(depsolve.Depsolve):
         self.log(3, 'Building updates object')
         #FIXME - add checks for the other pkglists to see if we should
         # raise an error
-        if not hasattr(self, pkgSack):
+        if not hasattr(self, 'pkgSack'):
             self.doRepoSetup()
             self.doSackSetup()
 
