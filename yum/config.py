@@ -283,7 +283,7 @@ class yumconf(object):
             setattr(self, option, value)
 
         # do the floats
-        for (option, value) in optionfloats:
+        for (option, default) in optionfloats:
             try:
                 value =  self.cfg._getoption('main', option, default)
                 value = variableReplace(self.yumvar, value)
