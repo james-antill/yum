@@ -1,24 +1,20 @@
+%define date #DATE#
 Summary: RPM installer/updater
 Name: yum
 Version: 2.4.1
-Release: 1
+Release: %{date}
 License: GPL
 Group: System Environment/Base
-Source: %{name}-%{version}.tar.gz
+Source: %{name}-%{date}.tar.gz
 #Source1: yum.conf
 #Source2: yum.cron
-URL: http://linux.duke.edu/yum/
+URL: http://www.dulug.duke.edu/yum/
 BuildRoot: %{_tmppath}/%{name}-%{version}root
 BuildArchitectures: noarch
 BuildRequires: python
 BuildRequires: gettext
-Requires: python, rpm-python, rpm >= 0:4.1.1
-Requires: python-sqlite
-Requires: urlgrabber
-Requires: python-elementtree
-Requires: libxml2-python
-Prereq: /sbin/chkconfig, /sbin/service, coreutils
-
+Requires: python, rpm-python, rpm >= 0:4.1.1, libxml2-python, python-sqlite
+Prereq: /sbin/chkconfig, /sbin/service
 
 %description
 Yum is a utility that can check for and automatically download and
@@ -26,9 +22,10 @@ install updated RPM packages. Dependencies are obtained and downloaded
 automatically prompting the user as necessary.
 
 %prep
-%setup -q
+%setup -q -n %{name}
 
 %build
+%configure 
 make
 
 
@@ -37,6 +34,8 @@ make
 make DESTDIR=$RPM_BUILD_ROOT install
 # install -m 644 %{SOURCE1} $RPM_BUILD_ROOT/etc/yum.conf
 # install -m 755 %{SOURCE2} $RPM_BUILD_ROOT/etc/cron.daily/yum.cron
+
+%find_lang %{name}
 
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
@@ -57,24 +56,20 @@ fi
 exit 0
 
 
-%files
+
+
+%files -f %{name}.lang
 %defattr(-, root, root)
-%doc README AUTHORS COPYING TODO INSTALL ChangeLog PLUGINS
+%doc README AUTHORS COPYING TODO INSTALL ChangeLog
 %config(noreplace) %{_sysconfdir}/yum.conf
-%dir %{_sysconfdir}/yum.repos.d
-%dir %{_sysconfdir}/%{name}
-%config(noreplace) %{_sysconfdir}/%{name}/*.yum
 %config(noreplace) %{_sysconfdir}/cron.daily/yum.cron
 %config(noreplace) %{_sysconfdir}/cron.weekly/yum.cron
-%config %{_sysconfdir}/rc.d/init.d/%{name}
+%config %{_sysconfdir}/init.d/%{name}
 %config %{_sysconfdir}/logrotate.d/%{name}
-%{_datadir}/yum-cli/*
+%{_datadir}/yum/*
 %{_bindir}/yum
 %{_bindir}/yum-arch
-/usr/lib/python?.?/site-packages/yum
-/usr/lib/python?.?/site-packages/repomd
-/usr/lib/python?.?/site-packages/rpmUtils
-%dir /var/cache/yum
+/var/cache/yum
 %{_mandir}/man*/*
 
 %changelog
@@ -84,92 +79,50 @@ exit 0
 * Sun Aug 14 2005 Seth Vidal <skvidal@phy.duke.edu>
 - 2.4.0
 
-* Fri Aug  5 2005 Seth Vidal <skvidal@phy.duke.edu>
-- back to libxml2-python req
-
-* Fri Jul  8 2005 Seth Vidal <skvidal@phy.duke.edu>
-- 2.3.4
-
-* Tue Jun 14 2005 Seth Vidal <skvidal@phy.duke.edu>
-- 2.3.3
-
-* Wed Apr  6 2005 Seth Vidal <skvidal@phy.duke.edu>
-- added python-elementtree dep, remove libxml2 dep
-
 * Mon Apr  4 2005 Seth Vidal <skvidal@phy.duke.edu>
 - 2.3.2
 
-* Mon Mar 28 2005 Seth Vidal <skvidal@phy.duke.edu>
-- add in the /etc/yum/*.yum yum shell files
-
 * Mon Mar  7 2005 Seth Vidal <skvidal@phy.duke.edu>
 - 2.3.1
-- get rid of old obsoletes
 
 * Fri Feb 25 2005 Gijs Hollestelle <gijs@gewis.nl>
 - Require python-sqlite
 
-* Fri Feb 25 2005 Seth Vidal <skvidal@phy.duke.edu>
-- add yum.cron to weekly to clean packages
-
 * Mon Feb 21 2005 Seth Vidal <skvidal@phy.duke.edu>
-- new devel branch - 2.3.0
+-  new devel branch - things will break - people will die!
 
 * Tue Jan 25 2005 Seth Vidal <skvidal@phy.duke.edu>
 - 2.1.13
 
-* Sat Nov 27 2004 Seth Vidal <skvidal@phy.duke.edu>
-- 2.1.12
+* Sat Nov 27 2004  Seth Vidal <skvidal@phy.duke.edu>
+- more misc fixes - 2.1.12
+
 
 * Wed Oct 27 2004 Seth Vidal <skvidal@phy.duke.edu>
-- 2.1.11
-
+- lots of misc fixes - 2.1.11
 
 * Tue Oct 19 2004 Seth Vidal <skvidal@phy.duke.edu>
 - 2.1.10
 
 * Mon Oct 18 2004 Seth Vidal <skvidal@phy.duke.edu>
-- 2.1.9 - paper bag release
+- 2.1.9 - sigh
 
 
 * Mon Oct 18 2004 Seth Vidal <skvidal@phy.duke.edu>
 - 2.1.8
 
-
 * Wed Oct 13 2004 Seth Vidal <skvidal@phy.duke.edu>
-- update to 2.1.7
-- re-include yum-arch w/deprecation notice
+- 2.1.7
+
 
 * Wed Oct  6 2004 Seth Vidal <skvidal@phy.duke.edu>
-- mdcaching code and list changes
 - 2.1.6
 
 * Mon Oct  4 2004 Seth Vidal <skvidal@phy.duke.edu>
-- 2.1.5
+- 2.1.5 - lots of small changes
 
-- lots of minor bugfixes and corrections
-
-
-* Tue Sep 28 2004 Seth Vidal <skvidal@phy.duke.edu>
-- 2.1.4
-
-* Fri Sep  3 2004 Seth Vidal <skvidal@phy.duke.edu>
-- big depsolver update
-
-* Wed Sep  1 2004 Seth Vidal <skvidal@phy.duke.edu>
-- more changes
-
-* Tue Aug 31 2004 Seth Vidal <skvidal@phy.duke.edu>
-- all new stuff for 2.1.X
-
-* Mon Sep  8 2003 Seth Vidal <skvidal@phy.duke.edu>
-- brown paper-bag 2.0.3
-
-* Sun Sep  7 2003 Seth Vidal <skvidal@phy.duke.edu>
-- bump to 2.0.2
-
-* Fri Aug 15 2003 Seth Vidal <skvidal@phy.duke.edu>
-- bump to 2.0.1
+* Sat Aug  9 2003 Seth Vidal <skvidal@phy.duke.edu>
+- daily spec file made 
 
 * Sun Jul 13 2003 Seth Vidal <skvidal@phy.duke.edu>
 - bump to 2.0
