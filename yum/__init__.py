@@ -837,7 +837,7 @@ class YumBase(depsolve.Depsolve):
 
     def cleanMetadata(self):
         filelist = []
-        exts = ['xml.gz', 'xml']
+        exts = ['xml.gz', 'xml', 'cachecookie']
         
         removed = 0
         for ext in exts:

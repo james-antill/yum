@@ -201,7 +201,7 @@ class yumconf(object):
                       ('errorlevel', 2), 
                       ('retries', 10),
                       ('recent', 7),
-                      ('metadata_expire', 28800)]
+                      ('metadata_expire', 1800)]
                       
                       
         #defaults -either get them or set them
