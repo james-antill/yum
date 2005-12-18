@@ -1,3 +1,31 @@
+2005-12-18 17:16  skvidal
+
+	* yum-daily.spec, yum.spec, yum/__init__.py: 
+	mark 2.4.2
+
+2005-12-12 13:19  skvidal
+
+	* docs/yum.8: make the man page reference be more useful
+
+2005-12-03 03:27  skvidal
+
+	* yummain.py: 
+	fix for rh bug: 174669 set locale to C if our locale assertion
+	fails.
+
+2005-12-03 02:15  skvidal
+
+	* cli.py, docs/yum.conf.5, yum/__init__.py, yum/config.py: 
+	- decrease default metadata_expire value from 8 hours to 30 minutes
+	- make yum clean metadata remove the cachecookie - make yum
+	makecache zero out the value of the metadata_expire so running	 it
+	will force cache updating
+
+2005-11-30 15:06  skvidal
+
+	* ChangeLog: 
+	changelog for 2.4.1
+
 2005-11-30 15:04  skvidal
 
 	* yum-daily.spec, yum.spec, yum/__init__.py: 
