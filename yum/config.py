@@ -209,7 +209,7 @@ class yumconf(object):
                          ('logfile', '/var/log/yum.log'), 
                          ('reposdir', ['/etc/yum/repos.d', '/etc/yum.repos.d']),
                          ('syslog_ident', None),
-                         ('syslog_facility', 'LOG_USER'),
+                         ('syslog_facility', 'LOG_DAEMON'),
                          ('distroverpkg', 'fedora-release'),
                          ('installroot', root),
                          ('commands', []),
