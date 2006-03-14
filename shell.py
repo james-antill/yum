@@ -155,7 +155,7 @@ class YumShell(cmd.Cmd):
         if cmd in ['debuglevel', 'errorlevel']:
             opts = shlex.split(args)
             if not opts:
-                self.base.log(2, '%s: %s' % (cmd, getattr(self.base.conf, cmd)))
+                self.base.log(2, '%s: %s' % (cmd, self.base.conf.getConfigOption(cmd)))
             else:
                 val = opts[0]
                 try:
@@ -163,7 +163,7 @@ class YumShell(cmd.Cmd):
                 except ValueError, e:
                     self.base.errorlog(0, 'Value %s for %s cannot be made to an int' % (val, cmd))
                     return
-                setattr(self.base.conf, cmd, val)
+                self.base.conf.setConfigOption(cmd, val)
                 if cmd == 'debuglevel':
                     self.base.log.threshold = val
                 elif cmd == 'errorlevel':
@@ -172,14 +172,14 @@ class YumShell(cmd.Cmd):
         elif cmd in ['gpgcheck', 'obsoletes', 'assumeyes']:
             opts = shlex.split(args)
             if not opts:
-                self.base.log(2, '%s: %s' % (cmd, getattr(self.base.conf, cmd)))
+                self.base.log(2, '%s: %s' % (cmd, self.base.conf.getConfigOption(cmd)))
             else:
                 value = opts[0]
                 if value.lower() not in BOOLEAN_STATES:
                     self.base.errorlog(0, 'Value %s for %s is not a Boolean' % (value, cmd))
                     return False
                 value = BOOLEAN_STATES[value.lower()]
-                setattr(self.base.conf, cmd, value)
+                self.base.conf.setConfigOption(cmd, value)
                 if cmd == 'obsoletes':
                     if hasattr(self.base, 'up'): # reset the updates
                         del self.base.up
@@ -189,11 +189,11 @@ class YumShell(cmd.Cmd):
             opts = shlex.split(args)
             if not opts:
                 msg = '%s: ' % cmd
-                msg = msg + string.join(getattr(self.base.conf, cmd))
+                msg = msg + string.join(self.base.conf.getConfigOption(cmd))
                 self.base.log(2, msg)
                 return False
             else:
-                setattr(self.base.conf, cmd, opts)
+                self.base.conf.setConfigOption(cmd, opts)
                 if hasattr(self.base, 'pkgSack'): # kill the pkgSack
                     del self.base.pkgSack
                     self.base.repos._selectSackType()
@@ -214,10 +214,12 @@ class YumShell(cmd.Cmd):
         if cmd in ['list', None]:
             if self.base.repos.repos.values():
                 self.base.log(2, '%-20.20s %-40.40s  status' % ('repo id', 'repo name'))
-            for repo in self.base.repos.repos.values():
-                if repo in self.base.repos.listEnabled():
+            repos = self.base.repos.repos.values()
+            repos.sort()
+            for repo in repos:
+                if repo in self.base.repos.listEnabled() and args in ('', 'enabled'):
                     self.base.log(2, '%-20.20s %-40.40s  enabled' % (repo, repo.name))
-                else:
+                elif args in ('', 'disabled'):
                     self.base.log(2, '%-20.20s %-40.40s  disabled' % (repo, repo.name))
         
         elif cmd == 'enable':
