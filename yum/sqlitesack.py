@@ -185,12 +185,15 @@ class YumSqlitePackageSack(repos.YumPackageSack):
             
     # Search packages that either provide something containing name
     # or provide a file containing name 
-    def searchAll(self,name, query_type='like'):
-    
+    def searchAll(self, name, query_type='like'):
+        
         # This should never be called with a name containing a %
         assert(name.find('%') == -1)
         result = []
         quotename = name.replace("'","''")
+        (dirname,filename) = os.path.split(name)
+        
+        # check provides
         for (rep,cache) in self.primarydb.items():
             cur = cache.cursor()
             cur.execute("select DISTINCT packages.pkgId as pkgId from provides,packages where provides.name LIKE '%%%s%%' AND provides.pkgKey = packages.pkgKey" % quotename)
@@ -199,39 +202,65 @@ class YumSqlitePackageSack(repos.YumPackageSack):
                     continue
                 pkg = self.getPackageDetails(ob['pkgId'])
                 result.append((self.pc(pkg,rep)))
-
+        
+        # check filelists/dirlists
         for (rep,cache) in self.filelistsdb.items():
-            cur = cache.cursor()
-            (dir,filename) = os.path.split(quotename)
-            # This query means:
-            # Either name is a substring of dirname or the directory part
-            # in name is a substring of dirname and the file part is part
-            # of filelist
-            cur.execute("select packages.pkgId as pkgId,\
+            querystrings = []
+            # dirnames
+            # just the dirname
+            if dirname != '':
+                tmp = "select packages.pkgId as pkgId,\
                 filelist.dirname as dirname,\
                 filelist.filetypes as filetypes,\
                 filelist.filenames as filenames \
                 from packages,filelist where \
-                (filelist.dirname LIKE '%%%s%%' \
-                OR (filelist.dirname LIKE '%%%s%%' AND\
-                filelist.filenames LIKE '%%%s%%'))\
-                AND (filelist.pkgKey = packages.pkgKey)" % (quotename,dir,filename))
-                    
-        # cull the results for false positives
-        for ob in cur.fetchall():
-            # Check if it is an actual match
-            # The query above can give false positives, when
-            # a package provides /foo/aaabar it will also match /foo/bar
-            if (self.excludes[rep].has_key(ob['pkgId'])):
-                continue
-            real = False
-            for filename in decodefilenamelist(ob['filenames']):
-                if (ob['dirname']+'/'+filename).find(name) != -1:
-                    real = True
-            if (not real):
-                continue
-            pkg = self.getPackageDetails(ob['pkgId'])
-            result.append((self.pc(pkg,rep)))
+                filelist.dirname LIKE '%%%s%%' \
+                AND (filelist.pkgKey = packages.pkgKey)" % (dirname)
+                querystrings.append(tmp)
+                
+            # look at full quotename
+            tmp = "select packages.pkgId as pkgId,\
+                filelist.dirname as dirname,\
+                filelist.filetypes as filetypes,\
+                filelist.filenames as filenames \
+                from packages,filelist where \
+                filelist.dirname LIKE '%%%s%%' \
+                AND (filelist.pkgKey = packages.pkgKey)" % (quotename)
+            querystrings.append(tmp)
+
+            # filenames
+            tmp = "select packages.pkgId as pkgId,\
+                filelist.dirname as dirname,\
+                filelist.filetypes as filetypes,\
+                filelist.filenames as filenames \
+                from packages,filelist where \
+                filelist.filenames LIKE '%%%s%%'\
+                AND (filelist.pkgKey = packages.pkgKey)" % (filename)
+            
+            querystrings.append(tmp)
+        
+            for querystring in querystrings:
+                cur = cache.cursor()
+                cur.execute("%s" % querystring)
+
+                # cull the results for false positives
+                for ob in cur.fetchall():
+                    # Check if it is an actual match
+                    # The query above can give false positives, when
+                    # a package provides /foo/aaabar it will also match /foo/bar
+                    if (self.excludes[rep].has_key(ob['pkgId'])):
+                        continue
+                    real = False
+        
+                    for filename in decodefilenamelist(ob['filenames']):
+                        if (ob['dirname'] + '/' + filename).find(name) != -1:
+                            real = True
+                    if (not real):
+                        continue
+
+                    pkg = self.getPackageDetails(ob['pkgId'])
+                    result.append((self.pc(pkg,rep)))
+
         return result     
     
     def returnObsoletes(self):
