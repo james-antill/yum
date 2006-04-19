@@ -1201,11 +1201,11 @@ class YumBase(depsolve.Depsolve):
             
             if hasattr(self.pkgSack, 'searchAll'):
                 if not re.match('.*[\*,\[,\],\{,\},\?,\+,\%].*', arg):
-                    self.log(4, 'Using the like search')
+                    self.log(4, 'Using the like search on %s' % arg)
                     where = self.pkgSack.searchAll(arg, query_type='like')
             
             self.log(4, 'Searching %d packages' % len(where))
-            self.log(4,'refining the search expression of %s' % arg) 
+            self.log(4, 'refining the search expression of %s' % arg) 
             restring = self._refineSearchPattern(arg)
             self.log(4, 'refined search: %s' % restring)
             try: 
