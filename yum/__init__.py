@@ -1173,9 +1173,14 @@ class YumBase(depsolve.Depsolve):
             self.log(4, 'searching the simple way')
             pkgs = self.returnPackagesByDep(arg)
             for po in pkgs:
+                # if the match is already in the list, just skip it
+                if matches.has_key(po):
+                    continue
+                
+                matches[po] = [arg]
                 if callback:
                     callback(po, [arg])
-                matches[po] = [arg]
+                
 
         # search pkgSack - fully populate the worthwhile metadata to search
         # if it even vaguely matches
@@ -1231,9 +1236,11 @@ class YumBase(depsolve.Depsolve):
                         tmpvalues.append(prov)
 
                 if len(tmpvalues) > 0:
-                    if callback:
-                        callback(po, tmpvalues)
-                    matches[po] = tmpvalues
+                    if not matches.has_key(po):
+                        matches[po] = tmpvalues
+                        if callback:
+                            callback(po, tmpvalues)
+                
         
         self.doRpmDBSetup()
         # installed rpms, too

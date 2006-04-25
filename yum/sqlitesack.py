@@ -189,7 +189,7 @@ class YumSqlitePackageSack(repos.YumPackageSack):
         
         # This should never be called with a name containing a %
         assert(name.find('%') == -1)
-        result = []
+        result = {}
         quotename = name.replace("'","''")
         (dirname,filename) = os.path.split(name)
         
@@ -200,8 +200,11 @@ class YumSqlitePackageSack(repos.YumPackageSack):
             for ob in cur.fetchall():
                 if (self.excludes[rep].has_key(ob['pkgId'])):
                     continue
-                pkg = self.getPackageDetails(ob['pkgId'])
-                result.append((self.pc(pkg,rep)))
+
+                pkgid = ob['pkgId']
+                if not result.has_key(pkgid):
+                    pkg = self.getPackageDetails(ob['pkgId'])
+                    result[pkgid] = (self.pc(pkg,rep))
         
         # check filelists/dirlists
         for (rep,cache) in self.filelistsdb.items():
@@ -258,10 +261,12 @@ class YumSqlitePackageSack(repos.YumPackageSack):
                     if (not real):
                         continue
 
-                    pkg = self.getPackageDetails(ob['pkgId'])
-                    result.append((self.pc(pkg,rep)))
+                    pkgid = ob['pkgId']
+                    if not result.has_key(pkgid):
+                        pkg = self.getPackageDetails(ob['pkgId'])
+                        result[pkgid] = (self.pc(pkg,rep))
 
-        return result     
+        return result.values()
     
     def returnObsoletes(self):
         obsoletes = {}
