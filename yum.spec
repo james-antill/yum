@@ -1,6 +1,6 @@
 Summary: RPM installer/updater
 Name: yum
-Version: 2.9.0
+Version: 2.6.1
 Release: 1
 License: GPL
 Group: System Environment/Base
@@ -78,8 +78,8 @@ exit 0
 %{_mandir}/man*/*
 
 %changelog
-* Tue Mar  7 2006 Seth Vidal <skvidal at linux.duke.edu>
-- 2.9.0 - new dev cycle
+* Wed Apr 26 2006 Seth Vidal <skvidal at linux.duke.edu>
+- 2.6.1
 
 * Mon Mar  6 2006 Seth Vidal <skvidal at linux.duke.edu>
 - 2.6.0
