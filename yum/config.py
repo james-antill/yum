@@ -230,7 +230,8 @@ class yumconf(object):
                                              'kernel-BOOT']),
                          ('exactarchlist', ['kernel', 'kernel-smp', 'glibc',
                                             'kernel-hugemem', 'kernel-enterprise',
-                                            'kernel-bigmem', 'kernel-devel']),
+                                            'kernel-bigmem', 'kernel-devel',
+                                            'kernel-largesmp']),
                          ('tsflags', []),
                          ]
                          
