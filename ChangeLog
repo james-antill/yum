@@ -1,3 +1,42 @@
+2006-05-12 14:13  skvidal
+
+	* yum-daily.spec, yum.spec, yum/__init__.py: 
+	2.4.3 version mark
+
+2006-05-10 15:11  pnasrat
+
+	* yum/config.py: Add largesmp
+
+2006-05-10 14:53  skvidal
+
+	* callback.py: check in Erich Focht <efocht at hpce.nec.com>'s
+	callback patch for non-tty progress
+
+2006-03-29 14:11  skvidal
+
+	* output.py: list epoch in yum info if it exists/is non-zero - bug
+	576
+
+2006-03-14 17:19  skvidal
+
+	* shell.py: 
+	patch to enable sorting of repos in the repo list in the shell -
+	bug #568 from Noah Friedman
+
+2006-01-13 01:10  skvidal
+
+	* cli.py, yum/config.py: 
+	check in syslog support into yum 2.4.X
+
+2005-12-19 11:03  skvidal
+
+	* yum/config.py: 
+	add kernel-devel to exactarchlist
+
+2005-12-18 17:17  skvidal
+
+	* ChangeLog: changelog for 2.4.2
+
 2005-12-18 17:16  skvidal
 
 	* yum-daily.spec, yum.spec, yum/__init__.py: 
