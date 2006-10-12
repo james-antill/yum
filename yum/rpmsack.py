@@ -178,7 +178,7 @@ class RPMDBPackageSack(PackageSackBase):
 
         return misc.newestInList(allpkg)
 
-    def returnNkiewestByName(self, name=None):
+    def returnNewestByName(self, name=None):
         if not name:
             return
 
