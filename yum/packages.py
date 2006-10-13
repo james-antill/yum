@@ -189,16 +189,8 @@ class RpmBase:
         self._changelog = [] # (ctime, cname, ctext)
         self.licenses = []
 
-    def __eq__(self, other):
-        if comparePoEVR(self, other) == 0 and self.arch == other.arch:
-            return True
-        return False
-
-    def __ne__(self, other):
-        if comparePoEVR(self, other) != 0 and self.arch != other.arch:
-            return True
-        return False
-       
+    def returnEVR(self):
+        return PackageEVR(self.epoch,self.ver,self.rel)
     
     def __hash__(self):
         mystr = '%s - %s:%s-%s-%s.%s' % (self.repo.id, self.epoch, self.name,
@@ -331,10 +323,10 @@ class RpmBase:
     
 class PackageEVR:
     
-    def init(self,e,v,r):
+    def __init__(self,e,v,r):
         self.epoch = e
         self.ver = v
-        self.release
+        self.rel = r
         
     def compare(self,other):
         return rpmUtils.miscutils.compareEVR((self.epoch, self.ver, self.rel), (other.epoch, other.ver, other.rel))
