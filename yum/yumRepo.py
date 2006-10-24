@@ -204,7 +204,7 @@ class YumRepository(Repository, config.RepoConf):
            filename = /path/to/file
            CHUNK=65536 by default"""
         try:
-            misc.checksum(sumtype, file, CHUNK)
+            return misc.checksum(sumtype, file, CHUNK)
         except (Errors.MiscError, EnvironmentError), e:
             raise Errors.RepoError, 'Error opening file for checksum: %s' % e
 
