@@ -15,6 +15,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 # Copyright 2003 Duke University
 
+import string
 import rpm
 import types
 import gzip
@@ -239,16 +240,16 @@ def splitFilename(filename):
     if filename[-4:] == '.rpm':
         filename = filename[:-4]
        
-    archIndex = filename.rfind('.')
+    archIndex = string.rfind(filename, '.')
     arch = filename[archIndex+1:]
 
-    relIndex = filename[:archIndex].rfind('-')
+    relIndex = string.rfind(filename[:archIndex], '-')
     rel = filename[relIndex+1:archIndex]
 
-    verIndex = filename[:relIndex].rfind('-')
+    verIndex = string.rfind(filename[:relIndex], '-')
     ver = filename[verIndex+1:relIndex]
 
-    epochIndex = filename.find(':')
+    epochIndex = string.find(filename, ':')
     if epochIndex == -1:
         epoch = ''
     else:
@@ -312,16 +313,16 @@ def flagToString(flags):
 def stringToVersion(verstring):
     if verstring is None:
         return ('0', None, None)
-    i = verstring.find(':')
+    i = string.find(verstring, ':')
     if i != -1:
         try:
-            epoch = long(verstring[:i])
+            epoch = string.atol(verstring[:i])
         except ValueError:
             # look, garbage in the epoch field, how fun, kill it
             epoch = '0' # this is our fallback, deal
     else:
         epoch = '0'
-    j = verstring.find('-')
+    j = string.find(verstring, '-')
     if j != -1:
         if verstring[i + 1:j] == '':
             version = None

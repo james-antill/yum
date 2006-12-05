@@ -171,7 +171,7 @@ class PackageObject:
                 return (csumtype, csum)
 
                 
-class RpmBase(object):
+class RpmBase:
     """return functions and storage for rpm-specific data"""
 
     def __init__(self):
@@ -475,7 +475,7 @@ class YumAvailablePackage(PackageObject, RpmBase):
         
         try:
             filesum = misc.checksum(csum_type, self.localPkg())
-        except Errors.MiscError:
+        except Errors.MiscError, e:
             return False
         
         if filesum != csum:

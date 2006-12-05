@@ -19,6 +19,7 @@
 
 import sys
 import gzip
+import string
 import exceptions
 
 from yum.yumRepo import YumRepository
@@ -212,7 +213,7 @@ class UpdateMetadata(object):
 
     def get_notice(self, nvr):
         """ Retrieve an update notice for a given (name, version, release). """
-        nvr = '-'.join(nvr)
+        nvr = string.join(nvr, '-')
         return self._cache.has_key(nvr) and self._cache[nvr] or None
 
     def add(self, obj, mdtype='updateinfo'):

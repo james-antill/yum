@@ -72,7 +72,7 @@ class priority(baseFailOverMethod):
         if index >= len(self.repo.urls):
             return None
         
-        return self.repo.urls[index]
+        return self.repos.urls[index]
         
         
     

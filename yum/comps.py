@@ -261,7 +261,7 @@ class Category(object):
                 self.translated_description[lang] = obj.translated_description[lang]
 
         
-class Comps(object):
+class Comps:
     def __init__(self, overwrite_groups=False):
         self._groups = {}
         self._categories = {}

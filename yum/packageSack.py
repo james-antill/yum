@@ -22,7 +22,7 @@ import misc
 import re
 import fnmatch
 
-class PackageSackBase(object):
+class PackageSackBase:
     """Base class that provides the interface for PackageSacks."""
     def __init__(self):
         self.added = {}
