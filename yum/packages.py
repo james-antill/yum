@@ -171,7 +171,7 @@ class PackageObject:
                 return (csumtype, csum)
 
                 
-class RpmBase:
+class RpmBase(object):
     """return functions and storage for rpm-specific data"""
 
     def __init__(self):
@@ -475,7 +475,7 @@ class YumAvailablePackage(PackageObject, RpmBase):
         
         try:
             filesum = misc.checksum(csum_type, self.localPkg())
-        except Errors.MiscError, e:
+        except Errors.MiscError:
             return False
         
         if filesum != csum:
@@ -600,10 +600,11 @@ class YumHeaderPackage(YumAvailablePackage):
         self.summary = self.tagByName('summary')
         self.description = self.tagByName('description')
         self.pkgid = self.tagByName(rpm.RPMTAG_SHA1HEADER)
-        self.size = self.tagByName('size')
         self.__mode_cache = {}
         self.__prcoPopulated = False
-        
+
+    size = property(lambda : self.tagByName('size'))
+
     def __str__(self):
         if self.epoch == '0':
             val = '%s - %s-%s.%s' % (self.name, self.version, self.release, 
