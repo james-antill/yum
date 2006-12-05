@@ -249,10 +249,15 @@ class MetaSack(PackageSackBase):
         """return list of package obsoleting the name (any evr and flag)"""
         return self._computeAggregateListResult("searchObsoletes", name)
 
-    def returnObsoletes(self):
+    def returnObsoletes(self, newest=False):
         """returns a dict of obsoletes dict[obsoleting pkgtuple] = [list of obs]"""
-        return self._computeAggregateDictResult("returnObsoletes")
-
+        if not newest:
+            return self._computeAggregateDictResult("returnObsoletes")
+        
+        
+        mysack = ListPackageSack(self.returnNewestByName())
+        return mysack.returnObsoletes()
+        
     def searchFiles(self, file):
         """return list of packages by filename"""
         return self._computeAggregateListResult("searchFiles", file)
@@ -477,7 +482,7 @@ class PackageSack(PackageSackBase):
     def addPackage(self, obj):
         """add a pkgobject to the packageSack"""
 
-        repoid = obj.returnSimple('repoid')
+        repoid = obj.repoid
         (name, arch, epoch, ver, rel) = obj.pkgtup
         
         if self.compatarchs:
@@ -598,8 +603,14 @@ class PackageSack(PackageSackBase):
                 return highdict[name]
             else:
                 raise PackageSackError, 'No Package Matching  %s' % name
-                
-        return highdict.values()
+        
+        #this is a list of lists - break it back out into a single list
+        returnlist = []
+        for polst in highdict.values():
+            for po in polst:
+                returnlist.append(po)
+
+        return returnlist
            
     def simplePkgList(self):
         """returns a list of pkg tuples (n, a, e, v, r) optionally from a single repoid"""

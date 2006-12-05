@@ -357,9 +357,9 @@ class YumBase(depsolve.Depsolve):
                                            self.pkgSack.simplePkgList())
         if self.conf.debuglevel >= 6:
             self.up.debug = 1
-            
+        
         if self.conf.obsoletes:
-            self.up.rawobsoletes = self.pkgSack.returnObsoletes()
+            self.up.rawobsoletes = self.pkgSack.returnObsoletes(newest=True)
             
         self.up.exactarch = self.conf.exactarch
         self.up.exactarchlist = self.conf.exactarchlist
