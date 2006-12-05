@@ -47,6 +47,8 @@ class MDParser:
         if not self._handlercls:
             raise ValueError('Unknown repodata type "%s" in %s' % (
                 elem.tag, filename))
+        # Get the total number of packages
+        self.total = int(elem.get('packages', 0))
 
     def __iter__(self):
         return self
