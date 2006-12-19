@@ -603,7 +603,7 @@ class YumHeaderPackage(YumAvailablePackage):
         self.__mode_cache = {}
         self.__prcoPopulated = False
 
-    size = property(lambda : self.tagByName('size'))
+    size = property(lambda self : self.tagByName('size'))
 
     def __str__(self):
         if self.epoch == '0':
