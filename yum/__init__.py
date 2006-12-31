@@ -790,7 +790,6 @@ class YumBase(depsolve.Depsolve):
         if check:
             ts = self.rpmdb.readOnlyTS()
             sigresult = rpmUtils.miscutils.checkSig(ts, po.localPkg())
-            ts.close()
             localfn = os.path.basename(po.localPkg())
             
             if sigresult == 0:
