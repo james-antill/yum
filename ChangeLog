@@ -1,3 +1,205 @@
+2006-12-31 15:35  skvidal
+
+	* yum/__init__.py: 
+	make package checking work again
+
+2006-12-30 19:22  skvidal
+
+	* yum.spec: 
+	3.0.2 in spec file
+
+2006-12-30 19:22  skvidal
+
+	* AUTHORS, TODO, yum/__init__.py: 
+	mark as 3.0.2 in the module, cleanup authors and todo
+
+2006-12-21 03:01  skvidal
+
+	* yum/: depsolve.py, rpmsack.py: 
+	remove the ts.close() calls in rpmsack. See if it helps the rpmdb
+	locking problems. Add in some debug output in the depsolving so we
+	can see how much time is spent per dep and what kind of dep it is
+
+2006-12-18 22:54  jbowes
+
+	* yum/packages.py: Add missing 'self'
+
+2006-12-18 22:50  jbowes
+
+	* yum/parser.py: Urlgrabber will always be used here (especially
+	since we don't import urllib)
+
+2006-12-18 22:48  jbowes
+
+	* output.py, yum-updatesd.py, yummain.py, yum/__init__.py,
+	yum/depsolve.py, yum/packageSack.py, yum/repos.py: Remove a bunch
+	of unused imports
+
+2006-12-18 20:45  jbowes
+
+	* yum/logginglevels.py: Replace catching Exception with IOError,
+	which should catch all cases
+
+2006-12-09 09:00  jbowes
+
+	* yum/packages.py: Undo my previous patch, since it breaks how the
+	sql package overrides returnChecksums
+
+2006-12-08 20:42  jbowes
+
+	* yum/packages.py: Remove unneeded use of lambda in some properties
+
+2006-12-07 18:25  skvidal
+
+	* cli.py: 
+	whitespace fix- thanks to terje rosten
+
+2006-12-07 17:15  skvidal
+
+	* yum/config.py: 
+	fix up the debuglevel and errorlevel so they are set appropriately
+	from the cmdline to the conf
+
+2006-12-05 15:58  katzj
+
+	* yum/mdparser.py: bring back self.total here too
+
+2006-12-05 09:39  jbowes
+
+	* callback.py, cli.py, output.py, progress_meter.py, shell.py,
+	yum-updatesd.py, bin/yum-updatesd.py, bin/yum.py,
+	rpmUtils/miscutils.py, rpmUtils/updates.py, yum/comps.py,
+	yum/depsolve.py, yum/failover.py, yum/mdparser.py, yum/misc.py,
+	yum/packageSack.py, yum/packages.py, yum/pgpmsg.py,
+	yum/sqlitecache.py, yum/update_md.py: Pychecker fixes back again,
+	less the brokenness
+
+2006-12-05 09:03  jbowes
+
+	* callback.py, cli.py, output.py, progress_meter.py, shell.py,
+	yum-updatesd.py, bin/yum-updatesd.py, bin/yum.py,
+	rpmUtils/miscutils.py, rpmUtils/updates.py, yum/comps.py,
+	yum/depsolve.py, yum/failover.py, yum/mdparser.py, yum/misc.py,
+	yum/packageSack.py, yum/packages.py, yum/pgpmsg.py,
+	yum/sqlitecache.py, yum/update_md.py: Revert previous pychecker
+	fixes patch, since I broke things good and proper
+
+2006-12-05 06:20  skvidal
+
+	* yum/: __init__.py, packageSack.py: 
+	- make old obsoletes be ignored by install/update command - fix a
+	variety of minor issues created by recent changes
+
+2006-12-04 19:44  jbowes
+
+	* callback.py, cli.py, output.py, progress_meter.py, shell.py,
+	yum-updatesd.py, bin/yum-updatesd.py, bin/yum.py,
+	rpmUtils/miscutils.py, rpmUtils/updates.py, yum/comps.py,
+	yum/depsolve.py, yum/failover.py, yum/mdparser.py, yum/misc.py,
+	yum/packageSack.py, yum/packages.py, yum/pgpmsg.py,
+	yum/sqlitecache.py, yum/update_md.py: pychecker related fixes,
+	including unused imports, and removal of use of deprecated methods
+	from the string module
+
+2006-12-04 05:22  skvidal
+
+	* output.py: get rid of deprecation warning
+
+2006-12-03 10:56  jbowes
+
+	* yum/packageSack.py: Re-enable using sack.searchAll in the
+	provides command. This really speeds up things, since we'll pull
+	fewer filelists for packages out of the db. Looks like this broke
+	when the metasack was introduced. oops. ;)
+
+2006-11-30 21:45  jbowes
+
+	* yum/yumRepo.py: Remove unused code for manipulating the
+	failure_obj during __get
+
+2006-11-28 17:22  katzj
+
+	* yum/__init__.py: 
+	* fix a deprecation warning * give an idea of where gpg keys come
+	from on the import; add a new callback	 method that's more
+	extensible
+
+2006-11-26 19:00  jbowes
+
+	* cli.py, shell.py, yumcommands.py, yummain.py: Implement the
+	ShellCommand code
+
+2006-11-25 17:43  jbowes
+
+	* yum/plugins.py: Close the file descriptor used by imp in case an
+	exception is thrown.
+
+2006-11-24 13:14  jbowes
+
+	* yum-updatesd.py, yummain.py, yum/__init__.py: Provide a default
+	file name for doLock and doUnlock
+
+2006-11-24 13:13  jbowes
+
+	* yum/storagefactory.py: Only catch ImportError in storagefactory
+
+2006-11-17 15:19  skvidal
+
+	* yum/Errors.py: 
+	apply patch for bug #670 - thanks to Joe Shaw
+
+2006-11-17 02:10  skvidal
+
+	* docs/yum.conf.5, yum/__init__.py, yum/config.py: 
+	allow setting the type of packages that will be installed by
+	default on a 'groupinstall' command.
+
+2006-11-15 21:22  katzj
+
+	* cli.py: fix format error (rh#212850)
+
+2006-11-14 16:15  skvidal
+
+	* yum/yumRepo.py: 
+	fix progress_obj typo - back to 3.0.X
+
+2006-11-14 16:14  skvidal
+
+	* yum/sqlitesack.py: 
+	check in changelog changes to 3.0.X
+
+2006-11-14 16:07  skvidal
+
+	* yum/misc.py: 
+	make sure we're comparing versions - thanks to pjones
+
+2006-11-08 10:31  katzj
+
+	* yum-updatesd.py: init plugins, fix log config (jbowes)
+
+2006-11-08 10:01  katzj
+
+	* etc/yum-updatesd.init: fix tyop (rh#214298)
+
+2006-11-06 16:18  katzj
+
+	* etc/yum-updatesd.conf: add a comment and the dbus_listener option
+	(rh#214242)
+
+2006-11-06 16:18  katzj
+
+	* yum-updatesd.py: fix excludes (rh#213622, rh#212494) and
+	auto-update (rh#212507)
+
+2006-11-03 13:11  katzj
+
+	* cli.py: print out version before plugins are loaded (rh#212292)
+
+2006-11-01 07:56  skvidal
+
+	* ChangeLog: 
+	check in changelog
+
 2006-11-01 07:55  skvidal
 
 	* yum.spec, yum/__init__.py: 
