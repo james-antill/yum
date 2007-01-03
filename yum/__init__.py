@@ -1723,9 +1723,7 @@ class YumBase(depsolve.Depsolve):
                 del(pkgSack)
 
                 lst = []
-                for pkg in pkgs:
-                    lst.extend(self.bestPackagesFromList(pkg))
-
+                lst.extend(self.bestPackagesFromList(pkgs))
                 pkgs = lst
 
         if len(pkgs) == 0:
