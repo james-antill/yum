@@ -251,9 +251,20 @@ class MetaSack(PackageSackBase):
         if not newest:
             return self._computeAggregateDictResult("returnObsoletes")
         
+        # get the dict back
+        obsdict = self._computeAggregateDictResult("returnObsoletes")
+        # get a sack of the newest pkgs
+        obstups = obsdict.keys()
+        # go through each of the keys of the obs dict and see if it is in the
+        # sack of newest pkgs - if it is not - remove the entry
+        for pkgtup in obstups:
+            (n,a,e,v,r) = pkgtup
+            tuplist = [ pkg.pkgtup
+                for pkg in self.returnNewestByName(name=n) ]
+            if pkgtup not in tuplist:
+                del obsdict[pkgtup]
         
-        mysack = ListPackageSack(self.returnNewestByName())
-        return mysack.returnObsoletes()
+        return obsdict
         
     def searchFiles(self, file):
         """return list of packages by filename"""
@@ -437,14 +448,14 @@ class PackageSack(PackageSackBase):
         """returns a dict of obsoletes dict[obsoleting pkgtuple] = [list of obs]"""
         obs = {}
         for po in self.returnPackages():
-            if len(po.returnPrco('obsoletes')) == 0:
+            if len(po.obsoletes) == 0:
                 continue
 
             if not obs.has_key(po.pkgtup):
-                obs[po.pkgtup] = po.returnPrco('obsoletes')
+                obs[po.pkgtup] = po.obsoletes
             else:
-                obs[po.pkgtup].extend(po.returnPrco('obsoletes'))
-        
+                obs[po.pkgtup].extend(po.obsoletes)
+            
         return obs
         
     def searchFiles(self, file):
