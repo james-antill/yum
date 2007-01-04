@@ -255,14 +255,16 @@ class MetaSack(PackageSackBase):
         obsdict = self._computeAggregateDictResult("returnObsoletes")
         # get a sack of the newest pkgs
         obstups = obsdict.keys()
+        newest_tup_dict = {}
+        for pkg in self.returnNewestByName():
+            if not newest_tup_dict.has_key(pkg.pkgtup):
+                newest_tup_dict[pkg.pkgtup] = 1
+        
         # go through each of the keys of the obs dict and see if it is in the
         # sack of newest pkgs - if it is not - remove the entry
-        for pkgtup in obstups:
-            (n,a,e,v,r) = pkgtup
-            tuplist = [ pkg.pkgtup
-                for pkg in self.returnNewestByName(name=n) ]
-            if pkgtup not in tuplist:
-                del obsdict[pkgtup]
+        for obstup in obstups:
+            if not newest_tup_dict.has_key(obstup):
+                del obsdict[obstup]
         
         return obsdict
         
