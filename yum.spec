@@ -1,6 +1,6 @@
 Summary: RPM installer/updater
 Name: yum
-Version: 3.0.2
+Version: 3.0.3
 Release: 1
 License: GPL
 Group: System Environment/Base
@@ -89,6 +89,9 @@ exit 0
 %{_mandir}/man*/yum-updatesd*
 
 %changelog
+* Sun Jan  7 2007 Seth Vidal <skvidal at linux.duke.edu>
+- 3.0.3
+
 * Sat Dec 30 2006 Seth Vidal <skvidal at linux.duke.edu>
 - 3.0.2
 
