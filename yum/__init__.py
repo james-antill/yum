@@ -89,8 +89,8 @@ class YumBase(depsolve.Depsolve):
         self.doRpmDBSetup()
         self.doRepoSetup()
         self.doSackSetup()
-       
-    def doConfigSetup(self, fn='/etc/yum.conf', root='/', init_plugins=True,
+
+    def doConfigSetup(self, fn='/etc/yum/yum.conf', root='/', init_plugins=True,
             plugin_types=(plugins.TYPE_CORE,), optparser=None, debuglevel=None,
             errorlevel=None):
         '''
@@ -109,8 +109,15 @@ class YumBase(depsolve.Depsolve):
         @param errorlevel: Error level to use for logging. If None, the debug
             level will be read from the configuration file.
         '''
+
+        # TODO: Remove this block when we no longer support configs outside
+        # of /etc/yum/
+        if fn == '/etc/yum/yum.conf' and not os.path.exists(fn):
+            # Try the old default
+            fn = '/etc/yum.conf'
+
         startupconf = config.readStartupConfig(fn, root)
-     
+
         if debuglevel != None:
             startupconf.debuglevel = debuglevel
         if errorlevel != None:

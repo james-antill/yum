@@ -672,7 +672,7 @@ def _getsysver(installroot, distroverpkg):
     return releasever
 
 #def main():
-#    mainconf = readMainConfig('/etc/yum.conf', '/') 
+#    mainconf = readMainConfig('/etc/yum/yum.conf', '/')
 #    repoconf = readRepoConfig(mainconf.cfg, 'core', mainconf)
 #
 #    print `repoconf.name`
