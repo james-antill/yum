@@ -185,10 +185,10 @@ def main(args):
 
 
 if __name__ == "__main__":
-    import hotshot
-    p = hotshot.Profile("yum.prof")
-    p.run('main(sys.argv[1:])')
-    p.close()    
+    #import hotshot
+    #p = hotshot.Profile("yum.prof")
+    #p.run('main(sys.argv[1:])')
+    #p.close()    
     try:
         main(sys.argv[1:])
     except KeyboardInterrupt, e:
