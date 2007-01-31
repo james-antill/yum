@@ -68,9 +68,9 @@ exit 0
 %files
 %defattr(-, root, root)
 %doc README AUTHORS COPYING TODO INSTALL ChangeLog PLUGINS
-%config(noreplace) %{_sysconfdir}/yum/yum.conf
+%config(noreplace) %{_sysconfdir}/yum.conf
+%dir %{_sysconfdir}/yum.repos.d
 %dir %{_sysconfdir}/%{name}
-%dir %{_sysconfdir}/yum/repos.d
 %config %{_sysconfdir}/logrotate.d/%{name}
 %{_datadir}/yum-cli/*
 %{_bindir}/yum

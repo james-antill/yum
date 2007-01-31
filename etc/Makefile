@@ -5,10 +5,8 @@ clean:
 	rm -f *.pyc *.pyo *~
 
 install:
-	mkdir -p $(DESTDIR)/etc/yum/
-	mkdir -p $(DESTDIR)/etc/yum/repos.d
-
-	install -m 644 yum.conf $(DESTDIR)/etc/yum/yum.conf
+	mkdir -p $(DESTDIR)/etc/yum.repos.d
+	install -m 644 yum.conf $(DESTDIR)/etc/yum.conf
 
 	mkdir -p $(DESTDIR)/etc/logrotate.d
 	install -m 644 yum.logrotate $(DESTDIR)/etc/logrotate.d/yum
@@ -19,6 +17,7 @@ install:
 	mkdir -p $(DESTDIR)/etc/dbus-1/system.d/
 	install -m 755 yum-updatesd-dbus.conf $(DESTDIR)/etc/dbus-1/system.d/yum-updatesd.conf
 
+	mkdir -p $(DESTDIR)/etc/yum/
 	install -m 755 yum-updatesd.conf $(DESTDIR)/etc/yum/yum-updatesd.conf
 
 

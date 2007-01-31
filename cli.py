@@ -131,7 +131,7 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
                 action="store_true", default=False,
                 help="run entirely from cache, don't update cache")
         self.optparser.add_option("-c", "", dest="conffile", action="store", 
-                default='/etc/yum/yum.conf', help="config file location",
+                default='/etc/yum.conf', help="config file location",
                 metavar=' [config file]')
         self.optparser.add_option("-R", "", dest="sleeptime", action="store",
                 type='int', default=None, help="maximum command wait time",
