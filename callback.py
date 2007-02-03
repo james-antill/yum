@@ -34,6 +34,7 @@ class RPMInstallCallback:
         self.mark = "#"
         self.marks = 27
         self.logger = logging.getLogger('yum.filelogging.RPMInstallCallback')
+        self.filelog = False
 
         self.myprocess = { TS_UPDATE : 'Updating', 
                            TS_ERASE: 'Erasing',
@@ -137,7 +138,7 @@ class RPMInstallCallback:
                     except KeyError:
                         pass
 
-                    if self.output:
+                    if self.filelog:
                         pkgrep = self._logPkgString(hdr)
                         msg = '%s: %s' % (processed, pkgrep)
                         self.logger.info(msg)
@@ -193,7 +194,7 @@ class RPMInstallCallback:
 
         elif what == rpm.RPMCALLBACK_UNINST_STOP:
             self.total_removed += 1
-            if self.output and h not in self.installed_pkg_names:
+            if self.filelog and h not in self.installed_pkg_names:
                 logmsg = _('Erased: %s' % (h))
                 self.logger.info(logmsg)
             
