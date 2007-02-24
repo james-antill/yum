@@ -506,7 +506,7 @@ class YumSqlitePackageSack(yumRepo.YumPackageSack):
         exactmatch = []
         unmatched = list(pkgspecs)
         for p in pkgspecs:
-            if re.match('[\*\?\[\]]', p):
+            if re.match('.*[\*\?\[\]].*', p):
                 query = PARSE_QUERY % ({ "op": "glob", "q": p })
                 matchres = matched
             else:
