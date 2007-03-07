@@ -1,3 +1,14 @@
+2007-03-07 15:17  skvidal
+
+	* cli.py: 
+	fix for change in matchPackageNames() to meet up with dlutter's
+	patch
+
+2007-03-07 14:47  skvidal
+
+	* ChangeLog: 
+	merge changelog
+
 2007-03-07 14:46  skvidal
 
 	* yum.spec, yum/__init__.py: 
