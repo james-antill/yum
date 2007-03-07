@@ -1,3 +1,92 @@
+2007-03-07 14:46  skvidal
+
+	* yum.spec, yum/__init__.py: 
+	mark as 3.0.4
+
+2007-02-28 07:55  timlau
+
+	* yum/packages.py: Added patch by Jack Neely to fix traceback when
+	the following is used.
+	
+	if po == None:
+	
+	(rhbz #229917)
+
+2007-02-24 03:09  skvidal
+
+	* yum/sqlitesack.py: 
+	make globs work again.
+
+2007-02-21 12:01  skvidal
+
+	* yum/sqlitesack.py: apply patch to fix excludes to 3.0.X
+
+2007-02-13 15:05  pmatilai
+
+	* yum/packages.py: - return changelog data from rpm headers in the
+	same (date, author, message)   order as elsewhere (rhbz#221166)
+
+2007-02-03 16:33  jbowes
+
+	* cli.py, yum/packageSack.py, yum/sqlitesack.py: Apply patch from
+	David Lutterkort for speedup of yum install
+
+2007-02-03 12:09  jbowes
+
+	* cli.py: Patch from Brian Wheeler for a nicer error summary of
+	required disk space
+
+2007-02-03 11:04  jbowes
+
+	* callback.py, cli.py, yum-updatesd.py: Fix for rhbz 222835 - Yet
+	another patch for logging
+
+2007-01-30 20:53  jbowes
+
+	* cli.py, yum-updatesd.py, yum.spec, docs/yum.8, docs/yum.conf.5,
+	etc/Makefile, etc/yum.conf, yum/config.py: Go back to using the old
+	config file locations, but support the new ones as well
+
+2007-01-30 20:30  jbowes
+
+	* yummain.py: Put back os.path.expanduser for the profiling stuff.
+	I need cvs training wheels
+
+2007-01-28 15:16  jbowes
+
+	* yummain.py: I uncommented the profile stuff and checked it in.
+	whoops! This fixes it.
+
+2007-01-27 09:59  skvidal
+
+	* docs/yum.8: 
+	fix unclosed parens typo in man page - closes rh bug: 224879
+
+2007-01-26 22:05  jbowes
+
+	* cli.py, yum-updatesd.py, yum.spec, yummain.py, docs/yum.8,
+	docs/yum.conf.5, etc/Makefile, etc/yum.conf, yum/__init__.py,
+	yum/config.py: Store all config files under /etc/yum. Fallback to
+	the old locations if needed.
+
+2007-01-25 13:50  katzj
+
+	* yum/comps.py: ignore bogus lines to avoid things like #224292
+
+2007-01-25 10:40  timlau
+
+	* yum/packages.py: Fixed problem in comparePoEVR, TransactionMember
+	objects dont have a ver property.
+
+2007-01-08 14:18  katzj
+
+	* yum/config.py: make the code match the man page (rh#221770)
+
+2007-01-07 15:08  skvidal
+
+	* ChangeLog: 
+	update Changelog
+
 2007-01-07 15:07  skvidal
 
 	* yum.spec, yum/__init__.py: 
