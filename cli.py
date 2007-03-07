@@ -935,8 +935,8 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
         
         for arg in args:
             pkgs = []
-            pogen = self.pkgSack.matchPackageNames(arg)
-            for po in pogen:
+            ematch, match, umatch = self.pkgSack.matchPackageNames([arg])
+            for po in ematch + match:
                 pkgs.append(po)
                 
             results = self.findDeps(pkgs)
