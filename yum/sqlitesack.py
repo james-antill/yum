@@ -519,7 +519,8 @@ class YumSqlitePackageSack(yumRepo.YumPackageSack):
                 for pkg in cur.fetchall():
                     if self.excludes[rep].has_key(pkg['pkgId']):
                         continue
-                    unmatched.remove(p)
+                    if p in unmatched:
+                        unmatched.remove(p)
                     matchres.append(self.pc(rep,self.db2class(pkg,True)))                    
 
         exactmatch = misc.unique(exactmatch)
