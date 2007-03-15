@@ -1,3 +1,30 @@
+2007-03-14 15:50  skvidal
+
+	* yum.spec, yum/__init__.py: 
+	mark as 3.0.5
+
+2007-03-12 23:22  skvidal
+
+	* cli.py: 
+	fix-bizarro perl/perl-devel case and a bunch of other similar ones.
+	 fixes rh bug: 231549 thanks to Robin Norwood for the easy
+	replicator.
+
+2007-03-09 10:47  skvidal
+
+	* yum/sqlitesack.py: 
+	make sure we don't remove an item from a list if it is not there. 
+	fixes rh bug: 231535
+
+2007-03-07 17:08  katzj
+
+	* shell.py: kill no longer existent method call (rh#231202)
+
+2007-03-07 15:18  skvidal
+
+	* ChangeLog: 
+	merge changelog, again
+
 2007-03-07 15:17  skvidal
 
 	* cli.py: 
