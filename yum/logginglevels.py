@@ -23,6 +23,7 @@ import socket
 import sys
 import logging
 import logging.handlers
+import time
 
 INFO_1 = 19
 INFO_2 = 18
@@ -167,3 +168,95 @@ def setLoggingApp(app):
     if syslog:
         syslogformatter = logging.Formatter("yum(%s): "% (app,) + "%(message)s")
         syslog.setFormatter(syslogformatter)
+
+
+class EasyLogger:
+    """ Smaller to use logger for yum, wraps "logging.getLogger" module. """
+
+    def __init__(self, name="main"):
+        self.name   = name
+        self.logger = logging.getLogger(name)
+
+    def info(msg, *args):
+        """ Log a message as info. """
+
+        self.logger.info(msg % args)
+
+    def info1(msg, *args):
+        """ Log a message as log.INFO_1. """
+
+        self.logger.log(logginglevels.INFO_1, msg % args)
+
+    def info2(msg, *args):
+        """ Log a message as log.INFO_2. """
+
+        self.logger.log(logginglevels.INFO_2, msg % args)
+
+    def warn(msg, *args):
+        """ Log a message as warning. """
+
+        self.logger.warning(msg % args)
+
+    def err(msg, *args):
+        """ Log a message as error. """
+
+        self.logger.error(msg % args)
+
+    def crit(msg, *args):
+        """ Log a message as critical. """
+
+        self.logger.critical(msg % args)
+
+    def dbg(msg, *args):
+        """ Log a message as debug. """
+
+        self.logger.debug(msg % args)
+
+    def dbg_tm(oldtm, msg, *args):
+        """ Log a message as debug, with a timestamp delta. """
+
+        now = time.time()
+        out = msg % args
+        self.logger.debug(out + " time: %.4f" (now - old_tm))
+
+    def dbg1(msg, *args):
+        """ Log a message as log.DEBUG_1. """
+
+        self.logger.log(DEBUG_1, msg % args)
+
+    def dbg2(msg, *args):
+        """ Log a message as log.DEBUG_2. """
+
+        self.logger.log(DEBUG_2, msg % args)
+
+    def dbg3(msg, *args):
+        """ Log a message as log.DEBUG_3. """
+
+        self.logger.log(DEBUG_3, msg % args)
+
+log  = EasyLogger(logging.getLogger("yum.YumBase"))
+vlog = EasyLogger(logging.getLogger("yum.verbose.YumBase"))
+
+info   = log.info
+info1  = log.info1
+info2  = log.info2
+warn   = log.warn
+err    = log.err
+crit   = log.crit
+dbg    = log.dbg
+dbg1   = log.dbg1
+dbg2   = log.dbg2
+dbg3   = log.dbg3
+dbg_tm = log.dbgtm
+
+vinfo   = vlog.info
+vinfo1  = vlog.info1
+vinfo2  = vlog.info2
+vwarn   = vlog.warn
+verr    = vlog.err
+vcrit   = vlog.crit
+vdbg    = vlog.dbg
+vdbg1   = vlog.dbg1
+vdbg2   = vlog.dbg2
+vdbg3   = vlog.dbg3
+vdbg_tm = vlog.dbgtm
