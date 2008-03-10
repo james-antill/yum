@@ -17,7 +17,10 @@
 import re
 import fnmatch
 import types
-import logging
+import logginglevels
+
+_logger = logginglevels.EasyLogger("yum.RepoStorage")
+(dbg,)  = _logger.funcs("dbg")
 
 import Errors
 from packageSack import MetaSack
@@ -34,7 +37,7 @@ class RepoStorage:
         self.callback = None # progress callback used for populateSack() for importing the xml files
         self.cache = 0
         self.pkgSack = MetaSack()
-        self.logger = logging.getLogger("yum.RepoStorage")
+        self.logger = _logger
 
         self._setup = False
 
@@ -51,7 +54,7 @@ class RepoStorage:
             repos = self.findRepos(thisrepo)
 
         if len(repos) < 1:
-            self.logger.debug('No Repositories Available to Set Up')
+            dbg('No Repositories Available to Set Up')
 
         num = 1
         for repo in repos:

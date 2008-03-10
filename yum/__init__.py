@@ -51,9 +51,13 @@ from packageSack import ListPackageSack
 import depsolve
 import plugins
 import logginglevels
-from logginglevels import info,info1,info2, warn,err,crit, dbg,dbg1,dbg2,dbg3
-from logginglevels import vinfo,vinfo1,vinfo2, vwarn,verr,vcrit
-from logginglevels import vdbg,vdbg1,vdbg2,vdbg3
+
+nelogger = logginglevels.EasyLogger("yum.YumBase")
+velogger = logginglevels.EasyLogger("yum.verbose.YumBase")
+(info,info1,info2, warn,err,crit)        = nelogger.funcs("sc_info", "sc_main")
+(vinfo,vinfo1,vinfo2, vwarn,verr,vcrit,
+ vdbg,vdbg1,vdbg2,vdbg3,vdbg4,vdbg_tm)   = velogger.funcs("sc", "dbg_tm")
+
 import yumRepo
 import callbacks
 
@@ -85,13 +89,10 @@ class YumBase(depsolve.Depsolve):
         self._up = None
         self._comps = None
         self._pkgSack = None
-        
-        self.log  = logginglevels.log
-        self.vlog = logginglevels.vlog
 
         # FIXME: backwards compat. with plugins etc., remove in next API bump
-        self.logger         = self.log.logger
-        self.verbose_logger = self.vlog.logger
+        self.logger         = nelogger.logger
+        self.verbose_logger = velogger.logger
         
         self._repos = RepoStorage(self)
 
@@ -2280,8 +2281,8 @@ class YumBase(depsolve.Depsolve):
             for available_pkg in availpkgs:
                 for updated in self.up.updating_dict.get(available_pkg.pkgtup, []):
                     if self.tsInfo.isObsoleted(updated):
-                        self.verbose_logger.log(logginglevels.DEBUG_2, _('Not Updating Package that is already obsoleted: %s.%s %s:%s-%s'), 
-                                                updated)
+                        vdbg2(_('Not Updating Package that is already obsoleted: %s.%s %s:%s-%s'), 
+                              updated)
                     else:
                         updated_pkg =  self.rpmdb.searchPkgTuple(updated)[0]
                         txmbr = self.tsInfo.addUpdate(available_pkg, updated_pkg)
@@ -2292,8 +2293,8 @@ class YumBase(depsolve.Depsolve):
                 for updating in self.up.updatesdict.get(installed_pkg.pkgtup, []):
                     updating_pkg = self.getPackageObject(updating)
                     if self.tsInfo.isObsoleted(installed_pkg.pkgtup):
-                        self.verbose_logger.log(logginglevels.DEBUG_2, _('Not Updating Package that is already obsoleted: %s.%s %s:%s-%s'), 
-                                                installed_pkg.pkgtup)
+                        vdbg2(_('Not Updating Package that is already obsoleted: %s.%s %s:%s-%s'), 
+                              installed_pkg.pkgtup)
                     else:
                         txmbr = self.tsInfo.addUpdate(updating_pkg, installed_pkg)
                         if requiringPo:
@@ -2380,8 +2381,7 @@ class YumBase(depsolve.Depsolve):
             except Errors.MiscError:
                 crit(_('Cannot open file: %s. Skipping.'), pkg)
                 return tx_return
-            self.verbose_logger.log(logginglevels.INFO_2,
-                _('Examining %s: %s'), po.localpath, po)
+            vinfo2(_('Examining %s: %s'), po.localpath, po)
 
         # everything installed that matches the name
         installedByKey = self.rpmdb.searchNevra(name=po.name)
@@ -2420,25 +2420,22 @@ class YumBase(depsolve.Depsolve):
            toexc = exactmatch + matched
 
         if po in toexc:
-           self.verbose_logger.debug(_('Excluding %s'), po)
+           vdbg(_('Excluding %s'), po)
            return tx_return
 
         for po in installpkgs:
-            self.verbose_logger.log(logginglevels.INFO_2,
-                _('Marking %s to be installed'), po.localpath)
+            vinfo2(_('Marking %s to be installed'), po.localpath)
             self.localPackages.append(po)
             tx_return.extend(self.install(po=po))
 
         for (po, oldpo) in updatepkgs:
-            self.verbose_logger.log(logginglevels.INFO_2,
-                _('Marking %s as an update to %s'), po.localpath, oldpo)
+            vinfo2(_('Marking %s as an update to %s'), po.localpath, oldpo)
             self.localPackages.append(po)
             txmbr = self.tsInfo.addUpdate(po, oldpo)
             tx_return.append(txmbr)
 
         for po in donothingpkgs:
-            self.verbose_logger.log(logginglevels.INFO_2,
-                _('%s: does not update installed package.'), po.localpath)
+            vinfo2(_('%s: does not update installed package.'), po.localpath)
 
         return tx_return
 
@@ -2688,8 +2685,7 @@ class YumBase(depsolve.Depsolve):
         ''' Do the RPM test transaction '''
         # This can be overloaded by a subclass.    
         if self.conf.rpm_check_debug:
-            self.verbose_logger.log(logginglevels.INFO_2, 
-                 _('Running rpm_check_debug'))
+            vinfo2(_('Running rpm_check_debug'))
             msgs = self._run_rpm_check_debug()
             if msgs:
                 retmsgs = [_('ERROR with rpm_check_debug vs depsolve:')]

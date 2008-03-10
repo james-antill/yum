@@ -42,8 +42,8 @@ class YumUtilBase(YumBaseCli):
             except yum.Errors.LockError, e:
                 if "%s" %(e.msg,) != lockerr:
                     lockerr = "%s" %(e.msg,)
-                    self.logger.critical(lockerr)
-                self.logger.critical("Another app is currently holding the yum lock; waiting for it to exit...")  
+                    crit(lockerr)
+                crit("Another app is currently holding the yum lock; waiting for it to exit...")  
                 time.sleep(2)
             else:
                 break
@@ -69,10 +69,10 @@ class YumUtilBase(YumBaseCli):
                     debuglevel=opts.debuglevel,
                     errorlevel=opts.errorlevel)
         except yum.Errors.ConfigError, e:
-            self.logger.critical(_('Config Error: %s'), e)
+            crit(_('Config Error: %s'), e)
             sys.exit(1)
         except ValueError, e:
-            self.logger.critical(_('Options Error: %s'), e)
+            crit(_('Options Error: %s'), e)
             sys.exit(1)
 
 
@@ -94,7 +94,7 @@ class YumUtilBase(YumBaseCli):
             self._getRepos()
             self._getSacks()
         except yum.Errors.YumBaseError, msg:
-            self.logger.critical(str(msg))
+            crit(str(msg))
             sys.exit(1)
             
 def main():
@@ -106,15 +106,15 @@ def main():
     parser.add_option("", "--myoption", dest="myoption",
                     action="store_true", default=False, 
                     help="This is an util option")
-    util.logger.info("Setup Yum Config")
+    info("Setup Yum Config")
     opts = util.doUtilConfigSetup()
-    util.logger.info("Setup Yum")
+    info("Setup Yum")
     util.doUtilYumSetup()
     print "Command line args: %s" % " ".join(util.cmds)
     print "Command line options :"
     print opts
     
-    util.logger.info("%s Completed" % name)
+    info("%s Completed" % name)
 if __name__ == '__main__':
     main()
 

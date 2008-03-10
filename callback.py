@@ -21,7 +21,10 @@ Progress display callback classes for the yum command line.
 import rpm
 import os
 import sys
-import logging
+import logginglevels
+_nlogger = logginglevels.EasyLogger("yum.filelogging.RPMInstallCallback")
+(info,info1,info2, warn,err,crit)        = _nlogger.funcs("sc_info", "sc_main")
+
 from yum.constants import *
 
 from yum.i18n import _
@@ -42,7 +45,7 @@ class RPMInstallCallback:
         self.mark = "#"
         self.marks = 27
         self.lastmsg = None
-        self.logger = logging.getLogger('yum.filelogging.RPMInstallCallback')
+        self.logger = _nlogger.logger
         self.filelog = False
 
         self.myprocess = { TS_UPDATE : _('Updating'), 
@@ -151,7 +154,7 @@ class RPMInstallCallback:
                     if self.filelog:
                         pkgrep = self._logPkgString(hdr)
                         msg = '%s: %s' % (processed, pkgrep)
-                        self.logger.info(msg)
+                        info(msg)
 
 
         elif what == rpm.RPMCALLBACK_INST_PROGRESS:
@@ -210,7 +213,7 @@ class RPMInstallCallback:
             self.total_removed += 1
             if self.filelog and h not in self.installed_pkg_names:
                 logmsg = _('Erased: %s' % (h))
-                self.logger.info(logmsg)
+                info(logmsg)
             
             if self.output and sys.stdout.isatty():
                 if h not in self.installed_pkg_names:

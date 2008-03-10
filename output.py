@@ -20,6 +20,12 @@
 import sys
 import time
 import logging
+
+from cli import nelogger, velogger
+(info,info1,info2, warn,err,crit)        = nelogger.funcs("sc_info", "sc_main")
+(vinfo,vinfo1,vinfo2, vwarn,verr,vcrit,
+ vdbg,vdbg1,vdbg2,vdbg3,vdbg4,vdbg_tm)   = velogger.funcs("sc", "dbg_tm")
+
 import types
 import gettext
 import rpm
@@ -33,7 +39,6 @@ from yum.misc import sortPkgObj, prco_tuple_to_string
 from rpmUtils.miscutils import checkSignals
 from yum.constants import *
 
-from yum import logginglevels
 from yum.rpmtrans import RPMBaseCallback
 
 from textwrap import fill
@@ -216,8 +221,8 @@ class YumOutput:
     """
 
     def __init__(self):
-        self.logger = logging.getLogger("yum.cli")
-        self.verbose_logger = logging.getLogger("yum.verbose.cli")
+        self.logger         = nelogger.logger
+        self.verbose_logger = velogger.logger
         if hasattr(rpm, "expandMacro"):
             self.i18ndomains = rpm.expandMacro("%_i18ndomains").split(":")
         else:
@@ -236,8 +241,8 @@ class YumOutput:
     def failureReport(self, errobj):
         """failure output for failovers from urlgrabber"""
         
-        self.logger.error('%s: %s', errobj.url, str(errobj.exception))
-        self.logger.error(_('Trying other mirror.'))
+        err('%s: %s', errobj.url, str(errobj.exception))
+        err(_('Trying other mirror.'))
         raise errobj.exception
     
         
@@ -286,7 +291,7 @@ class YumOutput:
         print _("Release    : %s") % pkg.release
         print _("Size       : %s") % self.format_number(float(pkg.size))
         print _("Repo       : %s") % pkg.repoid
-        if self.verbose_logger.isEnabledFor(logginglevels.DEBUG_3):
+        if velogger.isEnabledFor("dbg3"):
             print _("Committer  : %s") % pkg.committer
         print self._outKeyValFill(_("Summary    : "), enc(pkg.summary))
         if pkg.url:
@@ -446,12 +451,12 @@ class YumOutput:
             msg = self.term.sub_bold(msg, matchfor)
         
         print msg
-        self.verbose_logger.debug(_('Matched from:'))
+        vdbg(_('Matched from:'))
         for item in values:
             if matchfor:
                 item = self.term.sub_bold(item, matchfor)
-            self.verbose_logger.debug('%s', item)
-        self.verbose_logger.debug('\n\n')
+            vdbg('%s', item)
+        vdbg('\n\n')
         
     def reportDownloadSize(self, packages):
         """Report the total download size for a set of packages"""
@@ -472,16 +477,15 @@ class YumOutput:
                    pass
             except:
                  error = True
-                 self.logger.error(_('There was an error calculating total download size'))
+                 err(_('There was an error calculating total download size'))
                  break
 
         if (not error):
             if locsize:
-                self.verbose_logger.log(logginglevels.INFO_1, _("Total size: %s"), 
-                                        self.format_number(totsize))
+                vinfo1(_("Total size: %s"), self.format_number(totsize))
             if locsize != totsize:
-                self.verbose_logger.log(logginglevels.INFO_1, _("Total download size: %s"), 
-                                        self.format_number(totsize - locsize))
+                dlsize = totsize - locsize
+                vinfo1(_("Total download size: %s"), self.format_number(dlsize))
             
     def listTransaction(self):
         """returns a string rep of the  transaction in an easy-to-read way."""
@@ -606,7 +610,7 @@ Remove   %5.5s Package(s)
             msg = _("""
  Current download cancelled, %sinterrupt (ctrl-c) again%s within %s%s%s seconds to exit.
 """) % (hibeg, hiend, hibeg, delta_exit_str, hiend)
-            self.verbose_logger.log(logginglevels.INFO_2, msg)
+            vinfo2(msg)
         elif now - self._last_interrupt < delta_exit_chk:
             # Two quick CTRL-C's, quit
             raise KeyboardInterrupt
@@ -620,7 +624,7 @@ class DepSolveProgressCallBack:
     
     def __init__(self):
         """requires yum-cli log and errorlog functions as arguments"""
-        self.verbose_logger = logging.getLogger("yum.verbose.cli")
+        self.verbose_logger = velogger.logger
         self.loops = 0
     
     def pkgAdded(self, pkgtup, mode):
@@ -630,49 +634,40 @@ class DepSolveProgressCallBack:
                      'e': _('erased')}
         (n, a, e, v, r) = pkgtup
         modeterm = modedict[mode]
-        self.verbose_logger.log(logginglevels.INFO_2,
-            _('---> Package %s.%s %s:%s-%s set to be %s'), n, a, e, v, r,
-            modeterm)
+        vinfo2(_('---> Package %s.%s %s:%s-%s set to be %s'), n, a, e, v, r,
+               modeterm)
         
     def start(self):
         self.loops += 1
         
     def tscheck(self):
-        self.verbose_logger.log(logginglevels.INFO_2, _('--> Running transaction check'))
+        vinfo2(_('--> Running transaction check'))
         
     def restartLoop(self):
         self.loops += 1
-        self.verbose_logger.log(logginglevels.INFO_2,
-            _('--> Restarting Dependency Resolution with new changes.'))
-        self.verbose_logger.debug('---> Loop Number: %d', self.loops)
+        vinfo2(_('--> Restarting Dependency Resolution with new changes.'))
+        vdbg('---> Loop Number: %d', self.loops)
     
     def end(self):
-        self.verbose_logger.log(logginglevels.INFO_2,
-            _('--> Finished Dependency Resolution'))
-
+        vinfo2(_('--> Finished Dependency Resolution'))
     
     def procReq(self, name, formatted_req):
-        self.verbose_logger.log(logginglevels.INFO_2,
-            _('--> Processing Dependency: %s for package: %s'), formatted_req,
-            name)
-        
+        vinfo2(_('--> Processing Dependency: %s for package: %s'),
+               formatted_req, name)
     
     def unresolved(self, msg):
-        self.verbose_logger.log(logginglevels.INFO_2, _('--> Unresolved Dependency: %s'),
-            msg)
-
+        vinfo2(_('--> Unresolved Dependency: %s'), msg)
     
     def procConflict(self, name, confname):
-        self.verbose_logger.log(logginglevels.INFO_2,
-            _('--> Processing Conflict: %s conflicts %s'), name, confname)
+        vinfo2(_('--> Processing Conflict: %s conflicts %s'), name, confname)
 
     def transactionPopulation(self):
-        self.verbose_logger.log(logginglevels.INFO_2, _('--> Populating transaction set '
-            'with selected packages. Please wait.'))
+        vinfo2(_('--> Populating transaction set '
+                 'with selected packages. Please wait.'))
     
     def downloadHeader(self, name):
-        self.verbose_logger.log(logginglevels.INFO_2, _('---> Downloading header for %s '
-            'to pack into transaction set.'), name)
+        vinfo2(_('---> Downloading header for %s '
+                 'to pack into transaction set.'), name)
        
 
 class CacheProgressCallback:
@@ -682,9 +677,9 @@ class CacheProgressCallback:
     '''
     
     def __init__(self):
-        self.logger = logging.getLogger("yum.cli")
-        self.verbose_logger = logging.getLogger("yum.verbose.cli")
-        self.file_logger = logging.getLogger("yum.filelogging.cli")
+        self.logger         = nelogger.logger
+        self.verbose_logger = velogger.logger
+        self.file_logger    = logging.getLogger("yum.filelogging.cli")
 
     def log(self, level, message):
         self.verbose_logger.log(level, message)

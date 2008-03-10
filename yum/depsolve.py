@@ -34,6 +34,13 @@ from packageSack import ListPackageSack
 from constants import *
 import packages
 import logginglevels
+_nlogger = logginglevels.EasyLogger("yum.Depsolve")
+_vlogger = logginglevels.EasyLogger("yum.verbose.Depsolve")
+(info,info1,info2, warn,err,crit)        = _nlogger.funcs("sc_info", "sc_main")
+(vinfo,vinfo1,vinfo2, vwarn,verr,vcrit,
+ vdbg,vdbg1,vdbg2,vdbg3,vdbg4)           = _vlogger.funcs("sc")
+
+
 import Errors
 from i18n import _
 import warnings
@@ -69,8 +76,8 @@ class Depsolve(object):
         self._ts = None
         self._tsInfo = None
         self.dsCallback = None
-        self.logger = logging.getLogger("yum.Depsolve")
-        self.verbose_logger = logging.getLogger("yum.verbose.Depsolve")
+        self.logger         = _nlogger.logger
+        self.verbose_logger = _vlogger.logger
 
         self.path = []
         self.loops = []
@@ -132,7 +139,7 @@ class Depsolve(object):
             if ts_flags_to_rpm.has_key(flag):
                 self._ts.addTsFlag(ts_flags_to_rpm[flag])
             else:
-                self.logger.critical(_('Invalid tsflag in config file: %s'), flag)
+                crit(_('Invalid tsflag in config file: %s'), flag)
 
         probfilter = 0
         for flag in self.tsInfo.probFilterFlags:
@@ -143,8 +150,7 @@ class Depsolve(object):
         """searches the packageSacks for what provides the arguments
            returns a ListPackageSack of providing packages, possibly empty"""
 
-        self.verbose_logger.log(logginglevels.DEBUG_1, _('Searching pkgSack for dep: %s'),
-            name)
+        vdbg1(_('Searching pkgSack for dep: %s'), name)
         # we need to check the name - if it doesn't match:
         # /etc/* bin/* or /usr/lib/sendmail then we should fetch the 
         # filelists.xml for all repos to make the searchProvides more complete.
@@ -171,8 +177,7 @@ class Depsolve(object):
         defSack = ListPackageSack() # holder for items definitely providing this dep
         
         for po in pkgs:
-            self.verbose_logger.log(logginglevels.DEBUG_2,
-                _('Potential match for %s from %s'), name, po)
+            vdbg2(_('Potential match for %s from %s'), name, po)
             if name[0] == '/' and r_v is None:
                 # file dep add all matches to the defSack
                 defSack.addPackage(po)
@@ -180,7 +185,7 @@ class Depsolve(object):
 
             if po.checkPrco('provides', (name, flags, (r_e, r_v, r_r))):
                 defSack.addPackage(po)
-                self.verbose_logger.debug(_('Matched %s to require for %s'), po, name)
+                vdbg(_('Matched %s to require for %s'), po, name)
         
         return defSack
         
@@ -221,7 +226,7 @@ class Depsolve(object):
                 ts_elem[(pkginfo, mode)] = 1
                 
         for txmbr in self.tsInfo.getMembers():
-            self.verbose_logger.log(logginglevels.DEBUG_3, _('Member: %s'), txmbr)
+            vdbg3(_('Member: %s'), txmbr)
             if txmbr.ts_state in ['u', 'i']:
                 if ts_elem.has_key((txmbr.pkgtup, 'i')):
                     continue
@@ -234,15 +239,13 @@ class Depsolve(object):
 
                 if txmbr.ts_state == 'u':
                     if self.allowedMultipleInstalls(txmbr.po):
-                        self.verbose_logger.log(logginglevels.DEBUG_2,
-                            _('%s converted to install'), txmbr.po)
+                        vdbg2(_('%s converted to install'), txmbr.po)
                         txmbr.ts_state = 'i'
                         txmbr.output_state = TS_INSTALL
 
                 
                 self.ts.addInstall(hdr, (hdr, rpmfile), txmbr.ts_state)
-                self.verbose_logger.log(logginglevels.DEBUG_1,
-                    _('Adding Package %s in mode %s'), txmbr.po, txmbr.ts_state)
+                vdbg1(_('Adding Package %s in mode %s'),txmbr.po,txmbr.ts_state)
                 if self.dsCallback: 
                     self.dsCallback.pkgAdded(txmbr.pkgtup, txmbr.ts_state)
             
@@ -251,8 +254,7 @@ class Depsolve(object):
                     continue
                 self.ts.addErase(txmbr.po.idx)
                 if self.dsCallback: self.dsCallback.pkgAdded(txmbr.pkgtup, 'e')
-                self.verbose_logger.log(logginglevels.DEBUG_1,
-                    _('Removing Package %s'), txmbr.po)
+                vdbg1(_('Removing Package %s'), txmbr.po)
 
     def _processReq(self, po, requirement):
         """processes a Requires dep from the resolveDeps functions, returns a tuple
@@ -263,7 +265,7 @@ class Depsolve(object):
 
         needname, flags, needversion = requirement
         niceformatneed = rpmUtils.miscutils.formatRequire(needname, needversion, flags)
-        self.verbose_logger.log(logginglevels.DEBUG_1, _('%s requires: %s'), po, niceformatneed)
+        vdbg1(_('%s requires: %s'), po, niceformatneed)
         if self.dsCallback: self.dsCallback.procReq(po.name, niceformatneed)
 
         try:    
@@ -314,7 +316,7 @@ class Depsolve(object):
         providers = []
         
         if self.cheaterlookup.has_key((needname, needflags, needversion)):
-            self.verbose_logger.log(logginglevels.DEBUG_2, _('Needed Require has already been looked up, cheating'))
+            vdbg2(_('Needed Require has already been looked up, cheating'))
             cheater_po = self.cheaterlookup[(needname, needflags, needversion)]
             providers = [cheater_po]
         
@@ -324,14 +326,14 @@ class Depsolve(object):
                 providers.append(txmbr.po)
 
         else:
-            self.verbose_logger.log(logginglevels.DEBUG_2, _('Needed Require is not a package name. Looking up: %s'), niceformatneed)
+            vdbg2(_('Needed Require is not a package name. Looking up: %s'),
+		  niceformatneed)
             providers = self.rpmdb.getProvides(needname, needflags, needversion)
 
         for inst_po in providers:
             inst_str = '%s.%s %s:%s-%s' % inst_po.pkgtup
             (i_n, i_a, i_e, i_v, i_r) = inst_po.pkgtup
-            self.verbose_logger.log(logginglevels.DEBUG_2,
-                _('Potential Provider: %s'), inst_str)
+            vdbg2(_('Potential Provider: %s'), inst_str)
             thismode = self.tsInfo.getMode(name=i_n, arch=i_a, 
                             epoch=i_e, ver=i_v, rel=i_r)
 
@@ -354,16 +356,15 @@ class Depsolve(object):
                 needmode = thismode
 
                 self.cheaterlookup[(needname, needflags, needversion)] = inst_po
-                self.verbose_logger.log(logginglevels.DEBUG_2, _('Mode is %s for provider of %s: %s'),
-                    needmode, niceformatneed, inst_str)
+                vdbg2(_('Mode is %s for provider of %s: %s'),
+		      needmode, niceformatneed, inst_str)
                 break
                     
-        self.verbose_logger.log(logginglevels.DEBUG_2, _('Mode for pkg providing %s: %s'), 
-            niceformatneed, needmode)
+        vdbg2(_('Mode for pkg providing %s: %s'), niceformatneed, needmode)
 
         if needmode in ['e']:
-            self.verbose_logger.log(logginglevels.DEBUG_2, _('TSINFO: %s package requiring %s marked as erase'),
-                requiringPo, needname)
+            vdbg2(_('TSINFO: %s package requiring %s marked as erase'),
+		  requiringPo, needname)
             txmbr = self.tsInfo.addErase(requiringPo)
             txmbr.setAsDep(po=inst_po)
             checkdeps = 1
@@ -374,13 +375,13 @@ class Depsolve(object):
             txmbrs = self.tsInfo.getMembersWithState(requiringPo.pkgtup, TS_REMOVE_STATES)
             if len(self.tsInfo) != length and txmbrs:
                 if txmbrs[0].output_state == TS_OBSOLETED:
-                    self.verbose_logger.log(logginglevels.DEBUG_2, _('TSINFO: Obsoleting %s with %s to resolve dep.'),
-                                            requiringPo, txmbrs[0].obsoleted_by[0])
+                    vdbg2(_('TSINFO: Obsoleting %s with %s to resolve dep.'),
+			  requiringPo, txmbrs[0].obsoleted_by[0])
                 else:
-                    self.verbose_logger.log(logginglevels.DEBUG_2, _('TSINFO: Updating %s to resolve dep.'), requiringPo)
+                    vdbg2(_('TSINFO: Updating %s to resolve dep.'), requiringPo)
                 checkdeps = True
                 return checkdeps, missingdep
-            self.verbose_logger.log(logginglevels.DEBUG_2, _('Cannot find an update path for dep for: %s'), niceformatneed)
+            vdbg2(_('Cannot find an update path for dep for: %s'), niceformatneed)
             return self._requiringFromTransaction(requiringPo, requirement, errorlist)
             
 
@@ -392,7 +393,7 @@ class Depsolve(object):
                 prob_pkg = "%s (%s)" % (requiringPo,requiringPo.repoid)
                 msg = _('Unresolvable requirement %s for %s') % (niceformatneed,
                                                                prob_pkg)
-                self.verbose_logger.log(logginglevels.DEBUG_2, msg)
+                vdbg2(msg)
                 checkdeps = 0
                 missingdep = 1
                 errorlist.append(msg)
@@ -436,7 +437,7 @@ class Depsolve(object):
 
         for pkg in provSack.returnPackages():
             if pkg.pkgtup in self.rpmdb.simplePkgList(): # is it already installed?
-                self.verbose_logger.log(logginglevels.DEBUG_2, _('%s is in providing packages but it is already installed, removing.'), pkg)
+                vdbg2(_('%s is in providing packages but it is already installed, removing.'), pkg)
                 provSack.delPackage(pkg)
                 continue
 
@@ -451,8 +452,7 @@ class Depsolve(object):
                 tspkgs = self.tsInfo.matchNaevr(name=pkg.name, arch=pkg.arch)
                 for tspkg in tspkgs:
                     if tspkg.po.EVR > pkg.EVR:
-                        msg = _('Potential resolving package %s has newer instance in ts.') % pkg
-                        self.verbose_logger.log(logginglevels.DEBUG_2, msg)
+                        vdbg2(_('Potential resolving package %s has newer instance in ts.'), pkg)
                         provSack.delPackage(pkg)
                         continue
                     elif tspkg.po.EVR < pkg.EVR:
@@ -462,8 +462,7 @@ class Depsolve(object):
                 dbpkgs = self.rpmdb.searchNevra(name=pkg.name, arch=pkg.arch)
                 for dbpkg in dbpkgs:
                     if dbpkg.EVR > pkg.EVR:
-                        msg = _('Potential resolving package %s has newer instance installed.') % pkg
-                        self.verbose_logger.log(logginglevels.DEBUG_2, msg)
+                        vdbg2(_('Potential resolving package %s has newer instance installed.'), pkg)
                         provSack.delPackage(pkg)
                         continue
 
@@ -482,8 +481,7 @@ class Depsolve(object):
             (n,a,e,v,r) = pkg.pkgtup
             pkgmode = self.tsInfo.getMode(name=n, arch=a, epoch=e, ver=v, rel=r)
             if pkgmode in ['i', 'u']:
-                self.verbose_logger.log(logginglevels.DEBUG_2,
-                    _('%s already in ts, skipping this one'), pkg)
+                vdbg2(_('%s already in ts, skipping this one'), pkg)
                 # FIXME: Remove this line, if it is not needed ?
                 # checkdeps = 1
                 return checkdeps, missingdep
@@ -511,7 +509,7 @@ class Depsolve(object):
                 if loop_run >= len(newest)*2:
                     msg = _('Failure finding best provider of %s for %s, exceeded maximum loop length' % (needname, requiringPo))
                     errorlist.append(msg)
-                    self.verbose_logger.debug(msg)
+                    vdbg(msg)
                     break
                 loop_run += 1
                 old_best = best
@@ -536,15 +534,13 @@ class Depsolve(object):
         # and know what needs it that way and provide a more sensible dep structure in the txmbr
         inst = self.rpmdb.searchNevra(name=best.name, arch=best.arch)
         if len(inst) > 0: 
-            self.verbose_logger.debug(_('TSINFO: Marking %s as update for %s') %(best,
-                requiringPo))
+            vdbg(_('TSINFO: Marking %s as update for %s'), best, requiringPo)
             # FIXME: we should probably handle updating multiple packages...
             txmbr = self.tsInfo.addUpdate(best, inst[0])
             txmbr.setAsDep(po=requiringPo)
             txmbr.reason = "dep"
         else:
-            self.verbose_logger.debug(_('TSINFO: Marking %s as install for %s'), best,
-                requiringPo)
+            vdbg(_('TSINFO: Marking %s as install for %s'), best, requiringPo)
             txmbr = self.tsInfo.addInstall(best)
             txmbr.setAsDep(po=requiringPo)
 
@@ -594,7 +590,7 @@ class Depsolve(object):
 
         msg = '%s conflicts with %s' % (name, conflicting_po.name)
         errormsgs.append(msg)
-        self.verbose_logger.log(logginglevels.DEBUG_1, msg)
+        vdbg1(msg)
         CheckDeps = False
         self.po_with_problems.add((po,None,errormsgs[-1]))
         return CheckDeps, errormsgs
@@ -675,7 +671,7 @@ class Depsolve(object):
 
                 if CheckDeps:
                     if self.dsCallback: self.dsCallback.restartLoop()
-                    self.verbose_logger.log(logginglevels.DEBUG_1, _('Restarting Loop'))
+                    vdbg1(_('Restarting Loop'))
                     continue
 
             # check Conflicts
@@ -688,7 +684,7 @@ class Depsolve(object):
 
                 if CheckDeps:
                     if self.dsCallback: self.dsCallback.restartLoop()
-                    self.verbose_logger.log(logginglevels.DEBUG_1, _('Restarting Loop'))
+                    vdbg1(_('Restarting Loop'))
                     continue
 
             break
@@ -697,21 +693,19 @@ class Depsolve(object):
         for txmbr in self.tsInfo.getMembers():
             if self.allowedMultipleInstalls(txmbr.po) and \
                    txmbr.ts_state == 'u':
-                self.verbose_logger.log(logginglevels.DEBUG_2,
-                                        _('%s converted to install'),
-                                        txmbr.po)
+                vdbg2(_('%s converted to install'), txmbr.po)
                 txmbr.ts_state = 'i'
                 txmbr.output_state = TS_INSTALL
 
         if self.dsCallback: self.dsCallback.end()
-        self.verbose_logger.log(logginglevels.DEBUG_1, _('Dependency Process ending'))
+        vdbg1(_('Dependency Process ending'))
 
         self.tsInfo.changed = False
         if len(errors) > 0:
             errors = unique(errors)
             for po,wpo,err in self.po_with_problems:
-                self.verbose_logger.info(_("%s from %s has depsolving problems") % (po,po.repoid))
-                self.verbose_logger.info("  --> %s" % (err))
+                vinfo(_("%s from %s has depsolving problems"), po, po.repoid)
+                vinfo("  --> %s", err)
             return (1, errors)
 
         if len(self.tsInfo) > 0:
@@ -730,8 +724,7 @@ class Depsolve(object):
 
             if self.dsCallback and txmbr.ts_state:
                 self.dsCallback.pkgAdded(txmbr.pkgtup, txmbr.ts_state)
-            self.verbose_logger.log(logginglevels.DEBUG_2,
-                                    _("Checking deps for %s") %(txmbr,))
+            vdbg2(_("Checking deps for %s"), txmbr)
 
             # store the primary po we currently are working on 
             # so we can store it in self.po_with_problems.
@@ -784,7 +777,7 @@ class Depsolve(object):
             if req in oldreqs and self.rpmdb.getProvides(*req):
                 continue
             
-            self.verbose_logger.log(logginglevels.DEBUG_2, _("looking for %s as a requirement of %s"), req, txmbr)
+            vdbg2(_("looking for %s as a requirement of %s"), req, txmbr)
             provs = self.tsInfo.getProvides(*req)
             if not provs:
                 reqtuple = (req[0], version_tuple_to_string(req[2]), flags[req[1]])
@@ -938,12 +931,10 @@ class Depsolve(object):
             return x.sourcerpm == y.sourcerpm
 
         for po in pkgs:
-            self.verbose_logger.log(logginglevels.DEBUG_4,
-                _("Comparing best: %s to po: %s") %(bestpkg, po))
+            vdbg4(_("Comparing best: %s to po: %s"), bestpkg, po)
 
             if po == bestpkg: # if we're comparing the same one, skip it
-                self.verbose_logger.log(logginglevels.DEBUG_4,
-                    _("Same: best %s == po: %s") %(bestpkg, po))
+                vdbg4(_("Same: best %s == po: %s"), bestpkg, po)
 
                 continue
             # if best is obsoleted by any of the packages, then the obsoleter
@@ -957,19 +948,16 @@ class Depsolve(object):
                     # but this should 'break the loop'
                     for obs in bestpkg.obsoletes:
                         if po.inPrcoRange('provides', obs):
-                            self.verbose_logger.log(logginglevels.DEBUG_4,
-                                _("best %s obsoletes po: %s") %(bestpkg, po))
+                            vdbg4(_("best %s obsoletes po: %s"), bestpkg, po)
                             return bestpkg
-                    self.verbose_logger.log(logginglevels.DEBUG_4,
-                        _("po %s obsoletes best: %s") %(po, bestpkg))
+                    vdbg4(_("po %s obsoletes best: %s"), po, bestpkg)
                            
                     return po
 
             # just check if best obsoletes po
             for obs in bestpkg.obsoletes:
                 if po.inPrcoRange('provides', obs):
-                    self.verbose_logger.log(logginglevels.DEBUG_4,
-                        _("best %s obsoletes po: %s") %(bestpkg, po))
+                    vdbg4(_("best %s obsoletes po: %s"), bestpkg, po)
                     return bestpkg
 
                     
@@ -977,15 +965,13 @@ class Depsolve(object):
                 best_dist = archDifference(reqpo.arch, bestpkg.arch)
                 if isMultiLibArch(): # only go to the next one if we're multilib - i686 can satisfy i386 deps
                     if best_dist == 0: # can't really use best's arch anyway...
-                        self.verbose_logger.log(logginglevels.DEBUG_4,
-                            _("better arch in po %s") %(po))
+                        vdbg4(_("better arch in po %s"), po)
                         return po # just try the next one - can't be much worse
 
             
                 po_dist = archDifference(reqpo.arch, po.arch)
                 if po_dist > 0 and best_dist > po_dist:
-                    self.verbose_logger.log(logginglevels.DEBUG_4,
-                        _("better arch in po %s") %(po))
+                    vdbg4(_("better arch in po %s"), po)
                     
                     return po
                     
@@ -993,56 +979,51 @@ class Depsolve(object):
                     csp = _common_sourcerpm(reqpo, po)
                     csb = _common_sourcerpm(reqpo, bestpkg)
                     if not csb and csp:
-                        self.verbose_logger.log(logginglevels.DEBUG_4,
-                            _("po %s shares a sourcerpm with %s") %(po, reqpo))
+                        vdbg4(_("po %s shares a sourcerpm with %s"), po, reqpo)
                         return po
                     if csb and not csp:
-                        self.verbose_logger.log(logginglevels.DEBUG_4,
-                            _("best %s shares a sourcerpm with %s") %(bestpkg, reqpo))
+                        vdbg4(_("best %s shares a sourcerpm with %s"),
+			      bestpkg, reqpo)
                         return bestpkg
                         
                     cplp = _common_prefix_len(reqpo.name, po.name)
                     cplb = _common_prefix_len(reqpo.name, bestpkg.name)
                     if cplp > cplb:
-                        self.verbose_logger.log(logginglevels.DEBUG_4,
-                            _("po %s shares more of the name prefix with %s") %(po, reqpo))                    
+                        vdbg4(_("po %s shares more of the name prefix with %s"),
+			      po, reqpo)
                         return po
                     if cplp == cplb and len(po.name) < len(bestpkg.name):
-                        self.verbose_logger.log(logginglevels.DEBUG_4,
-                            _("po %s has a shorter name than best %s") %(po, bestpkg))                    
+                        vdbg4(_("po %s has a shorter name than best %s"),
+			      po, bestpkg)
                         return po
 
             # reqpo.arch == "noarch"
             elif (not _common_sourcerpm(reqpo, bestpkg) and
                   _common_sourcerpm(reqpo, po)):
-                self.verbose_logger.log(logginglevels.DEBUG_4,
-                    _("po %s shares a sourcerpm with %s") %(po, reqpo))
+                vdbg4(_("po %s shares a sourcerpm with %s"), po, reqpo)
                 return po
             elif (_common_sourcerpm(reqpo, bestpkg) and
                   not _common_sourcerpm(reqpo, po)):
-                self.verbose_logger.log(logginglevels.DEBUG_4,
-                    _("best %s shares a sourcerpm with %s") %(bestpkg,reqpo))
+                vdbg4(_("best %s shares a sourcerpm with %s"), bestpkg, reqpo)
                 return bestpkg
             elif (_common_prefix_len(reqpo.name, po.name) >
                   _common_prefix_len(reqpo.name, bestpkg.name)):
-                self.verbose_logger.log(logginglevels.DEBUG_4,
-                    _("po %s shares more of the name prefix with %s") %(po, reqpo))                    
+                vdbg4(_("po %s shares more of the name prefix with %s"),
+		      po, reqpo)
                 return po
             elif (_common_prefix_len(reqpo.name, po.name) <
                   _common_prefix_len(reqpo.name, bestpkg.name)):
-                self.verbose_logger.log(logginglevels.DEBUG_4,
-                    _("bestpkg %s shares more of the name prefix with %s") %(bestpkg, reqpo))
+                vdbg4(_("bestpkg %s shares more of the name prefix with %s"),
+		      bestpkg, reqpo)
                 return bestpkg
             elif len(po.name) < len(bestpkg.name):
-                self.verbose_logger.log(logginglevels.DEBUG_4,
-                    _("po %s has a shorter name than best %s") %(po, bestpkg))                    
+                vdbg4(_("po %s has a shorter name than best %s"), po, bestpkg)
                 return po
             elif len(po.name) == len(bestpkg.name):
                 # compare arch
                 arch = rpmUtils.arch.getBestArchFromList([po.arch, bestpkg.arch])
                 if arch == po.arch and arch != bestpkg.arch:
-                    self.verbose_logger.log(logginglevels.DEBUG_4,
-                        _("better arch in po %s") %(po))
+                    vdbg4(_("better arch in po %s"), po)
                     return po
 
         # Nothing else was better, so this is it

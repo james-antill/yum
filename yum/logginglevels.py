@@ -170,93 +170,103 @@ def setLoggingApp(app):
         syslog.setFormatter(syslogformatter)
 
 
+_name2val = {'info1' : INFO_1, 'info2' : INFO_2,
+             'dbg1' : DEBUG_1, 'dbg2' : DEBUG_2, 'dbg3' : DEBUG_3,
+             'dbg4' : DEBUG_4}
 class EasyLogger:
     """ Smaller to use logger for yum, wraps "logging.getLogger" module. """
 
     def __init__(self, name="main"):
         self.name   = name
         self.logger = logging.getLogger(name)
+        self._funcs  = {'sc' :[], 'sc_info' :[], 'sc_main' :[], 'sc_dbg' :[]}
 
-    def info(msg, *args):
+        for fname in ["info","info1","info2"]:
+            self._funcs['sc'].append(getattr(self, fname))
+            self._funcs['sc_info'].append(getattr(self, fname))
+        for fname in ["warn", "err", "crit"]:
+            self._funcs['sc'].append(getattr(self, fname))
+            self._funcs['sc_main'].append(getattr(self, fname))
+        for fname in ["dbg", "dbg1", "dbg2", "dbg3", "dbg4"]:
+            self._funcs['sc'].append(getattr(self, fname))
+            self._funcs['sc_dbg'].append(getattr(self, fname))
+
+    def funcs(self, *args):
+        """ Given a list of func names/group-names ... return them in order as
+            a tuple. """
+
+        ret = []
+        for name in args:
+            if name in self._funcs:
+                ret.extend(self._funcs[name])
+            elif hasattr(self, name):
+                ret.append(getattr(self, name))
+            else:
+                raise ValueError, "No such logging function: %s" % str(name)
+        return tuple(ret)
+
+    def info(self, msg, *args):
         """ Log a message as info. """
 
         self.logger.info(msg % args)
 
-    def info1(msg, *args):
+    def info1(self, msg, *args):
         """ Log a message as log.INFO_1. """
 
-        self.logger.log(logginglevels.INFO_1, msg % args)
+        self.logger.log(_name2val["info1"], msg % args)
 
-    def info2(msg, *args):
+    def info2(self, msg, *args):
         """ Log a message as log.INFO_2. """
 
-        self.logger.log(logginglevels.INFO_2, msg % args)
+        self.logger.log(_name2val["info2"], msg % args)
 
-    def warn(msg, *args):
+    def warn(self, msg, *args):
         """ Log a message as warning. """
 
         self.logger.warning(msg % args)
 
-    def err(msg, *args):
+    def err(self, msg, *args):
         """ Log a message as error. """
 
         self.logger.error(msg % args)
 
-    def crit(msg, *args):
+    def crit(self, msg, *args):
         """ Log a message as critical. """
 
         self.logger.critical(msg % args)
 
-    def dbg(msg, *args):
+    def dbg(self, msg, *args):
         """ Log a message as debug. """
 
         self.logger.debug(msg % args)
 
-    def dbg_tm(oldtm, msg, *args):
+    def dbg_tm(self, old_tm, msg, *args):
         """ Log a message as debug, with a timestamp delta. """
 
         now = time.time()
         out = msg % args
-        self.logger.debug(out + " time: %.4f" (now - old_tm))
+        self.logger.debug(out + " time: %.4f", (now - old_tm))
 
-    def dbg1(msg, *args):
+    def dbg1(self, msg, *args):
         """ Log a message as log.DEBUG_1. """
 
-        self.logger.log(DEBUG_1, msg % args)
+        self.logger.log(_name2val["dbg1"], msg % args)
 
-    def dbg2(msg, *args):
+    def dbg2(self, msg, *args):
         """ Log a message as log.DEBUG_2. """
 
-        self.logger.log(DEBUG_2, msg % args)
+        self.logger.log(_name2val["dbg2"], msg % args)
 
-    def dbg3(msg, *args):
+    def dbg3(self, msg, *args):
         """ Log a message as log.DEBUG_3. """
 
-        self.logger.log(DEBUG_3, msg % args)
+        self.logger.log(_name2val["dbg3"], msg % args)
 
-log  = EasyLogger(logging.getLogger("yum.YumBase"))
-vlog = EasyLogger(logging.getLogger("yum.verbose.YumBase"))
+    def dbg4(self, msg, *args):
+        """ Log a message as log.DEBUG_4. """
 
-info   = log.info
-info1  = log.info1
-info2  = log.info2
-warn   = log.warn
-err    = log.err
-crit   = log.crit
-dbg    = log.dbg
-dbg1   = log.dbg1
-dbg2   = log.dbg2
-dbg3   = log.dbg3
-dbg_tm = log.dbgtm
+        self.logger.log(_name2val["dbg4"], msg % args)
 
-vinfo   = vlog.info
-vinfo1  = vlog.info1
-vinfo2  = vlog.info2
-vwarn   = vlog.warn
-verr    = vlog.err
-vcrit   = vlog.crit
-vdbg    = vlog.dbg
-vdbg1   = vlog.dbg1
-vdbg2   = vlog.dbg2
-vdbg3   = vlog.dbg3
-vdbg_tm = vlog.dbgtm
+    def isEnabledFor(self, name):
+        """ Wrap self.logger.isEnabledFor() """
+        return self.logger.isEnabledFor(_name2val[name])

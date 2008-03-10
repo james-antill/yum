@@ -20,11 +20,14 @@ A shell implementation for the yum command line interface.
 import sys
 import cmd
 import shlex
-import logging
+
+from cli import nelogger, velogger
+(info,info1,info2, warn,err,crit)        = nelogger.funcs("sc_info", "sc_main")
+(vinfo,vinfo1,vinfo2, vwarn,verr,vcrit,
+ vdbg,vdbg1,vdbg2,vdbg3,vdbg4,vdbg_tm)   = velogger.funcs("sc", "dbg_tm")
 
 from yum import Errors
 from yum.constants import *
-import yum.logginglevels as logginglevels
 
 
 class YumShell(cmd.Cmd):
@@ -46,8 +49,8 @@ class YumShell(cmd.Cmd):
                 'run', 'ts', 'transaction', 'config']
                 
         self.commandlist = self.shell_specific_commands + self.base.yum_cli_commands.keys()
-        self.logger = logging.getLogger("yum.cli")
-        self.verbose_logger = logging.getLogger("yum.verbose.cli")
+        self.logger         = nelogger.logger
+        self.verbose_logger = velogger.logger
 
 
     def _shlex_split(self, input_string):
@@ -60,7 +63,7 @@ class YumShell(cmd.Cmd):
         try:
             inputs = shlex.split(input_string)
         except ValueError, e:
-            self.logger.critical('Script Error: %s', e)
+            crit('Script Error: %s', e)
             if self.from_file:
                 raise Errors.YumBaseError, "Fatal error in script, exiting"
         
@@ -147,7 +150,7 @@ class YumShell(cmd.Cmd):
         else:
             self.base.shellUsage()
         
-        self.verbose_logger.info(msg)
+        vinfo(msg)
         
     def do_EOF(self, line):
         self.resultmsgs = ['Leaving Shell']
@@ -167,8 +170,7 @@ class YumShell(cmd.Cmd):
     def do_transaction(self, line):
         (cmd, args, line) = self.parseline(line)
         if cmd in ['list', None]:
-            self.verbose_logger.log(logginglevels.INFO_2,
-                self.base.listTransaction())
+            vinfo2(self.base.listTransaction())
         
         elif cmd == 'reset':
             self.base.closeRpmDB()
@@ -177,15 +179,14 @@ class YumShell(cmd.Cmd):
             try:
                 (code, msgs) = self.base.buildTransaction()
             except Errors.YumBaseError, e:
-                self.logger.critical('Error building transaction: %s', e)
+                crit('Error building transaction: %s', e)
                 return False
                 
             if code == 1:
                 for msg in msgs:
-                    self.logger.critical('Error: %s', msg)
+                    crit('Error: %s', msg)
             else:
-                self.verbose_logger.log(logginglevels.INFO_2,
-                    'Success resolving dependencies')
+                vinfo2('Success resolving dependencies')
                 
         elif cmd == 'run':
             return self.do_run('')
@@ -199,14 +200,13 @@ class YumShell(cmd.Cmd):
         if cmd in ['debuglevel', 'errorlevel']:
             opts = self._shlex_split(args)
             if not opts:
-                self.verbose_logger.log(logginglevels.INFO_2, '%s: %s', cmd,
-                    getattr(self.base.conf, cmd))
+                vinfo2('%s: %s', cmd, getattr(self.base.conf, cmd))
             else:
                 val = opts[0]
                 try:
                     val = int(val)
                 except ValueError:
-                    self.logger.critical('Value %s for %s cannot be made to an int', val, cmd)
+                    crit('Value %s for %s cannot be made to an int', val, cmd)
                     return
                 setattr(self.base.conf, cmd, val)
                 if cmd == 'debuglevel':
@@ -217,12 +217,11 @@ class YumShell(cmd.Cmd):
         elif cmd in ['gpgcheck', 'obsoletes', 'assumeyes']:
             opts = self._shlex_split(args)
             if not opts:
-                self.verbose_logger.log(logginglevels.INFO_2, '%s: %s', cmd,
-                    getattr(self.base.conf, cmd))
+                vinfo2('%s: %s', cmd,  getattr(self.base.conf, cmd))
             else:
                 value = opts[0]
                 if value.lower() not in BOOLEAN_STATES:
-                    self.logger.critical('Value %s for %s is not a Boolean', value, cmd)
+                    crit('Value %s for %s is not a Boolean', value, cmd)
                     return False
                 value = BOOLEAN_STATES[value.lower()]
                 setattr(self.base.conf, cmd, value)
@@ -233,9 +232,7 @@ class YumShell(cmd.Cmd):
             args = args.replace(',', ' ')
             opts = self._shlex_split(args)
             if not opts:
-                msg = '%s: ' % cmd
-                msg = msg + ' '.join(getattr(self.base.conf, cmd))
-                self.verbose_logger.log(logginglevels.INFO_2, msg)
+                vinfo2('%s: %s', cmd, ' '.join(getattr(self.base.conf, cmd)))
                 return False
             else:
                 setattr(self.base.conf, cmd, opts)
@@ -274,16 +271,16 @@ class YumShell(cmd.Cmd):
                 try:
                     changed = self.base.repos.enableRepo(repo)
                 except Errors.ConfigError, e:
-                    self.logger.critical(e)
+                    crit(e)
                 except Errors.RepoError, e:
-                    self.logger.critical(e)
+                    crit(e)
                     
                 else:
                     for repo in changed:
                         try:
                             self.base.doRepoSetup(thisrepo=repo)
                         except Errors.RepoError, e:
-                            self.logger.critical('Disabling Repository')
+                            crit('Disabling Repository')
                             self.base.repos.disableRepo(repo)
                             return False
                             
@@ -295,9 +292,9 @@ class YumShell(cmd.Cmd):
                 try:
                     offrepos = self.base.repos.disableRepo(repo)
                 except Errors.ConfigError, e:
-                    self.logger.critical(e)
+                    crit(e)
                 except Errors.RepoError, e:
-                    self.logger.critical(e)
+                    crit(e)
 
                 else:
                     # close the repos, too
@@ -322,23 +319,22 @@ class YumShell(cmd.Cmd):
                 (code, msgs) = self.base.buildTransaction()
                 if code == 1:
                     for msg in msgs:
-                        self.logger.critical('Error: %s', msg)
+                        crit('Error: %s', msg)
                     return False
 
                 returnval = self.base.doTransaction()
             except Errors.YumBaseError, e:
-                self.logger.critical('Error: %s', e)
+                crit('Error: %s', e)
             except KeyboardInterrupt, e:
-                self.logger.critical('\n\nExiting on user cancel')
+                crit('\n\nExiting on user cancel')
             except IOError, e:
                 if e.errno == 32:
-                    self.logger.critical('\n\nExiting on Broken Pipe')
+                    crit('\n\nExiting on Broken Pipe')
             else:
                 if returnval != 0:
-                    self.verbose_logger.info('Transaction did not run.')
+                    vinfo('Transaction did not run.')
                 else:
-                    self.verbose_logger.log(logginglevels.INFO_2,
-                        'Finished Transaction')
+                    vinfo2('Finished Transaction')
                     self.base.closeRpmDB()
 
 

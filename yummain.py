@@ -21,12 +21,19 @@ Entrance point for the yum command line interface.
 import os
 import sys
 import locale
-import logging
+
+from yum import logginglevels
+
+_nlogger = logginglevels.EasyLogger("yum.main")
+_vlogger = logginglevels.EasyLogger("yum.verbose.main")
+(info,info1,info2, warn,err,crit)        = _nlogger.funcs("sc_info", "sc_main")
+(vinfo,vinfo1,vinfo2, vwarn,verr,vcrit,
+ vdbg,vdbg1,vdbg2,vdbg3,vdbg4,vdbg_tm)   = _vlogger.funcs("sc", "dbg_tm")
+
 import time # test purposes only
 
 from yum import Errors
 from yum import plugins
-from yum import logginglevels
 from yum.i18n import _ 
 import cli
 
@@ -38,13 +45,13 @@ def main(args):
         sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
 
     def exUserCancel():
-        logger.critical(_('\n\nExiting on user cancel'))
+        crit(_('\n\nExiting on user cancel'))
         if unlock(): return 200
         return 1
 
     def exIOError(e):
         if e.errno == 32:
-            logger.critical(_('\n\nExiting on Broken Pipe'))
+            crit(_('\n\nExiting on Broken Pipe'))
         if unlock(): return 200
         return 1
 
@@ -55,12 +62,12 @@ def main(args):
         '''
         exitmsg = str(e)
         if exitmsg:
-            logger.warn('\n\n%s', exitmsg)
+            warn('\n\n%s', exitmsg)
         if unlock(): return 200
         return 1
 
     def exFatal(e):
-        logger.critical('\n\n%s', str(e))
+        crit('\n\n%s', str(e))
         if unlock(): return 200
         return 1
 
@@ -71,9 +78,6 @@ def main(args):
         except Errors.LockError, e:
             return 200
         return 0
-
-    logger = logging.getLogger("yum.main")
-    verbose_logger = logging.getLogger("yum.verbose.main")
 
     try:
         locale.setlocale(locale.LC_ALL, '')
@@ -101,8 +105,8 @@ def main(args):
         except Errors.LockError, e:
             if "%s" %(e.msg,) != lockerr:
                 lockerr = "%s" %(e.msg,)
-                logger.critical(lockerr)
-            logger.critical(_("Another app is currently holding the yum lock; waiting for it to exit..."))
+                crit(lockerr)
+            crit(_("Another app is currently holding the yum lock; waiting for it to exit..."))
             time.sleep(2)
         else:
             break
@@ -123,13 +127,13 @@ def main(args):
     if result == 0:
         # Normal exit 
         for msg in resultmsgs:
-            verbose_logger.log(logginglevels.INFO_2, '%s', msg)
+            vinfo2('%s', msg)
         if unlock(): return 200
         return 0
     elif result == 1:
         # Fatal error
         for msg in resultmsgs:
-            logger.critical(_('Error: %s'), msg)
+            crit(_('Error: %s'), msg)
         if unlock(): return 200
         return 1
     elif result == 2:
@@ -139,14 +143,14 @@ def main(args):
         if unlock(): return 200
         return 100
     else:
-        logger.critical(_('Unknown Error(s): Exit Code: %d:'), result)
+        crit(_('Unknown Error(s): Exit Code: %d:'), result)
         for msg in resultmsgs:
-            logger.critical(msg)
+            crit(msg)
         if unlock(): return 200
         return 3
             
     # Depsolve stage
-    verbose_logger.log(logginglevels.INFO_2, _('Resolving Dependencies'))
+    vinfo2(_('Resolving Dependencies'))
 
     try:
         (result, resultmsgs) = base.buildTransaction() 
@@ -168,20 +172,20 @@ def main(args):
     elif result == 1:
         # Fatal error
         for msg in resultmsgs:
-            logger.critical(_('Error: %s'), msg)
+            crit(_('Error: %s'), msg)
         if unlock(): return 200
         return 1
     elif result == 2:
         # Continue on
         pass
     else:
-        logger.critical(_('Unknown Error(s): Exit Code: %d:'), result)
+        crit(_('Unknown Error(s): Exit Code: %d:'), result)
         for msg in resultmsgs:
-            logger.critical(msg)
+            crit(msg)
         if unlock(): return 200
         return 3
 
-    verbose_logger.log(logginglevels.INFO_2, _('\nDependencies Resolved'))
+    vinfo2(_('\nDependencies Resolved'))
 
     # Run the transaction
     try:
@@ -195,7 +199,7 @@ def main(args):
     except IOError, e:
         return exIOError(e)
 
-    verbose_logger.log(logginglevels.INFO_2, _('Complete!'))
+    vinfo2(_('Complete!'))
     if unlock(): return 200
     return 0
 

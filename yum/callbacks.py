@@ -15,7 +15,10 @@
 
 # imports
 
-import logging 
+import logginglevels
+_vlogger = logginglevels.EasyLogger("yum.verbose.ProcessTrasactionBaseCallback")
+vinfo    = _vlogger.info
+
 from urlgrabber.progress import BaseMeter,format_time,format_number
 
 
@@ -37,11 +40,11 @@ PT_MESSAGES = { PT_DOWNLOAD    : "Downloading Packages",
 class ProcessTransBaseCallback:
     
     def __init__(self):
-        self.logger = logging.getLogger('yum.verbose.ProcessTrasactionBaseCallback')
+        self.logger = _vlogger.logger
         
     def event(self,state,data=None):
         if state in PT_MESSAGES.keys():
-            self.logger.info(PT_MESSAGES[state])
+            vinfo(PT_MESSAGES[state])
 
 class ProcessTransNoOutputCallback:
     def __init__(self):

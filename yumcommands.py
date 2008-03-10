@@ -21,7 +21,12 @@ Classes for subcommands of the yum command line interface.
 
 import os
 import cli
-from yum import logginglevels
+from cli import nelogger, velogger
+
+(info,info1,info2, crit, dbg) = nelogger.funcs("sc_info", "crit", "dbg")
+(vinfo,vinfo1,vinfo2, vwarn,verr,vcrit,
+ vdbg,vdbg1,vdbg2,vdbg3,vdbg4,vdbg_tm)   = velogger.funcs("sc", "dbg_tm")
+
 import yum.Errors
 from yum.i18n import _
 
@@ -33,7 +38,7 @@ def checkRootUID(base):
     @param base: a YumBase object.
     """
     if base.conf.uid != 0:
-        base.logger.critical(_('You need to be root to perform this command.'))
+        crit(_('You need to be root to perform this command.'))
         raise cli.CliError
 
 def checkGPGKey(base):
@@ -54,25 +59,24 @@ will install it for you.
 
 For more information contact your distribution or package provider.
 """)
-                base.logger.critical(msg)
+                crit(msg)
                 raise cli.CliError
 
 def checkPackageArg(base, basecmd, extcmds):
     if len(extcmds) == 0:
-        base.logger.critical(
-                _('Error: Need to pass a list of pkgs to %s') % basecmd)
+        crit(_('Error: Need to pass a list of pkgs to %s') % basecmd)
         base.usage()
         raise cli.CliError
 
 def checkItemArg(base, basecmd, extcmds):
     if len(extcmds) == 0:
-        base.logger.critical(_('Error: Need an item to match'))
+        crit(_('Error: Need an item to match'))
         base.usage()
         raise cli.CliError
 
 def checkGroupArg(base, basecmd, extcmds):
     if len(extcmds) == 0:
-        base.logger.critical(_('Error: Need a group or list of groups'))
+        crit(_('Error: Need a group or list of groups'))
         base.usage()
         raise cli.CliError    
 
@@ -81,12 +85,11 @@ def checkCleanArg(base, basecmd, extcmds):
             'all')
 
     if len(extcmds) == 0:
-        base.logger.critical(_('Error: clean requires an option: %s') % (
-            ", ".join(VALID_ARGS)))
+        crit(_('Error: clean requires an option: %s'), ", ".join(VALID_ARGS))
 
     for cmd in extcmds:
         if cmd not in VALID_ARGS:
-            base.logger.critical(_('Error: invalid clean argument: %r') % cmd)
+            crit(_('Error: invalid clean argument: %r'), cmd)
             base.usage()
             raise cli.CliError
 
@@ -99,20 +102,17 @@ def checkShellArg(base, basecmd, extcmds):
     raise cli.CliError.
     """
     if len(extcmds) == 0:
-        base.verbose_logger.debug(_("No argument to shell"))
+        vdbg(_("No argument to shell"))
         pass
     elif len(extcmds) == 1:
-        base.verbose_logger.debug(_("Filename passed to shell: %s"), 
-            extcmds[0])              
+        vdbg(_("Filename passed to shell: %s"), extcmds[0])
         if not os.path.isfile(extcmds[0]):
-            base.logger.critical(
-                _("File %s given as argument to shell does not exist."), 
-                extcmds[0])
+            crit(_("File %s given as argument to shell does not exist."),
+                 extcmds[0])
             base.usage()
             raise cli.CliError
     else:
-        base.logger.critical(
-                _("Error: more than one file given as argument to shell."))
+        crit(_("Error: more than one file given as argument to shell."))
         base.usage()
         raise cli.CliError
 
@@ -164,8 +164,7 @@ class InstallCommand(YumCommand):
         checkPackageArg(base, basecmd, extcmds)
 
     def doCommand(self, base, basecmd, extcmds):
-        base.verbose_logger.log(logginglevels.INFO_2, 
-                _("Setting up Install Process"))
+        vinfo2(_("Setting up Install Process"))
         try:
             return base.installPkgs(extcmds)
         except yum.Errors.YumBaseError, e:
@@ -186,8 +185,7 @@ class UpdateCommand(YumCommand):
         checkGPGKey(base)
 
     def doCommand(self, base, basecmd, extcmds):
-        base.verbose_logger.log(logginglevels.INFO_2, 
-                _("Setting up Update Process"))
+        vinfo2(_("Setting up Update Process"))
         try:
             return base.updatePkgs(extcmds)
         except yum.Errors.YumBaseError, e:
@@ -262,8 +260,7 @@ class EraseCommand(YumCommand):
         checkPackageArg(base, basecmd, extcmds)
 
     def doCommand(self, base, basecmd, extcmds):
-        base.verbose_logger.log(logginglevels.INFO_2, 
-                _("Setting up Remove Process"))
+        vinfo2(_("Setting up Remove Process"))
         try:
             return base.erasePkgs(extcmds)
         except yum.Errors.YumBaseError, e:
@@ -274,8 +271,7 @@ class EraseCommand(YumCommand):
 
 class GroupCommand(YumCommand):
     def doCommand(self, base, basecmd, extcmds):
-        base.verbose_logger.log(logginglevels.INFO_2, 
-                _("Setting up Group Process"))
+        vinfo2(_("Setting up Group Process"))
 
         base.doRepoSetup(dosack=0)
         try:
@@ -387,8 +383,8 @@ class MakeCacheCommand(YumCommand):
         checkRootUID(base)
 
     def doCommand(self, base, basecmd, extcmds):
-        base.logger.debug(_("Making cache files for all metadata files."))
-        base.logger.debug(_("This may take a while depending on the speed of this computer"))
+        dbg(_("Making cache files for all metadata files."))
+        dbg(_("This may take a while depending on the speed of this computer"))
         try:
             for repo in base.repos.findRepos('*'):
                 repo.metadata_expire = 0
@@ -450,7 +446,7 @@ class ProvidesCommand(YumCommand):
         checkItemArg(base, basecmd, extcmds)
 
     def doCommand(self, base, basecmd, extcmds):
-        base.logger.debug("Searching Packages: ")
+        dbg("Searching Packages: ")
         try:
             return base.provides(extcmds)
         except yum.Errors.YumBaseError, e:
@@ -493,7 +489,7 @@ class SearchCommand(YumCommand):
         checkItemArg(base, basecmd, extcmds)
 
     def doCommand(self, base, basecmd, extcmds):
-        base.logger.debug(_("Searching Packages: "))
+        dbg(_("Searching Packages: "))
         try:
             return base.search(extcmds)
         except yum.Errors.YumBaseError, e:
@@ -518,8 +514,7 @@ class UpgradeCommand(YumCommand):
 
     def doCommand(self, base, basecmd, extcmds):
         base.conf.obsoletes = 1
-        base.verbose_logger.log(logginglevels.INFO_2, 
-                _("Setting up Upgrade Process"))
+        vinfo2(_("Setting up Upgrade Process"))
         try:
             return base.updatePkgs(extcmds)
         except yum.Errors.YumBaseError, e:
@@ -541,8 +536,7 @@ class LocalInstallCommand(YumCommand):
         checkPackageArg(base, basecmd, extcmds)
         
     def doCommand(self, base, basecmd, extcmds):
-        base.verbose_logger.log(logginglevels.INFO_2,
-                                _("Setting up Local Package Process"))
+        vinfo2(_("Setting up Local Package Process"))
 
         updateonly = basecmd == 'localupdate'
         try:
@@ -564,7 +558,7 @@ class ResolveDepCommand(YumCommand):
         return _("Determine which package provides the given dependency")
 
     def doCommand(self, base, basecmd, extcmds):
-        base.logger.debug(_("Searching Packages for Dependency:"))
+        dbg(_("Searching Packages for Dependency:"))
         try:
             return base.resolveDepCli(extcmds)
         except yum.Errors.YumBaseError, e:
@@ -584,7 +578,7 @@ class ShellCommand(YumCommand):
         checkShellArg(base, basecmd, extcmds)
 
     def doCommand(self, base, basecmd, extcmds):
-        base.verbose_logger.log(logginglevels.INFO_2, _('Setting up Yum Shell'))
+        vinfo2(_('Setting up Yum Shell'))
         try:
             return base.doShell()
         except yum.Errors.YumBaseError, e:
@@ -608,7 +602,7 @@ class DepListCommand(YumCommand):
         checkPackageArg(base, basecmd, extcmds)
 
     def doCommand(self, base, basecmd, extcmds):
-       base.verbose_logger.log(logginglevels.INFO_2, _("Finding dependencies: "))
+       vinfo2(_("Finding dependencies: "))
        try:
           return base.deplist(extcmds)
        except yum.Errors.YumBaseError, e:
@@ -641,17 +635,14 @@ class RepoListCommand(YumCommand):
 
         format_string = "%-20.20s %-40.40s  %s"
         if base.repos.repos.values():
-            base.verbose_logger.log(logginglevels.INFO_2, format_string,
-                _('repo id'), _('repo name'), _('status'))
+            vinfo2(format_string, _('repo id'), _('repo name'), _('status'))
         repos = base.repos.repos.values()
         repos.sort()
         for repo in repos:
             if repo in base.repos.listEnabled() and arg in ('all', 'enabled'):
-                base.verbose_logger.log(logginglevels.INFO_2, format_string,
-                    repo, repo.name, _('enabled'))
+                vinfo2(format_string, repo, repo.name, _('enabled'))
             elif arg in ('all', 'disabled'):
-                base.verbose_logger.log(logginglevels.INFO_2, format_string,
-                    repo, repo.name, _('disabled'))
+                vinfo2(format_string, repo, repo.name, _('disabled'))
 
         return 0, []
 
@@ -717,8 +708,7 @@ class HelpCommand(YumCommand):
     def doCommand(self, base, basecmd, extcmds):
         if base.yum_cli_commands.has_key(extcmds[0]):
             command = base.yum_cli_commands[extcmds[0]]
-            base.verbose_logger.log(logginglevels.INFO_2,
-                    self._makeOutput(command))
+            vinfo2(self._makeOutput(command))
         return 0, []
 
     def needTs(self, base, basecmd, extcmds):
@@ -737,8 +727,7 @@ class ReInstallCommand(YumCommand):
         checkPackageArg(base, basecmd, extcmds)
 
     def doCommand(self, base, basecmd, extcmds):
-        base.verbose_logger.log(logginglevels.INFO_2, 
-                _("Setting up Reinstall Process"))
+        vinfo2(_("Setting up Reinstall Process"))
         oldcount = len(base.tsInfo)
         try:
             for item in extcmds:

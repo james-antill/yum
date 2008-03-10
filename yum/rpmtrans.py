@@ -20,11 +20,13 @@ import rpm
 import os
 import fcntl
 import time
-import logging
 import types
 import sys
 from yum.constants import *
+import logginglevels
 
+_logger = logginglevels.EasyLogger("yum.filelogging.RPMInstallCallback")
+(info,) = _logger.funcs("info")
 
 class NoOutputCallBack:
     def __init__(self):
@@ -82,7 +84,7 @@ class RPMBaseCallback:
                             TS_OBSOLETED: 'Obsoleted',
                             TS_OBSOLETING: 'Installed',
                             TS_UPDATED: 'Cleanup'}   
-        self.logger = logging.getLogger('yum.filelogging.RPMInstallCallback')        
+        self.logger = _logger.logger
         
     def event(self, package, action, te_current, te_total, ts_current, ts_total):
         """
@@ -114,7 +116,7 @@ class RPMBaseCallback:
             msg = '%s: %s' % (self.fileaction[action], package)
         else:
             msg = '%s: %s' % (package, action)
-        self.logger.info(msg)
+        info(msg)
             
 
 class SimpleCliCallBack(RPMBaseCallback):
@@ -151,7 +153,7 @@ class RPMTransaction:
         self.complete_actions = 0
         self.installed_pkg_names = []
         self.total_removed = 0
-        self.logger = logging.getLogger('yum.filelogging.RPMInstallCallback')
+        self.logger = _logger.logger
         self.filelog = False
 
         self._setupOutputLogging()

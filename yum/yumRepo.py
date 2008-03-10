@@ -35,8 +35,11 @@ from yum import config
 from yum import misc
 from constants import *
 
-import logging
 import logginglevels
+_nlogger = logginglevels.EasyLogger("yum.Repos")
+_vlogger = logginglevels.EasyLogger("yum.verbose.Repos")
+(warn,err,crit, dbg2) = _nlogger.funcs("sc_main", "dbg2")
+(vdbg2,)              = _vlogger.funcs("dbg2")
 
 import warnings
 
@@ -46,8 +49,9 @@ import stat
 
 warnings.simplefilter("ignore", Errors.YumFutureDeprecationWarning)
 
-logger = logging.getLogger("yum.Repos")
-verbose_logger = logging.getLogger("yum.verbose.Repos")
+# API compat.
+logger         = _nlogger.logger
+verbose_logger = _vlogger.logger
 
 class YumPackageSack(packageSack.PackageSack):
     """imports/handles package objects from an mdcache dict object"""
@@ -344,7 +348,7 @@ class YumRepository(Repository, config.RepoConf):
             self.cfg.write(file(self.repofile, 'w'))
         except IOError, e:
             if e.errno == 13:
-                self.logger.warning(e)
+                warn(e)
             else:
                 raise IOError, str(e)
 
@@ -357,7 +361,7 @@ class YumRepository(Repository, config.RepoConf):
             self.cfg.write(file(self.repofile, 'w'))
         except IOError, e:
             if e.errno == 13:
-                self.logger.warning(e)
+                warn(e)
             else:
                 raise IOError, str(e)
 
@@ -593,7 +597,8 @@ class YumRepository(Repository, config.RepoConf):
                 result = self.mediafunc(local = local, checkfunc = checkfunc, relative = relative, text = text, copy_local = copy_local, url = url, mediaid = self.mediaid, name = self.name, discnum = discnum, range = (start, end))
                 return result
             except Errors.MediaError, e:
-                verbose_logger.log(logginglevels.DEBUG_2, "Error getting package from media; falling back to url %s" %(e,))
+                dbg2("Error getting package from media; falling back to url %s",
+                     e)
         
         if url is not None and scheme != "media":
             ug = URLGrabber(keepalive = self.keepalive,
@@ -737,7 +742,7 @@ class YumRepository(Repository, config.RepoConf):
         except Errors.RepoError, e:
             raise
         if not self.mediafunc and self.mediaid and not self.mirrorlist and not self.baseurl:
-            verbose_logger.log(logginglevels.DEBUG_2, "Disabling media repo for non-media-aware frontend")
+            vdbg2("Disabling media repo for non-media-aware frontend")
             self.enabled = False
 
     def _cachingRepoXML(self, local):
