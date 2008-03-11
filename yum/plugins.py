@@ -21,6 +21,11 @@ import atexit
 import gettext
 import logging
 import logginglevels
+
+velogger = logginglevels.EasyLogger("yum.verbose.YumPlugins")
+(vinfo,vinfo1,vinfo2, vwarn,verr,vcrit,
+ vdbg,vdbg1,vdbg2,vdbg3,vdbg4,vdbg_tm)   = velogger.funcs("sc", "dbg_tm")
+
 from constants import *
 try:
     import iniparse.compat as ConfigParser
@@ -133,7 +138,7 @@ class YumPlugins:
         self.base = base
         self.optparser = optparser
         self.cmdline = (None, None)
-        self.verbose_logger = logging.getLogger("yum.verbose.YumPlugins")
+        self.verbose_logger = velogger.logger
         self.disabledPlugins = disabled
         if types is None:
             types = ALL_TYPES
@@ -141,9 +146,8 @@ class YumPlugins:
             types = (types,)
 
         if id(TYPE_INTERFACE) in [id(t) for t in types]:
-            self.verbose_logger.log(logginglevels.INFO_2,
-                    'Deprecated constant TYPE_INTERFACE during plugin '
-                    'initialization.\nPlease use TYPE_INTERACTIVE instead.')
+            vinfo2('Deprecated constant TYPE_INTERFACE during plugin '
+                   'initialization.\nPlease use TYPE_INTERACTIVE instead.')
 
         self._importplugins(types)
 
@@ -165,8 +169,7 @@ class YumPlugins:
         conduitcls = eval(conduitcls)       # Convert name to class object
 
         for modname, func in self._pluginfuncs[slotname]:
-            self.verbose_logger.debug('Running "%s" handler for "%s" plugin', slotname,
-                modname)
+            vdbg('Running "%s" handler for "%s" plugin', slotname, modname)
     
             _, conf = self._plugins[modname]
             func(conduitcls(self, self.base, conf, **kwargs))
@@ -193,9 +196,7 @@ class YumPlugins:
             key = _("Loaded plugins: ")
             val = ", ".join(plugins)
             nxt = ' ' * (len(key) - 2) + ': '
-            self.verbose_logger.log(logginglevels.INFO_2,
-                                    fill(val, width=80, initial_indent=key,
-                                         subsequent_indent=nxt))
+            vinfo2(fill(val, width=80,initial_indent=key,subsequent_indent=nxt))
 
     def _loadplugin(self, modulefile, types):
         '''Attempt to import a plugin module and register the hook methods it
@@ -207,7 +208,7 @@ class YumPlugins:
         conf = self._getpluginconf(modname)
         if not conf or not config.getOption(conf, 'main', 'enabled', 
                 config.BoolOption(False)):
-            self.verbose_logger.debug(_('"%s" plugin is disabled'), modname)
+            vdbg(_('"%s" plugin is disabled'), modname)
             return
 
         fp, pathname, description = imp.find_module(modname, [dir])
@@ -238,10 +239,9 @@ class YumPlugins:
             return
         for plugintype in plugintypes:
             if id(plugintype) == id(TYPE_INTERFACE):
-                self.verbose_logger.log(logginglevels.INFO_2,
-                        'Plugin "%s" uses deprecated constant '
-                        'TYPE_INTERFACE.\nPlease use TYPE_INTERACTIVE '
-                        'instead.', modname)
+                vinfo2('Plugin "%s" uses deprecated constant '
+                       'TYPE_INTERFACE.\nPlease use TYPE_INTERACTIVE '
+                       'instead.', modname)
 
             if plugintype not in types:
                 return
@@ -250,8 +250,7 @@ class YumPlugins:
             if modname in self.disabledPlugins:
                 return
 
-        self.verbose_logger.log(logginglevels.DEBUG_3, _('Loading "%s" plugin'),
-                                modname)
+        vdbg3(_('Loading "%s" plugin'), modname)
 
         # Store the plugin module and its configuration file
         if not self._plugins.has_key(modname):
@@ -277,11 +276,10 @@ class YumPlugins:
             if os.access(conffilename, os.R_OK):
                 # Found configuration file
                 break
-            self.verbose_logger.log(logginglevels.INFO_2, _("Configuration file %s not found") % conffilename)
+            vinfo2(_("Configuration file %s not found"), conffilename)
         else: # for
             # Configuration files for the plugin not found
-            self.verbose_logger.log(logginglevels.INFO_2, _("Unable to find configuration file for plugin %s")
-                % modname)
+            vinfo2(_("Unable to find configuration file for plugin %s"),modname)
             return None
         parser = ConfigParser.ConfigParser()
         confpp_obj = ConfigPreProcessor(conffilename)
