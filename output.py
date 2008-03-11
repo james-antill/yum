@@ -20,8 +20,12 @@
 import sys
 import time
 import logging
+from yum import logginglevels
 
-from cli import nelogger, velogger
+# Don't import cli, as cli needs to import us, for YumOutput
+nelogger = logginglevels.EasyLogger("yum.cli")
+velogger = logginglevels.EasyLogger("yum.verbose.cli")
+
 (info,info1,info2,info3, warn,err,crit)  = nelogger.funcs("sc_info", "sc_main")
 (vinfo,vinfo1,vinfo2,vinfo3, vwarn,verr,vcrit,
  vdbg,vdbg1,vdbg2,vdbg3,vdbg4,vdbg_tm)   = velogger.funcs("sc", "dbg_tm")
@@ -292,9 +296,13 @@ class YumOutput:
         print _("Release    : %s") % pkg.release
         print _("Size       : %s") % self.format_number(float(pkg.size))
         print _("Repo       : %s") % pkg.repoid
+        print self._outKeyValFill(_("Summary    : "),self._enc(pkg.summary))
         if velogger.verbose():
             print _("Committer  : %s") % pkg.committer
-        print self._outKeyValFill(_("Summary    : "),self._enc(pkg.summary))
+            print _("Committime : %s") % time.ctime(pkg.committime)
+            print _("Buildtime  : %s") % time.ctime(pkg.buildtime)
+            if hasattr(pkg, 'installtime'):
+                print _("Installtime: %s") % time.ctime(pkg.installtime)
         if pkg.url:
             print _("URL        : %s") % pkg.url
         print _("License    : %s") % pkg.license
