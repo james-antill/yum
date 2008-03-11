@@ -36,8 +36,8 @@ import packages
 import logginglevels
 _nlogger = logginglevels.EasyLogger("yum.Depsolve")
 _vlogger = logginglevels.EasyLogger("yum.verbose.Depsolve")
-(info,info1,info2, warn,err,crit)        = _nlogger.funcs("sc_info", "sc_main")
-(vinfo,vinfo1,vinfo2, vwarn,verr,vcrit,
+(info,info1,info2,info3, warn,err,crit)  = _nlogger.funcs("sc_info", "sc_main")
+(vinfo,vinfo1,vinfo2,vinfo3, vwarn,verr,vcrit,
  vdbg,vdbg1,vdbg2,vdbg3,vdbg4)           = _vlogger.funcs("sc")
 
 

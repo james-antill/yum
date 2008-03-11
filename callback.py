@@ -23,7 +23,7 @@ import os
 import sys
 import logginglevels
 _nlogger = logginglevels.EasyLogger("yum.filelogging.RPMInstallCallback")
-(info,info1,info2, warn,err,crit)        = _nlogger.funcs("sc_info", "sc_main")
+(info,info1,info2,info3, warn,err,crit) = _nlogger.funcs("sc_info", "sc_main")
 
 from yum.constants import *
 

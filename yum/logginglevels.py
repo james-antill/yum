@@ -25,9 +25,15 @@ import logging
 import logging.handlers
 import time
 
+# logging.info() == 20
+INFO    = logging.INFO
+assert INFO == 20
 INFO_1 = 19
 INFO_2 = 18
+INFO_3 = 17
 
+DEBUG   = logging.DEBUG
+assert DEBUG == 10
 DEBUG_1 = 9
 DEBUG_2 = 8
 DEBUG_3 = 7
@@ -35,6 +41,7 @@ DEBUG_4 = 6
 
 logging.addLevelName(INFO_1, "INFO_1")
 logging.addLevelName(INFO_2, "INFO_2")
+logging.addLevelName(INFO_3, "INFO_3")
 
 logging.addLevelName(DEBUG_1, "DEBUG_1")
 logging.addLevelName(DEBUG_2, "DEBUG_2")
@@ -48,17 +55,30 @@ logging.raiseExceptions = False
 
 syslog = None
 
+DBG_QUIET_LEVEL   = 0
+DBG_NORMAL_LEVEL  = 2
+DBG_VERBOSE_LEVEL = 3
+DBG_DBG0_LEVEL    = 4
+DBG_DBG1_LEVEL    = 5
+DBG_DBG2_LEVEL    = 6
+DBG_DBG3_LEVEL    = 7
+DBG_DBG4_LEVEL    = 8
+
+ERR_NORMAL_LEVEL  = 1
+ERR_VERBOSE_LEVEL = 2
+
 def logLevelFromErrorLevel(error_level):
     """ Convert an old-style error logging level to the new style. """
-    error_table = { -1 : __NO_LOGGING, 0 : logging.CRITICAL, 1 : logging.ERROR,
-        2 : logging.WARNING}
+    error_table = { -1 : __NO_LOGGING,
+                    0 : logging.CRITICAL, 1 : logging.ERROR, 2 :logging.WARNING}
     
     return __convertLevel(error_level, error_table)
 
 def logLevelFromDebugLevel(debug_level):
     """ Convert an old-style debug logging level to the new style. """
-    debug_table = {-1 : __NO_LOGGING, 0 : logging.INFO, 1 : INFO_1, 2 : INFO_2,
-        3 : logging.DEBUG, 4 : DEBUG_1, 5 : DEBUG_2, 6 : DEBUG_3, 7 : DEBUG_4}
+    debug_table = {-1 : __NO_LOGGING,
+                   0 : INFO, 1 : INFO_1, 2 : INFO_2, 3 : INFO_3,
+                   4 : DEBUG, 5 : DEBUG_1, 6 : DEBUG_2, 7 : DEBUG_3, 8 :DEBUG_4}
 
     return __convertLevel(debug_level, debug_table)
 
@@ -124,7 +144,7 @@ def doLoggingSetup(debuglevel, errorlevel):
     logger.addHandler(console_stderr)
    
     filelogger = logging.getLogger("yum.filelogging")
-    filelogger.setLevel(logging.INFO)
+    filelogger.setLevel(INFO)
     filelogger.propagate = False
 
     log_dev = '/dev/log'
@@ -170,7 +190,7 @@ def setLoggingApp(app):
         syslog.setFormatter(syslogformatter)
 
 
-_name2val = {'info1' : INFO_1, 'info2' : INFO_2,
+_name2val = {'info1' : INFO_1, 'info2' : INFO_2, 'info3' : INFO_3,
              'dbg1' : DEBUG_1, 'dbg2' : DEBUG_2, 'dbg3' : DEBUG_3,
              'dbg4' : DEBUG_4}
 class EasyLogger:
@@ -181,7 +201,7 @@ class EasyLogger:
         self.logger = logging.getLogger(name)
         self._funcs  = {'sc' :[], 'sc_info' :[], 'sc_main' :[], 'sc_dbg' :[]}
 
-        for fname in ["info","info1","info2"]:
+        for fname in ["info","info1","info2","info3"]:
             self._funcs['sc'].append(getattr(self, fname))
             self._funcs['sc_info'].append(getattr(self, fname))
         for fname in ["warn", "err", "crit"]:
@@ -206,7 +226,7 @@ class EasyLogger:
         return tuple(ret)
 
     def info(self, msg, *args):
-        """ Log a message as info. """
+        """ Log a message as log.INFO. """
 
         self.logger.info(msg % args)
 
@@ -219,6 +239,11 @@ class EasyLogger:
         """ Log a message as log.INFO_2. """
 
         self.logger.log(_name2val["info2"], msg % args)
+
+    def info3(self, msg, *args):
+        """ Log a message as log.INFO_3. """
+
+        self.logger.log(_name2val["info3"], msg % args)
 
     def warn(self, msg, *args):
         """ Log a message as warning. """
@@ -236,7 +261,7 @@ class EasyLogger:
         self.logger.critical(msg % args)
 
     def dbg(self, msg, *args):
-        """ Log a message as debug. """
+        """ Log a message as log.DEBUG. """
 
         self.logger.debug(msg % args)
 
@@ -245,7 +270,7 @@ class EasyLogger:
 
         now = time.time()
         out = msg % args
-        self.logger.debug(out + " time: %.4f", (now - old_tm))
+        self.dbg(out + " time: %.4f", (now - old_tm))
 
     def dbg1(self, msg, *args):
         """ Log a message as log.DEBUG_1. """
@@ -270,3 +295,7 @@ class EasyLogger:
     def isEnabledFor(self, name):
         """ Wrap self.logger.isEnabledFor() """
         return self.logger.isEnabledFor(_name2val[name])
+
+    def verbose(self):
+        """ Is this logger in "yum verbose" mode. """
+        return self.isEnabledFor("info3")

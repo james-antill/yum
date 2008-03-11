@@ -23,7 +23,7 @@ import logging
 import logginglevels
 
 velogger = logginglevels.EasyLogger("yum.verbose.YumPlugins")
-(vinfo,vinfo1,vinfo2, vwarn,verr,vcrit,
+(vinfo,vinfo1,vinfo2,vinfo3, vwarn,verr,vcrit,
  vdbg,vdbg1,vdbg2,vdbg3,vdbg4,vdbg_tm)   = velogger.funcs("sc", "dbg_tm")
 
 from constants import *
@@ -250,7 +250,7 @@ class YumPlugins:
             if modname in self.disabledPlugins:
                 return
 
-        vdbg3(_('Loading "%s" plugin'), modname)
+        vdbg(_('Loading "%s" plugin'), modname)
 
         # Store the plugin module and its configuration file
         if not self._plugins.has_key(modname):

@@ -34,6 +34,7 @@ except ImportError:
 import rpmUtils.transaction
 import rpmUtils.arch
 import Errors
+import logginglevels
 
 class Option(object):
     '''
@@ -553,8 +554,8 @@ class StartupConf(BaseConfig):
     required early in the initialisation process or before the other [main]
     options can be parsed. 
     '''
-    debuglevel = IntOption(2, 0, 10)
-    errorlevel = IntOption(2, 0, 10)
+    debuglevel = IntOption(logginglevels.DBG_NORMAL_LEVEL, 0, 10)
+    errorlevel = IntOption(logginglevels.ERR_NORMAL_LEVEL, 0, 10)
 
     distroverpkg = Option('redhat-release')
     installroot = Option('/')

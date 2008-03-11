@@ -54,8 +54,8 @@ import logginglevels
 
 nelogger = logginglevels.EasyLogger("yum.YumBase")
 velogger = logginglevels.EasyLogger("yum.verbose.YumBase")
-(info,info1,info2, warn,err,crit)        = nelogger.funcs("sc_info", "sc_main")
-(vinfo,vinfo1,vinfo2, vwarn,verr,vcrit,
+(info,info1,info2,info3, warn,err,crit)  = nelogger.funcs("sc_info", "sc_main")
+(vinfo,vinfo1,vinfo2,vinfo3, vwarn,verr,vcrit,
  vdbg,vdbg1,vdbg2,vdbg3,vdbg4,vdbg_tm)   = velogger.funcs("sc", "dbg_tm")
 
 import yumRepo
@@ -478,7 +478,7 @@ class YumBase(depsolve.Depsolve):
         self._up = rpmUtils.updates.Updates(rpmdb_pkglist, sack_pkglist)
         del rpmdb_pkglist
         del sack_pkglist
-        if self.conf.debuglevel >= 6:
+        if self.conf.debuglevel >= logginglevels.DBG_DBG3_LEVEL:
             self._up.debug = 1
         
         if self.conf.obsoletes:
@@ -1444,6 +1444,7 @@ class YumBase(depsolve.Depsolve):
     def searchGenerator(self, fields, criteria, showdups=True):
         """Generator method to lighten memory load for some searches.
            This is the preferred search function to use."""
+        srch_st = time.time()
         sql_fields = []
         for f in fields:
             if RPM_TO_SQLITE.has_key(f):
@@ -1468,6 +1469,8 @@ class YumBase(depsolve.Depsolve):
         for sack in self.pkgSack.sacks.values():
             tmpres.extend(sack.searchPrimaryFieldsMultipleStrings(sql_fields, real_crit))
 
+        vdbg_tm(srch_st, 'srch:sPFMS')
+        sort_st = time.time()
         for (po, count) in tmpres:
             # check the pkg for sanity
             # pop it into the sorted lists
@@ -1482,7 +1485,8 @@ class YumBase(depsolve.Depsolve):
             if len(tmpvalues) > 0:
                 sorted_lists[count].append((po, tmpvalues))
 
-            
+        vdbg_tm(sort_st, 'srch:sort')
+        rpmdb_st = time.time()
         
         for po in self.rpmdb:
             tmpvalues = []
@@ -1509,6 +1513,8 @@ class YumBase(depsolve.Depsolve):
 
         # close our rpmdb connection so we can ctrl-c, kthxbai                    
         self.closeRpmDB()
+        vdbg_tm(rpmdb_st, 'srch:rpmdb')
+        vdbg_tm(srch_st, 'srch')
         
         yielded = {}
         for val in reversed(sorted(sorted_lists)):

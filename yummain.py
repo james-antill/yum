@@ -26,8 +26,8 @@ from yum import logginglevels
 
 _nlogger = logginglevels.EasyLogger("yum.main")
 _vlogger = logginglevels.EasyLogger("yum.verbose.main")
-(info,info1,info2, warn,err,crit)        = _nlogger.funcs("sc_info", "sc_main")
-(vinfo,vinfo1,vinfo2, vwarn,verr,vcrit,
+(info,info1,info2,info3, warn,err,crit)  = _nlogger.funcs("sc_info", "sc_main")
+(vinfo,vinfo1,vinfo2,vinfo3, vwarn,verr,vcrit,
  vdbg,vdbg1,vdbg2,vdbg3,vdbg4,vdbg_tm)   = _vlogger.funcs("sc", "dbg_tm")
 
 import time # test purposes only

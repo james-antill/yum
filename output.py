@@ -22,8 +22,8 @@ import time
 import logging
 
 from cli import nelogger, velogger
-(info,info1,info2, warn,err,crit)        = nelogger.funcs("sc_info", "sc_main")
-(vinfo,vinfo1,vinfo2, vwarn,verr,vcrit,
+(info,info1,info2,info3, warn,err,crit)  = nelogger.funcs("sc_info", "sc_main")
+(vinfo,vinfo1,vinfo2,vinfo3, vwarn,verr,vcrit,
  vdbg,vdbg1,vdbg2,vdbg3,vdbg4,vdbg_tm)   = velogger.funcs("sc", "dbg_tm")
 
 import types
@@ -268,36 +268,37 @@ class YumOutput:
             ret = fill(val, width=cols,
                        initial_indent=key, subsequent_indent='     ...: ')
         return ret
-    
+
+    def _enc(self, s):
+        """Get the translated version from specspo and ensure that
+        it's actually encoded in UTF-8."""
+        if type(s) == unicode:
+            s = s.encode("UTF-8")
+        if len(s) > 0:
+            for d in self.i18ndomains:
+                t = gettext.dgettext(d, s)
+                if t != s:
+                    s = t
+                    break
+        s = unicode(s, "UTF-8")
+        return s
+
     def infoOutput(self, pkg):
-        def enc(s):
-            """Get the translated version from specspo and ensure that
-            it's actually encoded in UTF-8."""
-            if type(s) == unicode:
-                s = s.encode("UTF-8")
-            if len(s) > 0:
-                for d in self.i18ndomains:
-                    t = gettext.dgettext(d, s)
-                    if t != s:
-                        s = t
-                        break
-            s = unicode(s, "UTF-8")
-            return s
         print _("Name       : %s") % pkg.name
         print _("Arch       : %s") % pkg.arch
-        if pkg.epoch != "0":
+        if velogger.verbose() or pkg.epoch != "0":
             print _("Epoch      : %s") % pkg.epoch
         print _("Version    : %s") % pkg.version
         print _("Release    : %s") % pkg.release
         print _("Size       : %s") % self.format_number(float(pkg.size))
         print _("Repo       : %s") % pkg.repoid
-        if velogger.isEnabledFor("dbg3"):
+        if velogger.verbose():
             print _("Committer  : %s") % pkg.committer
-        print self._outKeyValFill(_("Summary    : "), enc(pkg.summary))
+        print self._outKeyValFill(_("Summary    : "),self._enc(pkg.summary))
         if pkg.url:
             print _("URL        : %s") % pkg.url
         print _("License    : %s") % pkg.license
-        print self._outKeyValFill(_("Description: "), enc(pkg.description))
+        print self._outKeyValFill(_("Description: "),self._enc(pkg.description))
         print ""
     
     def updatesObsoletesList(self, uotup, changetype):
@@ -442,21 +443,44 @@ class YumOutput:
         return(format % (number, space, symbols[depth]))
 
     def matchcallback(self, po, values, matchfor=None):
-        if self.conf.showdupesfromrepos:
+        if velogger.verbose() or self.conf.showdupesfromrepos:
             msg = '%s : ' % po
         else:
             msg = '%s.%s : ' % (po.name, po.arch)
-        msg = self._outKeyValFill(msg, po.summary)
+        msg = self._outKeyValFill(msg, self._enc(po.summary))
         if matchfor:
             msg = self.term.sub_bold(msg, matchfor)
         
         print msg
-        vdbg(_('Matched from:'))
+        if not velogger.verbose():
+            return
+        
+        vinfo3(_('Matched from (ignoring name and summary):'))
         for item in values:
+            if po.name == item or po.summary == item:
+                continue # Skip double name/summary printing
+
+            can_overflow = True
+            if False: pass
+            elif po.description == item:
+                key = _("Description: ")
+                item = self._enc(item)
+            elif po.url == item:
+                key = _("URL        : %s")
+                can_overflow = False
+            elif po.license == item:
+                key = _("License    : %s")
+                can_overflow = False
+            else:
+                key = _("Unknown    : ")
+
             if matchfor:
                 item = self.term.sub_bold(item, matchfor)
-            vdbg('%s', item)
-        vdbg('\n\n')
+            if can_overflow:
+                vinfo3('%s', self._outKeyValFill(key, item))
+            else:
+                vinfo3(key, item)
+        vinfo3('')
         
     def reportDownloadSize(self, packages):
         """Report the total download size for a set of packages"""

@@ -29,8 +29,8 @@ from yum import logginglevels
 
 nelogger = logginglevels.EasyLogger("yum.cli")
 velogger = logginglevels.EasyLogger("yum.verbose.cli")
-(info,info1,info2, warn,err,crit)        = nelogger.funcs("sc_info", "sc_main")
-(vinfo,vinfo1,vinfo2, vwarn,verr,vcrit,
+(info,info1,info2,info3, warn,err,crit)  = nelogger.funcs("sc_info", "sc_main")
+(vinfo,vinfo1,vinfo2,vinfo3, vwarn,verr,vcrit,
  vdbg,vdbg1,vdbg2,vdbg3,vdbg4,vdbg_tm)   = velogger.funcs("sc", "dbg_tm")
 
 from optparse import OptionParser
@@ -170,9 +170,10 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
         root = self.optparser.getRoot(opts)
 
         if opts.quiet:
-            opts.debuglevel = 0
+            opts.debuglevel = logginglevels.DBG_QUIET_LEVEL
         if opts.verbose:
-            opts.debuglevel = opts.errorlevel = 6
+            opts.debuglevel = logginglevels.DBG_VERBOSE_LEVEL
+            opts.errorlevel = logginglevels.ERR_VERBOSE_LEVEL
        
         # Read up configuration options and initialise plugins
         try:
@@ -311,7 +312,10 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
             except yum.Errors.YumBaseError, e:
                 return 1, [str(e)]
 
-        return self.yum_cli_commands[self.basecmd].doCommand(self, self.basecmd, self.extcmds)
+        cmd_st = time.time()
+        ret = self.yum_cli_commands[self.basecmd].doCommand(self, self.basecmd, self.extcmds)
+        vdbg_tm(cmd_st, 'command')
+        return ret
 
     def doTransaction(self):
         """takes care of package downloading, checking, user confirmation and actually
@@ -637,9 +641,10 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
         if len(extcmds) > 0:
             if extcmds[0] in special:
                 pkgnarrow = extcmds.pop(0)
-            
+
+        dpl_st = time.time()
         ypl = self.doPackageLists(pkgnarrow=pkgnarrow, patterns=extcmds)
-        
+        vdbg_tm(dpl_st, 'list:dPL')
         # rework the list output code to know about:
         # obsoletes output
         # the updates format
@@ -652,13 +657,16 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
             else:
                 return lst
         
+        shrink_st = time.time()
         ypl.updates = _shrinklist(ypl.updates, extcmds)
         ypl.installed = _shrinklist(ypl.installed, extcmds)
         ypl.available = _shrinklist(ypl.available, extcmds)
         ypl.recent = _shrinklist(ypl.recent, extcmds)
         ypl.extras = _shrinklist(ypl.extras, extcmds)
         ypl.obsoletes = _shrinklist(ypl.obsoletes, extcmds)
+        vdbg_tm(shrink_st, 'list: shrink')
         
+        vdbg_tm(dpl_st, 'list')
 #        for lst in [ypl.obsoletes, ypl.updates]:
 #            if len(lst) > 0 and len(extcmds) > 0:
 #                vdbg1('Matching packages for tupled package list to user args')

@@ -23,9 +23,9 @@ import os
 import cli
 from cli import nelogger, velogger
 
-(info,info1,info2, crit, dbg) = nelogger.funcs("sc_info", "crit", "dbg")
-(vinfo,vinfo1,vinfo2, vwarn,verr,vcrit,
- vdbg,vdbg1,vdbg2,vdbg3,vdbg4,vdbg_tm)   = velogger.funcs("sc", "dbg_tm")
+(info,info1,info2,info3, crit, dbg)   = nelogger.funcs("sc_info", "crit", "dbg")
+(vinfo,vinfo1,vinfo2,vinfo3, vwarn,verr,vcrit,
+ vdbg,vdbg1,vdbg2,vdbg3,vdbg4,vdbg_tm)= velogger.funcs("sc", "dbg_tm")
 
 import yum.Errors
 from yum.i18n import _
