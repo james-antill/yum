@@ -114,7 +114,10 @@ class RPMDBPackageSack(PackageSackBase):
 
     pkglist = property(_get_pkglist, None)
 
-    def dropCachedData(self):
+    def dropCachedData(self, pkgs=False):
+        if pkgs:
+            for pkg in self._tup2pkg.itervalues():
+                pkg.dropCachedData()
         self._idx2pkg = {}
         self._name2pkg = {}
         self._tup2pkg = {}

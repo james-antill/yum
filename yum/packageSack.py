@@ -261,10 +261,10 @@ class MetaSack(PackageSackBase):
             ret += len(sack)
         return ret
 
-    def dropCachedData(self):
+    def dropCachedData(self, pkgs=False):
         for sack in self.sacks.values():
             if hasattr(sack, 'dropCachedData'):
-                sack.dropCachedData()
+                sack.dropCachedData(pkgs)
 
     def addSack(self, repoid, sack):
         """Adds a repository's packageSack to this MetaSack."""
@@ -489,7 +489,7 @@ class PackageSack(PackageSackBase):
             elif failure == 'build':
                 self.buildIndexes()
 
-    def dropCachedData(self):
+    def dropCachedData(self, pkgs=False):
         """ Do nothing, mainly for the testing code. """
         pass
 

@@ -221,15 +221,13 @@ class RpmBase(object):
     """return functions and storage for rpm-specific data"""
 
     def __init__(self):
-        self.prco = {}
-        self.prco['obsoletes'] = [] # (name, flag, (e,v,r))
-        self.prco['conflicts'] = [] # (name, flag, (e,v,r))
-        self.prco['requires'] = [] # (name, flag, (e,v,r))
-        self.prco['provides'] = [] # (name, flag, (e,v,r))
-        self.files = {}
-        self.files['file'] = []
-        self.files['dir'] = []
-        self.files['ghost'] = []
+        self.prco = { misc.share_data('obsoletes'): (),
+                      misc.share_data('conflicts'): (),
+                      misc.share_data('requires') : (),
+                      misc.share_data('provides') : () }
+        self.files = { misc.share_data('file')  : [],
+                       misc.share_data('dir')   : [],
+                       misc.share_data('ghost') : [] }
         self._changelog = [] # (ctime, cname, ctext)
         self.licenses = []
         self._hash = None
@@ -452,6 +450,15 @@ class YumAvailablePackage(PackageObject, RpmBase):
             self.ver = self.version
             self.rel = self.release
         self.pkgtup = (self.name, self.arch, self.epoch, self.version, self.release)
+
+    def dropCachedData(self):
+        self.files = { misc.share_data('file')  : [],
+                       misc.share_data('dir')   : [],
+                       misc.share_data('ghost') : [] }
+        self._loadedfiles = False
+
+        # RpmBase, but screw it
+        self._hash = None
 
     def exclude(self):
         """remove self from package sack"""
@@ -731,6 +738,17 @@ class YumHeaderPackage(YumAvailablePackage):
                                            self.release, self.arch)
         return val
 
+    def dropCachedData(self):
+        self.__mode_cache = {}
+
+        self.prco = { misc.share_data('obsoletes'): (),
+                      misc.share_data('conflicts'): (),
+                      misc.share_data('requires') : (),
+                      misc.share_data('provides') : () }
+        self.__prcoPopulated = False
+
+        YumAvailablePackage.dropCachedData(self)
+
     def returnPrco(self, prcotype, printable=False):
         if not self.__prcoPopulated:
             self._populatePrco()
@@ -743,10 +761,10 @@ class YumHeaderPackage(YumAvailablePackage):
     def _populatePrco(self):
         "Populate the package object with the needed PRCO interface."
 
-        tag2prco = { "OBSOLETE": misc.share_data("obsoletes"),
-                     "CONFLICT": misc.share_data("conflicts"),
-                     "REQUIRE":  misc.share_data("requires"),
-                     "PROVIDE":  misc.share_data("provides") }
+        tag2prco = { "OBSOLETE": "obsoletes",
+                     "CONFLICT": "conflicts",
+                     "REQUIRE":  "requires",
+                     "PROVIDE":  "provides" }
         hdr = self._get_hdr()
         for tag in tag2prco:
             name = hdr[getattr(rpm, 'RPMTAG_%sNAME' % tag)]

@@ -50,10 +50,10 @@ def _share_data(value):
 
 class YumAvailablePackageSqlite(YumAvailablePackage, PackageObject, RpmBase):
     def __init__(self, repo, db_obj):
-        self.prco = { 'obsoletes': (),
-                      'conflicts': (),
-                      'requires': (),
-                      'provides': () }
+        self.prco = { _share_data('obsoletes'): (),
+                      _share_data('conflicts'): (),
+                      _share_data('requires'): (),
+                      _share_data('provides'): () }
         self.sack = repo.sack
         self.repoid = repo.id
         self.repo = repo
@@ -191,6 +191,17 @@ class YumAvailablePackageSqlite(YumAvailablePackage, PackageObject, RpmBase):
             self._changelog = result
             return
     
+    def dropCachedData(self):
+        # del <non-default-attributes>
+        if self._loadedfiles:
+            del self._files
+            self._loadedfiles = False
+        self._changelog = None
+        self._hash = None
+        self.prco = { _share_data('obsoletes'): (),
+                      _share_data('conflicts'): (),
+                      _share_data('requires'): (),
+                      _share_data('provides'): () }
         
     def returnIdSum(self):
             return (self.checksum_type, self.pkgId)
@@ -283,13 +294,17 @@ class YumSqlitePackageSack(yumRepo.YumPackageSack):
             pkg_num += self._sql_MD_pkg_num('primary', repo)
         return pkg_num - exclude_num
 
-    def dropCachedData(self):
+    def dropCachedData(self, pkgs=False):
         if hasattr(self, '_memoize_requires'):
             del self._memoize_requires
         if hasattr(self, '_memoize_provides'):
             del self._memoize_provides
         if hasattr(self, 'pkgobjlist'):
             del self.pkgobjlist
+        if pkgs:
+            for repo in self._key2pkg:
+                for pkg in self._key2pkg[repo].itervalues():
+                    pkg.dropCachedData()
         self._key2pkg = {}
         self._search_cache = {
             'provides' : { },
