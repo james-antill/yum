@@ -32,6 +32,36 @@ import cli
 
 
 def main(args):
+    if 'YUM_I18N' in os.environ: # Give people the exceptions...
+        return _i18n_main(args)
+
+    # And for the rest, just trying to do things...
+    try:
+        return _i18n_main(args)
+    except UnicodeDecodeError, e:
+        pass
+    except UnicodeEncodeError, e:
+        pass
+
+    print """\
+ YUM is currently in the middle of adding support for full localization, i.e.
+messages in non-English languages. However there are still some rough spots,
+for various reasons, of which you have just found one. If you need to perform
+the operationo you were trying to do, you can type:
+
+  LANG=C yum <arguments>
+
+...to temporarily disable localization. If you have time it'd be helpful to
+tell the YUM developers of your current problem, so they can help fix it. To
+do that you should type:
+
+  YUM_I18N=1 yum <arguments>
+
+...so that you can give the developers the debugging information they need.
+"""
+    sys.exit(1)
+
+def _i18n_main(args):
     """This does all the real work"""
     if not sys.stdout.isatty():
         import codecs
