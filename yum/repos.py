@@ -165,6 +165,25 @@ class RepoStorage:
 
         return returnlist
 
+    def maxDataTimestamp(self, data='all', repos=None):
+        """ Return the latest timestamp for data in the given repos. (default
+            all enabled repos.). Eg. maxDataTimestamp('group') will give the
+            latest timestamp for a group file. """
+        if repos is None:
+            repos = self.listEnabled()
+
+        ret = None
+        for repo in repos:
+            if not hasattr(repo, "dataTimestamp"):
+                continue
+
+            # Again, no max() in 2.4.z
+            ts = repo.dataTimestamp(data)
+            if ret < ts:
+                ret = ts
+
+        return ret
+
     def setCache(self, cacheval):
         """sets cache value in all repos"""
         self.cache = cacheval

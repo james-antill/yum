@@ -1086,6 +1086,16 @@ class YumRepository(Repository, config.RepoConf):
                        fset=lambda self, val: setattr(self, "_repoXML", val),
                        fdel=lambda self: setattr(self, "_repoXML", None))
 
+    def dataTimestamp(self, data='all'):
+        """ Return the timestamp for data, uses the correct mdtype entry. """
+
+        if data == 'all':
+            return self.repoXML.timestamp
+        ret = self._get_mdtype_data(data)
+        if ret[1] is None:
+            return None
+        return ret[1].timestamp
+
     def _checkRepoXML(self, fo):
         if type(fo) is types.InstanceType:
             filepath = fo.filename
