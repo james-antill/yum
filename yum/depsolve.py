@@ -67,7 +67,7 @@ class Depsolve(object):
     """
 
     def __init__(self):
-        packages.base = self
+        packages.base = self # FIXME: this is evil
         self._ts = None
         self._tsInfo = None
         self.dsCallback = None
@@ -547,7 +547,8 @@ class Depsolve(object):
         newest = provSack.returnNewestByNameArch()
         if len(newest) > 1: # there's no way this can be zero
                             
-            pkgresults = self._compare_providers(newest, requiringPo)
+            pkgresults = self._compare_providers(newest, requiringPo,
+                                                 requirement)
             # take the first one...
             best = pkgresults[0][0]                   
                 
@@ -983,7 +984,7 @@ class Depsolve(object):
         return installed
     _isPackageInstalled = isPackageInstalled
 
-    def _compare_providers(self, pkgs, reqpo):
+    def _compare_providers(self, pkgs, reqpo, requirement=None):
         """take the list of pkgs and score them based on the requesting package
            return a dictionary of po=score"""
         self.verbose_logger.log(logginglevels.DEBUG_4,
@@ -1027,12 +1028,25 @@ class Depsolve(object):
             if y_dist == x_dist:
                 return None
             return x
-            
+
         pkgresults = {}
 
         for pkg in pkgs:
             pkgresults[pkg] = 0
-            
+
+        # If we have any best_providers data, use that...
+        if requirement and hasattr(self, '_bestProviders'):
+            providers = set([pkg.name for pkg in pkgs])
+            reqrepoid = None
+            if reqpo is not None:
+                if reqpo.repoid in self._bestProviders:
+                    reqrepoid = reqpo.repoid
+            bprov = self._bestProviders[reqrepoid]
+            for pkgname in bprov.filter_providers(requirement[0], providers):
+                for pkg in pkgs:
+                    if pkg.name == pkgname:
+                        pkgresults[pkg] = 10000 # FIXME: $rand number
+
         # go through each pkg and compare to others
         # if it is same skip it
         # if the pkg is obsoleted by any other of the packages

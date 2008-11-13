@@ -60,6 +60,7 @@ import plugins
 import logginglevels
 import yumRepo
 import callbacks
+import bestprov
 
 import warnings
 warnings.simplefilter("ignore", Errors.YumFutureDeprecationWarning)
@@ -108,6 +109,8 @@ class YumBase(depsolve.Depsolve):
         self.localPackages = [] # for local package handling
 
         self.mediagrabber = None
+
+        self.__bestProviders = None # Atm. we don't want this public
 
     def __del__(self):
         self.close()
@@ -608,8 +611,19 @@ class YumBase(depsolve.Depsolve):
     comps = property(fget=lambda self: self._getGroups(),
                      fset=lambda self, value: self._setGroups(value),
                      fdel=lambda self: setattr(self, "_comps", None))
-    
-    
+
+    # Atm. we don't want this public, so add another _ to everything
+    def __getBestProviders(self):
+        if self.__bestProviders is None:
+            rootbprov = bestprov.BestProviders()
+            self.__bestProviders = {None: rootbprov}
+            for repo in self.repos.listEnabled():
+                bprov = bestprov.BestProviders(set([rootbprov]), repo)
+                self.__bestProviders[repo.id] = bprov
+        return self.__bestProviders
+
+    _bestProviders = property(fget=lambda self: self.__getBestProviders())
+
     def doSackFilelistPopulate(self):
         """convenience function to populate the repos with the filelist metadata
            it also is simply to only emit a log if anything actually gets populated"""
@@ -2194,8 +2208,9 @@ class YumBase(depsolve.Depsolve):
             pkglist = self.returnPackagesByDep(depstring)
         except Errors.YumBaseError:
             raise Errors.YumBaseError, _('No Package found for %s') % depstring
-        
-        result = self._bestPackageFromList(pkglist)
+
+        requirement = (depstring, None, None) # FIXME: depstring == name only?
+        result = self._bestPackageFromList(pkglist, requirement)
         if result is None:
             raise Errors.YumBaseError, _('No Package found for %s') % depstring
         
@@ -2226,7 +2241,7 @@ class YumBase(depsolve.Depsolve):
         
         return self.rpmdb.getProvides(depname, depflags, depver).keys()
 
-    def _bestPackageFromList(self, pkglist):
+    def _bestPackageFromList(self, pkglist, requirement=None):
         """take list of package objects and return the best package object.
            If the list is empty, return None. 
            
@@ -2248,30 +2263,12 @@ class YumBase(depsolve.Depsolve):
         # in nbestlist.
         nbestlist = packagesNewestByName(bestlist)
 
-        best = nbestlist[0]
-        nbestlist = set(nbestlist)
-        for pkg in bestlist:
-            if pkg == best:
-                continue
-            if pkg not in nbestlist:
-                continue
-
-            # This is basically _compare_providers() ... but without a reqpo
-            if len(pkg.name) < len(best.name): # shortest name silliness
-                best = pkg
-                continue
-            elif len(pkg.name) > len(best.name):
-                continue
-
-            # compare arch
-            arch = rpmUtils.arch.getBestArchFromList([pkg.arch, best.arch])
-            if arch == pkg.arch:
-                best = pkg
-                continue
-
+        bestpkgs = self._compare_providers(nbestlist, None, requirement)
+        best = bestpkgs[0][0]
         return best
 
-    def bestPackagesFromList(self, pkglist, arch=None, single_name=False):
+    def bestPackagesFromList(self, pkglist, arch=None, single_name=False,
+                             requirement=None):
         """Takes a list of packages, returns the best packages.
            This function is multilib aware so that it will not compare
            multilib to singlelib packages""" 
@@ -2292,9 +2289,9 @@ class YumBase(depsolve.Depsolve):
                 singleLib.append(po)
                 
         # we now have three lists.  find the best package(s) of each
-        multi = self._bestPackageFromList(multiLib)
-        single = self._bestPackageFromList(singleLib)
-        no = self._bestPackageFromList(noarch)
+        multi = self._bestPackageFromList(multiLib, requirement)
+        single = self._bestPackageFromList(singleLib, requirement)
+        no = self._bestPackageFromList(noarch, requirement)
 
         if single_name and multi and single and multi.name != single.name:
             # Sinlge _must_ match multi, if we want a single package name
@@ -2308,7 +2305,7 @@ class YumBase(depsolve.Depsolve):
         # if there's a noarch and it's newer than the multilib, we want
         # just the noarch.  otherwise, we want multi + single
         elif multi:
-            best = self._bestPackageFromList([multi,no])
+            best = self._bestPackageFromList([multi,no], requirement)
             if best.arch == "noarch":
                 returnlist.append(no)
             else:
@@ -2316,7 +2313,7 @@ class YumBase(depsolve.Depsolve):
                 if single: returnlist.append(single)
         # similar for the non-multilib case
         elif single:
-            best = self._bestPackageFromList([single,no])
+            best = self._bestPackageFromList([single,no], requirement)
             if best.arch == "noarch":
                 returnlist.append(no)
             else:
@@ -2429,8 +2426,10 @@ class YumBase(depsolve.Depsolve):
                         if mypkgs:
                             #  Dep. installs don't do wildcards, so we
                             # just want a single named package.
-                            mypkgs = self.bestPackagesFromList(mypkgs,
-                                                               single_name=True)
+                            requirement = (arg, None, None)
+                            mypkgs = self.bestPackagesFromList(mypkgs, None,
+                                                               True,
+                                                               requirement)
                             pkgs.extend(mypkgs)
                         
             else:
