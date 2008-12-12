@@ -651,8 +651,97 @@ class YumRepository(Repository, config.RepoConf):
                                                               value),
                              fdel=lambda self: setattr(self, "_metalink", None))
 
+    def _avahi_baseurls(self):
+        """ Return a list of URLs we can try to get checksumed data from. """
+        import dbus, gobject, avahi
+        from dbus import DBusException
+        from dbus.mainloop.glib import DBusGMainLoop
+
+        __DNS__  = "_checksum_data._tcp"
+
+        urls = []
+        def found(interface, protocol, name, stype, domain, flags):
+            """ Found some data from Avahi. """
+            info = server.ResolveService(interface, protocol, name, stype,
+                                         domain,
+                                         avahi.PROTO_UNSPEC, dbus.UInt32(0))
+            url = "http://%s:%s/" % (str(info[7]), str(info[8]))
+            if flags & avahi.LOOKUP_RESULT_LOCAL:
+                urls.append(url)
+            else:
+                urls.insert(0, url)
+        def all_done():
+            # Avahi callbacks finished
+            mainloop.quit()
+
+        loop = DBusGMainLoop()
+        bus = dbus.SystemBus(mainloop=loop)
+        server = dbus.Interface(bus.get_object(avahi.DBUS_NAME,
+                                               avahi.DBUS_PATH_SERVER),
+                                avahi.DBUS_INTERFACE_SERVER)
+
+        path = server.ServiceBrowserNew(avahi.IF_UNSPEC, avahi.PROTO_INET,
+                                        __DNS__, "local", dbus.UInt32(0))
+
+        sbrowser = dbus.Interface(bus.get_object(avahi.DBUS_NAME, path), 
+                                  avahi.DBUS_INTERFACE_SERVICE_BROWSER)
+
+        sbrowser.connect_to_signal('ItemNew', found)
+        sbrowser.connect_to_signal('AllForNow', all_done)
+
+        mainloop = gobject.MainLoop()
+
+        mainloop.run()
+        sbrowser.Free()
+        return urls
+
+    def _avahi_grab(self, remote_data,
+                    local, text, range, reget, checkfunc, http_headers):
+        """ Try and get the data from avahi. """
+
+        if remote_data is None:
+            return None
+
+        relative = []
+        for key in ('sha256', 'sha1', 'md5', 'len'):
+            if key in remote_data:
+                relative.append(key)
+                relative.append(str(remote_data[key]))
+        if not relative:
+            return None
+        relative = '/'.join(relative)
+
+        ug = URLGrabber(progress_obj = self.callback,
+                        reget = reget,
+                        interrupt_callback=self.interrupt_callback,
+                        timeout=self.timeout,
+                        checkfunc=checkfunc,
+                        http_headers=http_headers,
+                        failure_callback=None)
+        ug.opts.user_agent = default_grabber.opts.user_agent
+
+        try:
+            urls = self._avahi_baseurls()
+        except:
+            return None
+
+        print "JDBG: avahi urls:", urls
+        print "JDBG: avahi rel :", relative
+
+        # NOTE: Not sure this failure_cb is right...
+        fcb = self.mirror_failure_obj
+        mug = urlgrabber.mirror.MGRandomOrder(ug, urls) #, failure_callback=fcb)
+        try:
+            result = mug.urlgrab(relative, local,
+                                 text=text, range=range)
+        except URLGrabError, e:
+            return None
+
+        return result
+
     def _getFile(self, url=None, relative=None, local=None, start=None, end=None,
-            copy_local=None, checkfunc=None, text=None, reget='simple', cache=True):
+            copy_local=None, checkfunc=None, text=None, reget='simple', cache=True,
+                 remote_data=None):
         """retrieve file from the mirrorgroup for the repo
            relative to local, optionally get range from
            start to end, also optionally retrieve from a specific baseurl"""
@@ -740,6 +829,17 @@ class YumRepository(Repository, config.RepoConf):
 
 
         else:
+            result = self._avahi_grab(remote_data,
+                                      local, text = misc.to_utf8(text),
+                                      range = (start, end),
+                                      reget = reget,
+                                      checkfunc=checkfunc,
+                                      http_headers=headers,
+                                      )
+            if result is not None:
+                print "JDBG: avahi SUCCESS"
+                return result
+
             try:
                 result = self.grab.urlgrab(misc.to_utf8(relative), local,
                                            text = misc.to_utf8(text),
@@ -763,13 +863,17 @@ class YumRepository(Repository, config.RepoConf):
         remote = package.relativepath
         local = package.localPkg()
         basepath = package.basepath
+        remote_data = {} # FIXME: This needs work when we move to sha256/etc.
+        remote_data['sha1'] = package.pkgId
+        remote_data['len'] = package.packagesize
 
         return self._getFile(url=basepath,
                         relative=remote,
                         local=local,
                         checkfunc=checkfunc,
                         text=text,
-                        cache=cache
+                        cache=cache,
+                        remote_data=remote_data
                         )
 
     def getHeader(self, package, checkfunc = None, reget = 'simple',
@@ -893,15 +997,26 @@ class YumRepository(Repository, config.RepoConf):
             grab_can_fail = 'old_repo_XML' in self._oldRepoMDData
         try:
             # This is named so that "yum clean metadata" picks it up
-            tfname = tempfile.mktemp(prefix='repomd', suffix="tmp.xml",
+            tfname = tempfile.mktemp(prefix='repomd', suffix=".tmp.xml",
                                      dir=os.path.dirname(local))
+            if not self.metalink:
+                remote_data = None
+            else:
+                # We only give the remote_data for the latest repomd.xml ...
+                remote_data = {}
+                for csum in ('md5', 'sha1', 'sha256', 'sha512'):
+                    if csum not in self.metalink_data.repomd.chksums:
+                        continue
+                    remote_data[csum] = self.metalink_data.repomd.chksums[csum]
+                remote_data['len']  = self.metalink_data.repomd.size
             result = self._getFile(relative=self.repoMDFile,
                                    local=tfname,
                                    copy_local=1,
                                    text=text,
                                    reget=None,
                                    checkfunc=checkfunc,
-                                   cache=self.http_caching == 'all')
+                                   cache=self.http_caching == 'all',
+                                   remote_data=remote_data)
 
         except URLGrabError, e:
             _cleanup_tmp()
@@ -1429,10 +1544,17 @@ class YumRepository(Repository, config.RepoConf):
 
         try:
             checkfunc = (self.checkMD, (mdtype,), {})
+
+            # FIXME: yet again, we need to do the openchecksum thing too,
+            # as that's what most people will have in /var/cache/* ... blah.
+            remote_data = {}
+            remote_data['sha1'] = self.repoXML.getData(mdtype).checksum[1]
+
             text = "%s/%s" % (self.id, mdtype)
             local = self._getFile(relative=remote, local=local, copy_local=1,
                              checkfunc=checkfunc, reget=None, text=text,
-                             cache=self.http_caching == 'all')
+                             cache=self.http_caching == 'all',
+                             remote_data=remote_data)
         except (Errors.NoMoreMirrorsRepoError, Errors.RepoError):
             if retrieve_can_fail:
                 return None
