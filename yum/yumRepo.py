@@ -167,8 +167,10 @@ class YumPackageSack(packageSack.PackageSack):
 
                 db_un_fn = self._check_uncompressed_db(repo, mydbtype)
                 if not db_un_fn:
-                    db_fn = repo._retrieveMD(mydbtype)
-                    if db_fn:
+                    db_fn = repo._retrieveMD(mydbtype, unbzip2=True)
+                    if db_fn and not db_fn.endswith('.bz2'):
+                        db_un_fn = self._check_uncompressed_db(repo, mydbtype)
+                    elif db_fn:
                         db_un_fn = db_fn.replace('.bz2', '')
                         if not repo.cache:
                             misc.bunzipFile(db_fn, db_un_fn)
@@ -796,6 +798,9 @@ class YumRepository(Repository, config.RepoConf):
                 verbose_logger.log(logginglevels.DEBUG_2, "Error getting package from media; falling back to url %s" %(e,))
 
         if url is not None and scheme != "media":
+            if remote_data and 'avahi_only' in remote_data:
+                return None
+
             ug = URLGrabber(keepalive = self.keepalive,
                             bandwidth = self.bandwidth,
                             retry = self.retries,
@@ -839,6 +844,8 @@ class YumRepository(Repository, config.RepoConf):
             if result is not None:
                 print "JDBG: avahi SUCCESS"
                 return result
+            if remote_data and 'avahi_only' in remote_data:
+                return None
 
             try:
                 result = self.grab.urlgrab(misc.to_utf8(relative), local,
@@ -1353,12 +1360,13 @@ class YumRepository(Repository, config.RepoConf):
             if self._groupCheckDataMDValid(ndata, nmdtype, mdtype):
                 continue
 
-            if not self._retrieveMD(nmdtype, retrieve_can_fail=True):
+            local = self._retrieveMD(nmdtype, retrieve_can_fail=True,
+                                     unbzip2=nmdtype.endswith("_db"))
+            if not local:
                 self._revertOldRepoXML()
                 return False
 
-            local = self._get_mdtype_fname(ndata, False)
-            if nmdtype.endswith("_db"): # Uncompress any .sqlite.bz2 files
+            if local.endswith(".bz2"): # Uncompress any .sqlite.bz2 files
                 dl_local = local
                 local = local.replace('.bz2', '')
                 misc.bunzipFile(dl_local, local)
@@ -1510,7 +1518,7 @@ class YumRepository(Repository, config.RepoConf):
            mdtype can be 'primary', 'filelists', 'other' or 'group'."""
         return self._retrieveMD(mdtype)
 
-    def _retrieveMD(self, mdtype, retrieve_can_fail=False):
+    def _retrieveMD(self, mdtype, retrieve_can_fail=False, unbzip2=False):
         """ Internal function, use .retrieveMD() from outside yum. """
         thisdata = self.repoXML.getData(mdtype)
 
@@ -1543,14 +1551,28 @@ class YumRepository(Repository, config.RepoConf):
                 return local # it's the same return the local one
 
         try:
+            text = "%s/%s" % (self.id, mdtype)
+            mddata = self.repoXML.getData(mdtype)
+
+            if unbzip2: # Check for unbzip2'd data, _locally only_...
+                checkfunc = (self.checkMD, (mdtype, True), {})
+
+                remote_data = {'avahi_only' : True}
+                remote_data['sha1'] = mddata.openchecksum[1]
+
+                assert remote.endswith('.bz2')
+                unrem = remote.replace('.bz2', '')
+                ret = self._getFile(relative=unrem, local=local, copy_local=1,
+                                    checkfunc=checkfunc, reget=None, text=text,
+                                    cache=self.http_caching == 'all',
+                                    remote_data=remote_data)
+                if ret is not None:
+                    return ret
+
             checkfunc = (self.checkMD, (mdtype,), {})
 
-            # FIXME: yet again, we need to do the openchecksum thing too,
-            # as that's what most people will have in /var/cache/* ... blah.
             remote_data = {}
-            remote_data['sha1'] = self.repoXML.getData(mdtype).checksum[1]
-
-            text = "%s/%s" % (self.id, mdtype)
+            remote_data['sha1'] = mddata.checksum[1]
             local = self._getFile(relative=remote, local=local, copy_local=1,
                              checkfunc=checkfunc, reget=None, text=text,
                              cache=self.http_caching == 'all',
