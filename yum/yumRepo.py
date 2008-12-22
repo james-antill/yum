@@ -224,6 +224,64 @@ class YumPackageSack(packageSack.PackageSack):
     def _check_db_version(self, repo, mdtype):
         return repo._check_db_version(mdtype)
 
+_avahi_cache_timestamp = 0
+_avahi_cache_baseurls  = []
+def _avahi_baseurls():
+    """ Return a list of URLs we can try to get checksumed data from. """
+    import dbus, gobject, avahi
+    from dbus import DBusException
+    from dbus.mainloop.glib import DBusGMainLoop
+
+    global _avahi_cache_timestamp, _avahi_cache_baseurls
+    now = time.time()
+    if now <= (_avahi_cache_timestamp + 30):
+        return _avahi_cache_baseurls
+
+    __DNS__  = "_checksum_data._tcp"
+
+    urls = []
+    def found(interface, protocol, name, stype, domain, flags):
+        """ Found some data from Avahi. """
+        info = server.ResolveService(interface, protocol, name, stype,
+                                     domain,
+                                     avahi.PROTO_UNSPEC, dbus.UInt32(0))
+        url = "http://%s:%s/" % (str(info[7]), str(info[8]))
+        if flags & avahi.LOOKUP_RESULT_LOCAL:
+            urls.append(url)
+        else:
+            urls.insert(0, url)
+    def all_done():
+        # Avahi callbacks finished
+        mainloop.quit()
+
+    # FIXME: I guess we should probably cache something here...
+    loop = DBusGMainLoop()
+    bus = dbus.SystemBus(mainloop=loop)
+    server = dbus.Interface(bus.get_object(avahi.DBUS_NAME,
+                                           avahi.DBUS_PATH_SERVER),
+                            avahi.DBUS_INTERFACE_SERVER)
+
+    path = server.ServiceBrowserNew(avahi.IF_UNSPEC, avahi.PROTO_INET,
+                                    __DNS__, "local", dbus.UInt32(0))
+
+    sbrowser = dbus.Interface(bus.get_object(avahi.DBUS_NAME, path), 
+                              avahi.DBUS_INTERFACE_SERVICE_BROWSER)
+
+    sbrowser.connect_to_signal('ItemNew', found)
+    sbrowser.connect_to_signal('AllForNow', all_done)
+
+    mainloop = gobject.MainLoop()
+
+    mainloop.run()
+    sbrowser.Free()
+
+    print "JDBG: avahi urls:", now, urls
+    _avahi_cache_baseurls  = urls
+    _avahi_cache_timestamp = now
+    return urls
+
+
+
 class YumRepository(Repository, config.RepoConf):
     """
     This is an actual repository object
@@ -653,50 +711,6 @@ class YumRepository(Repository, config.RepoConf):
                                                               value),
                              fdel=lambda self: setattr(self, "_metalink", None))
 
-    def _avahi_baseurls(self):
-        """ Return a list of URLs we can try to get checksumed data from. """
-        import dbus, gobject, avahi
-        from dbus import DBusException
-        from dbus.mainloop.glib import DBusGMainLoop
-
-        __DNS__  = "_checksum_data._tcp"
-
-        urls = []
-        def found(interface, protocol, name, stype, domain, flags):
-            """ Found some data from Avahi. """
-            info = server.ResolveService(interface, protocol, name, stype,
-                                         domain,
-                                         avahi.PROTO_UNSPEC, dbus.UInt32(0))
-            url = "http://%s:%s/" % (str(info[7]), str(info[8]))
-            if flags & avahi.LOOKUP_RESULT_LOCAL:
-                urls.append(url)
-            else:
-                urls.insert(0, url)
-        def all_done():
-            # Avahi callbacks finished
-            mainloop.quit()
-
-        loop = DBusGMainLoop()
-        bus = dbus.SystemBus(mainloop=loop)
-        server = dbus.Interface(bus.get_object(avahi.DBUS_NAME,
-                                               avahi.DBUS_PATH_SERVER),
-                                avahi.DBUS_INTERFACE_SERVER)
-
-        path = server.ServiceBrowserNew(avahi.IF_UNSPEC, avahi.PROTO_INET,
-                                        __DNS__, "local", dbus.UInt32(0))
-
-        sbrowser = dbus.Interface(bus.get_object(avahi.DBUS_NAME, path), 
-                                  avahi.DBUS_INTERFACE_SERVICE_BROWSER)
-
-        sbrowser.connect_to_signal('ItemNew', found)
-        sbrowser.connect_to_signal('AllForNow', all_done)
-
-        mainloop = gobject.MainLoop()
-
-        mainloop.run()
-        sbrowser.Free()
-        return urls
-
     def _avahi_grab(self, remote_data,
                     local, text, range, reget, checkfunc, http_headers):
         """ Try and get the data from avahi. """
@@ -723,11 +737,10 @@ class YumRepository(Repository, config.RepoConf):
         ug.opts.user_agent = default_grabber.opts.user_agent
 
         try:
-            urls = self._avahi_baseurls()
+            urls = _avahi_baseurls()
         except:
             return None
 
-        print "JDBG: avahi urls:", urls
         print "JDBG: avahi rel :", relative
 
         # NOTE: Not sure this failure_cb is right...
