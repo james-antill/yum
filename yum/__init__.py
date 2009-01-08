@@ -73,7 +73,7 @@ import string
 
 from urlgrabber.grabber import default_grabber
 
-__version__ = '3.2.20'
+__version__ = '3.2.21'
 __version_info__ = tuple([ int(num) for num in __version__.split('.')])
 
 #  Setup a default_grabber UA here that says we are yum, done using the global
@@ -2813,7 +2813,10 @@ class YumBase(depsolve.Depsolve):
             #        it to of what is installed. in the meantime name.arch is
             #        most likely correct
             pot_updated = self.rpmdb.searchNevra(name=available_pkg.name, arch=available_pkg.arch)
-            for ipkg in pot_updated:
+            # only compare against the newest of what's installed
+            if pot_updated:
+                pot_updated.sort()
+                ipkg = pot_updated[-1]
                 if self.tsInfo.isObsoleted(ipkg.pkgtup):
                     self.verbose_logger.log(logginglevels.DEBUG_2, _('Not Updating Package that is already obsoleted: %s.%s %s:%s-%s'), 
                                             ipkg.pkgtup)

@@ -580,6 +580,7 @@ class Depsolve(object):
         else:
             self.verbose_logger.debug(_('TSINFO: Marking %s as install for %s'), best,
                 requiringPo)
+            # FIXME: Don't we want .install() here, so obsoletes get done?
             txmbr = self.tsInfo.addInstall(best)
             txmbr.setAsDep(po=requiringPo)
             self._last_req = best
@@ -719,6 +720,8 @@ class Depsolve(object):
                     (checkdep, errormsgs) = self._processConflict(*conflict)
                     CheckDeps |= checkdep
                     errors += errormsgs
+                    if checkdep:
+                        break # The next conflict might be the same pkg
 
                 if CheckDeps:
                     if self.dsCallback: self.dsCallback.restartLoop()
@@ -883,6 +886,8 @@ class Depsolve(object):
                 continue
             if newpoprovs.has_key(prov):
                 continue
+            # FIXME: This is probably the best place to fix the postfix rename
+            # problem long term (post .21) ... see compare_providers.
             for pkg, hits in self.tsInfo.getRequires(*prov).iteritems():
                 for rn, rf, rv in hits:
                     if not self.tsInfo.getProvides(rn, rf, rv):
@@ -1030,9 +1035,24 @@ class Depsolve(object):
             return x
             
         pkgresults = {}
+        ipkgresults = {}
 
         for pkg in pkgs:
             pkgresults[pkg] = 0
+            if self.rpmdb.contains(pkg.name):
+                ipkgresults[pkg] = 0
+
+        #  This is probably only for "renames". What happens is that pkgA-1 gets
+        # obsoleted by pkgB but pkgB requires pkgA-2, now _if_ the pkgA txmbr
+        # gets processed before pkgB then we'll process the "checkRemove" of
+        # pkgA ... so any deps. on pkgA-1 will look for a new provider, one of
+        # which is pkgA-2 in that case we want to choose that pkg over any
+        # others. This works for multiple cases too, but who'd do that right?:)
+        #  FIXME: A good long term. fix here is to just not get into this
+        # problem, but that's too much for .21. This is much safer.
+        if ipkgresults:
+            pkgresults = ipkgresults
+            pkgs = ipkgresults.keys()
             
         # go through each pkg and compare to others
         # if it is same skip it
