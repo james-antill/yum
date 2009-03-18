@@ -27,6 +27,7 @@ import re
 import fnmatch
 import stat
 import warnings
+import types
 from rpmUtils import RpmUtilsError
 import rpmUtils.arch
 import rpmUtils.miscutils
@@ -364,7 +365,12 @@ class RpmBase(object):
 
         if True: # Keep indentation for patch smallness...
             # make us look it up and compare
-            (reqn, reqf, (reqe, reqv ,reqr)) = prcotuple
+            print "JDBG:", prcotuple
+            (reqn, reqf, reqv) = prcotuple
+            if type(reqv) in (types.StringType, types.UnicodeType):
+                (reqe, reqv ,reqr) = rpmUtils.miscutils.stringToVersion(reqv)
+            else:
+                (reqe, reqv ,reqr) = reqv
             if reqf is not None:
                 return self.inPrcoRange(prcotype, prcotuple)
             else:
@@ -381,7 +387,12 @@ class RpmBase(object):
         return bool(self.matchingPrcos(prcotype, reqtuple))
 
     def matchingPrcos(self, prcotype, reqtuple):
-        (reqn, reqf, (reqe, reqv, reqr)) = reqtuple
+        (reqn, reqf, reqv) = reqtuple
+        if type(reqv) in (types.StringType, types.UnicodeType):
+            (reqe, reqv ,reqr) = rpmUtils.miscutils.stringToVersion(reqv)
+        else:
+            (reqe, reqv ,reqr) = reqv
+        reqtuple = (reqn, reqf, (reqe, reqv ,reqr))
         # find the named entry in pkgobj, do the comparsion
         result = []
         for (n, f, (e, v, r)) in self.returnPrco(prcotype):

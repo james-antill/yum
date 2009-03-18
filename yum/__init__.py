@@ -2656,7 +2656,7 @@ class YumBase(depsolve.Depsolve):
                 self.tsInfo.remove(txmbr.po.pkgtup)
         return found
 
-    def update(self, po=None, requiringPo=None, **kwargs):
+    def update(self, po=None, requiringPo=None, required_provides=[], **kwargs):
         """try to mark for update the item(s) specified. 
             po is a package object - if that is there, mark it for update,
             if possible
@@ -2750,6 +2750,12 @@ class YumBase(depsolve.Depsolve):
                 availpkgs = self.pkgSack.searchNevra(name=nevra_dict['name'],
                             epoch=nevra_dict['epoch'], arch=nevra_dict['arch'],
                             ver=nevra_dict['version'], rel=nevra_dict['release'])
+                for prov in required_provides:
+                    navailpkgs = []
+                    for apkg in availpkgs:
+                        if apkg.checkPrco('provides', prov):
+                            navailpkgs.append(apkg)
+                    availpkgs = navailpkgs
                 if len(availpkgs) > 1:
                     availpkgs = self._compare_providers(availpkgs, requiringPo)
                     availpkgs = map(lambda x: x[0], availpkgs)

@@ -537,7 +537,7 @@ class Depsolve(object):
         for pkg in provSack.returnNewestByName():
             results = self.update(requiringPo=requiringPo, name=pkg.name,
                                   epoch=pkg.epoch, version=pkg.version,
-                                  rel=pkg.rel)
+                                  rel=pkg.rel, required_provides=[requirement])
             for txmbr in results:
                 if pkg == txmbr.po:
                     checkdeps = True
