@@ -683,3 +683,47 @@ class SimpleUpdateTests(OperationsTests):
                                      [p11, pr12, py12])
         self.assert_(res=='ok', msg)
         self.assertResult((pi12,py12))
+
+    def testUpdateKernelDBG1(self):
+        kd11  = FakePackage('kernel-debuginfo', '1', '1', '0', 'i586')
+        kd11.addRequires('kernel-debuginfo-common-i586', 'EQ', ('0', '1', '1'))
+        kdc11 = FakePackage('kernel-debuginfo-common', '1', '1', '0', 'i586')
+        kdc11.addProvides('kernel-debuginfo-common-i586', 'EQ', ('0', '1', '1'))
+        
+        akd12  = FakePackage('kernel-debuginfo', '1', '2', '0', 'i586')
+        akd12.addRequires('kernel-debuginfo-common-i586', 'EQ', ('0', '1', '2'))
+        akdc512 = FakePackage('kernel-debuginfo-common', '1', '2', '0', 'i586')
+        akdc512.addProvides('kernel-debuginfo-common-i586', 'EQ',
+                            ('0', '1', '2'))
+        akdc612 = FakePackage('kernel-debuginfo-common', '1', '2', '0', 'i686')
+        akdc612.addProvides('kernel-debuginfo-common-i686', 'EQ',
+                            ('0', '1', '2'))
+
+        res, msg = self.runOperation(['update'],
+                                     [kd11, kdc11],
+                                     [akd12, akdc512, akdc612])
+
+        self.assert_(res=='ok', msg)
+        self.assertResult((akd12, akdc512))
+
+    def testUpdateKernelDBG2(self):
+        kd11  = FakePackage('kernel-debuginfo', '1', '1', '0', 'i586')
+        kd11.addRequires('kernel-debuginfo-common-i586', 'EQ', ('0', '1', '1'))
+        kdc11 = FakePackage('kernel-debuginfo-common', '1', '1', '0', 'i586')
+        kdc11.addProvides('kernel-debuginfo-common-i586', 'EQ', ('0', '1', '1'))
+        
+        akd12  = FakePackage('kernel-debuginfo', '1', '2', '0', 'i586')
+        akd12.addRequires('kernel-debuginfo-common-i586', 'EQ', ('0', '1', '2'))
+        akdc512 = FakePackage('kernel-debuginfo-common', '1', '2', '0', 'i586')
+        akdc512.addProvides('kernel-debuginfo-common-i586', 'EQ',
+                            ('0', '1', '2'))
+        akdc612 = FakePackage('kernel-debuginfo-common', '1', '2', '0', 'i686')
+        akdc612.addProvides('kernel-debuginfo-common-i686', 'EQ',
+                            ('0', '1', '2'))
+
+        res, msg = self.runOperation(['update', 'kernel-debuginfo'],
+                                     [kd11, kdc11],
+                                     [akd12, akdc512, akdc612])
+
+        self.assert_(res=='ok', msg)
+        self.assertResult((akd12, akdc512))
