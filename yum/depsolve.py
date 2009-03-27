@@ -832,6 +832,28 @@ class Depsolve(object):
             return 0
         return _req_name2val(pkgtup1[0]) - _req_name2val(pkgtup2[0])
 
+    def _getInstalledRpmlibs(self):
+        if hasattr(self, '_cached__getInstalledRpmlibs'):
+            return self._cached__getInstalledRpmlibs
+        self._cached__getInstalledRpmlibs = ret = {}
+        rev_flags = (((rpm.RPMSENSE_EQUAL | rpm.RPMSENSE_GREATER),  'GE'),
+                     ((rpm.RPMSENSE_EQUAL | rpm.RPMSENSE_LESS), 'LE'),
+                     (rpm.RPMSENSE_EQUAL, 'EQ'),
+                     (rpm.RPMSENSE_GREATER, 'GT'),
+                     (rpm.RPMSENSE_LESS, 'LT'))
+        for ds in rpm.ds.Rpmlib():
+            fl = ds.Flags()
+            ufl = None
+            for (rfl, rufl) in rev_flags:
+                if rfl & fl == rfl:
+                    ufl = rufl
+            assert ufl is not None
+            n = ds.N()
+            ret[n] = (n, ufl, rpmUtils.miscutils.stringToVersion(ds.EVR()))
+        return self._cached__getInstalledRpmlibs
+
+    installed_rpmlibs = property(lambda self: self._getInstalledRpmlibs())
+
     def _checkInstall(self, txmbr):
         txmbr_reqs = txmbr.po.returnPrco('requires')
         txmbr_provs = set(txmbr.po.returnPrco('provides'))
@@ -844,8 +866,13 @@ class Depsolve(object):
         oldreqs = set(oldreqs)
 
         ret = []
+        print "JDBG:", self.installed_rpmlibs
         for req in sorted(txmbr_reqs, cmp=self._sort_reqs):
             if req[0].startswith('rpmlib('):
+                print "JDBG:", req
+                ir = self.installed_rpmlibs.get(req[0], None)
+                if ir is None or not rpmUtils.miscutils.rangeCompare(ir, req):
+                    print " ** FAIL", req
                 continue
             if req in txmbr_provs:
                 continue
