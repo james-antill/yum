@@ -147,8 +147,6 @@ class UpdateNotice(object):
                 self._md[attrib] = elem.attrib.get(attrib)
             for child in elem:
                 if child.tag == 'id':
-                    if not child.text:
-                        raise UpdateNoticeException("No id element found")
                     self._md['update_id'] = child.text
                 elif child.tag == 'pushcount':
                     self._md['pushcount'] = child.text
@@ -166,6 +164,12 @@ class UpdateNotice(object):
                     self._md['title'] = child.text
                 elif child.tag == 'release':
                     self._md['release'] = child.text
+
+            if not self._md['update_id']:
+                if not self._md['title']:
+                    raise UpdateNoticeException("No id element found")
+                raise UpdateNoticeException("No id element found: title=" +
+                                            self._md['title'])
         else:
             raise UpdateNoticeException('No update element found')
 
