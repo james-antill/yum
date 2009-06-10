@@ -384,7 +384,7 @@ class UpdateMetadata(object):
                 try:
                     un = UpdateNotice(elem)
                 except UpdateNoticeException, e:
-                    print >> sys.stderr, "An update notice lacks ID tag, skipping."
+                    print >> sys.stderr, "Updateinfo failure:", e
                     # what else should we do?
                     continue
                 if not self._notices.has_key(un['update_id']):
