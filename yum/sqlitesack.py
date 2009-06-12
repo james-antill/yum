@@ -155,6 +155,12 @@ class YumAvailablePackageSqlite(YumAvailablePackage, PackageObject, RpmBase):
             except (IndexError, KeyError):
                 pass
 
+        for item in ['summary', 'description']:
+            try:
+                setattr(self, item, db_obj[item])
+            except (IndexError, KeyError):
+                pass
+
         try:
             checksum_type = _share_data(db_obj['checksum_type'])
             check_sum = (checksum_type, db_obj['pkgId'], True)
@@ -840,8 +846,8 @@ class YumSqlitePackageSack(yumRepo.YumPackageSack):
                 result.append((po, tot[po]))
             return result
        
-        unionstring = "select pkgKey, SUM(cumul) AS total from ( "
-        endunionstring = ")GROUP BY pkgKey ORDER BY total DESC"
+        unionstring = "select pkgKey, pkgId, name, epoch, version, release, arch, summary, description, SUM(cumul) AS total from ( "
+        endunionstring = ")GROUP BY pkgKey, pkgId, name, epoch, version, release, arch, summary, description ORDER BY total DESC"
                 
         #SELECT pkgkey, SUM(cumul) AS total FROM (SELECT pkgkey, 1 
         #AS cumul FROM packages WHERE description LIKE '%foo%' UNION ... ) 
@@ -851,7 +857,7 @@ class YumSqlitePackageSack(yumRepo.YumPackageSack):
         for s in searchstrings:         
             s = s.replace("'", "''")
             (s, esc) = self._sql_esc(s)
-            sql="select pkgKey,1 AS cumul from packages where %s like '%%%s%%'%s " % (fields[0], s, esc)
+            sql="select pkgKey,pkgId, name, epoch, version, release, arch, summary, description, 1 AS cumul from packages where %s like '%%%s%%'%s " % (fields[0], s, esc)
             for f in fields[1:]:
                 sql = "%s or %s like '%%%s%%'%s " % (sql, f, s, esc)
             selects.append(sql)
@@ -862,7 +868,7 @@ class YumSqlitePackageSack(yumRepo.YumPackageSack):
             cur = cache.cursor()
             executeSQL(cur, totalstring)
             for ob in cur:
-                pkg = self._packageByKey(rep, ob['pkgKey'])
+                pkg = self._packageByKeyData(rep, ob['pkgKey'], ob)
                 if pkg is None:
                     continue
                 result.append((pkg, ob['total']))
