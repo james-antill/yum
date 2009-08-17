@@ -573,6 +573,41 @@ class SimpleObsoletesTests(OperationsTests):
         # self.assert_(res=='err', msg)
         self.assertResult([])
 
+    def _helperQuaggaMess(self):
+        rp1 = FakePackage('bird',       '1', '0', arch='i386')
+
+        ap1 = FakePackage('quagga',     '1', '0', arch='i386')
+        ap1.addObsoletes('bird', 'LE', ('0', '1', '2'))
+        ap1.addConflicts('bird', 'LE', ('0', '1', '2'))
+        ap2 = FakePackage('quagga',     '2', '0', arch='i386')
+        ap2.addConflicts('bird', 'LE', ('0', '1', '2'))
+
+        return [rp1], [ap1, ap2], [ap2], locals()
+
+    def testRLQuaggaInstall1(self):
+        rps, aps, ret, all = self._helperQuaggaMess()
+        res, msg = self.runOperation(['update'], rps, aps)
+
+        # Really we want the latest quagga installed, but the older quagga
+        # installed is good enough
+        # self.assertResult(ret)
+        self.assertResult([all['ap1']])
+
+    def testRLQuaggaInstall2(self):
+        rps, aps, ret, all = self._helperQuaggaMess()
+        res, msg = self.runOperation(['update', 'bird'], rps, aps)
+
+        # Really we want the latest quagga installed, but the older quagga
+        # installed is good enough
+        # self.assertResult(ret)
+        self.assertResult([all['ap1']])
+
+    def testRLQuaggaInstall3(self):
+        rps, aps, ret, all = self._helperQuaggaMess()
+        res, msg = self.runOperation(['install', 'quagga'], rps, aps)
+
+        self.assertResult(ret)
+
 class GitMetapackageObsoletesTests(OperationsTests):
 
     @staticmethod
