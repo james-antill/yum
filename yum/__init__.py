@@ -2990,6 +2990,15 @@ class YumBase(depsolve.Depsolve):
                 # It's a minor UI problem for RHEL, but might as well dtrt.
                 obs_pkgs = [self.getPackageObject(tup) for tup in obs_tups]
                 for obsoleting_pkg in packagesNewestByNameArch(obs_pkgs):
+                    newer = self.tsInfo.findNewer(obsoleting_pkg)
+                    if newer:
+                        #  This is to work around pkgA-1 obs pkgB, but pkgA-2
+                        # doesn't. So we don't want to install two versions.
+                        tx = newer[0]
+                        txmbr = self.tsInfo.addObsoleting(tx.po, installed_pkg)
+                        self.tsInfo.addObsoleted(installed_pkg, tx.po)
+                        tx_return.append(txmbr)
+                        continue
                     tx_return.extend(self.install(po=obsoleting_pkg))
             for available_pkg in availpkgs:
                 for obsoleted in self.up.obsoleting_dict.get(available_pkg.pkgtup, []):

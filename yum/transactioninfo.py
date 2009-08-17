@@ -155,6 +155,17 @@ class TransactionData:
 
         return result
 
+    def findNewer(self, po, states=('i', 'u')):
+        """ Return any packages in the transaction that are newer than the
+            given package. Can also filter to states, default is
+            install/update. """
+
+        ret = []
+        for txmbr in self.matchNaevr(name=po.name):
+            if txmbr.ts_state in states and txmbr.po.verGT(po):
+                ret.append(txmbr)
+        return ret
+
     def _isLocalPackage(self, txmember):
         # Is this the right criteria?
         # FIXME: This is kinda weird, we really want all local pkgs to be in a
