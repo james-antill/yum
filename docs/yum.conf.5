@@ -111,6 +111,28 @@ separated list.
 Shell globs using wildcards (eg. * and ?) are allowed.
 
 .IP
+\fBaclpkgs\fR
+List of ACLs, and if needed packages to match. ACLs are split into 2 or 3 parts,
+separated by ".". The first part is either: include, exclude, mark or wash. The
+second part specifies the what you are operatoring on: name, nevr, nevra, arch,
+blank (meaning the full 7 matches used in exclude/includepkgs) marked, washed
+and "*". The last part, if needed, says if the match should be a strict
+equality check or allow shell globs using wildcards (eg. * and ?) are with
+either: eq or match. There is an implicit "include.*" as the final ACL.
+ Eg. Both these ACLs will exclude 32bit pkgs on x86_64, except glibc.
+
+aclpkgs = include.name.eq:glibc exclude.arch.match:i?86
+.br
+aclpkgs = mark.washed
+.br
+          wash.arch.eq:x86_64 wash.arch.eq:noarch
+.br
+          wash.name.eq:glibc
+.br
+          exclude.marked
+.br
+
+.IP
 \fBexactarch\fR
 Either `1' or `0'. Set to `1' to make yum update only update the architectures
 of packages that you have installed. ie: with this enabled yum will not install
@@ -588,6 +610,11 @@ repository, all keys specified for that repository will be installed.
 .IP
 \fBexclude\fR
 Same as the [main] \fBexclude\fR option but only for this repository.
+Substitution variables, described below, are honored here.
+
+.IP
+\fBaclpkgs\fR
+Same as the [main] \fBaclpkgs\fR option but only for this repository.
 Substitution variables, described below, are honored here.
 
 .IP

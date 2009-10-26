@@ -552,6 +552,7 @@ class YumBase(depsolve.Depsolve):
         self._pkgSack = self.repos.getPackageSack()
         
         self.excludePackages()
+        self.aclPackages()
         self._pkgSack.excludeArchs(archlist)
         
         #FIXME - this could be faster, too.
@@ -560,6 +561,7 @@ class YumBase(depsolve.Depsolve):
         for repo in repos:
             self.includePackages(repo)
             self.excludePackages(repo)
+            self.aclPackages(repo)
         self.plugins.run('exclude')
         self._pkgSack.buildIndexes()
 
@@ -1258,6 +1260,47 @@ class YumBase(depsolve.Depsolve):
         exid = "yum.includepkgs.3"
         self.pkgSack.addPackageExcluder(repo.id, exid, 'exclude.marked')
         
+    def aclPackages(self, repo=None):
+        """ Allow users to apply somewhat arbitrary ACLs to the pkg list. """
+
+        if repo is None:
+            acllist = self.conf.aclpkgs
+            repoid = None
+            exid_beg = 'yum.aclpkgs'
+        else:
+            acllist = repo.aclpkgs
+            repoid = repo.id
+            exid_beg = 'yum.aclpkgs.' + repoid
+
+        if not acllist:
+            return
+
+        acl_end = {'marked' : 1, 'washed' : 1, 'nevr.eq' : 2, '*' : 1}
+        for acl in ('eq', 'match'):
+            acl_end['name.'  + acl] = 2
+            acl_end['arch.'  + acl] = 2
+            acl_end['nevra.' + acl] = 2
+            acl_end[acl] = 2
+        valid_acls = {}
+        for acl in acl_end:
+            valid_acls['include.' + acl] = acl_end[acl]
+            valid_acls['exclude.' + acl] = acl_end[acl]
+            valid_acls['mark.'    + acl] = acl_end[acl]
+            valid_acls['wash.'    + acl] = acl_end[acl]
+        count = 0
+        for acl_data in acllist:
+            count += 1
+            exid = "%s.%u" % (exid_beg, count)
+            acl_data = acl_data.split(':', 2)
+            if len(acl_data) != valid_acls.get(acl_data[0], 0):
+                continue
+
+            if len(acl_data) == 2:
+                acl, val = acl_data
+                self.pkgSack.addPackageExcluder(repoid, exid, acl, val)
+            else:
+                self.pkgSack.addPackageExcluder(repoid, exid, acl_data[0])
+
     def doLock(self, lockfile = YUM_PID_FILE):
         """perform the yum locking, raise yum-based exceptions, not OSErrors"""
         

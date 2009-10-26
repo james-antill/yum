@@ -617,6 +617,7 @@ class YumConf(StartupConf):
 
     commands = ListOption()
     exclude = ListOption()
+    aclpkgs = ListOption()
     failovermethod = Option('roundrobin')
     proxy = UrlOption(schemes=('http', 'ftp', 'https'), allow_none=True)
     proxy_username = Option()
@@ -733,8 +734,9 @@ class RepoConf(BaseConfig):
     metalink   = UrlOption()
     mediaid = Option()
     gpgkey = UrlListOption()
-    exclude = ListOption() 
+    exclude = ListOption()     # Should be excludepkgs, but need to migrate
     includepkgs = ListOption() 
+    aclpkgs = ListOption()
 
     proxy = Inherit(YumConf.proxy)
     proxy_username = Inherit(YumConf.proxy_username)
