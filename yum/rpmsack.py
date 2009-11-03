@@ -334,17 +334,30 @@ class RPMDBPackageSack(PackageSackBase):
            always filtered to those matching the patterns/case. repoid is
            ignored, and is just here for compatibility with non-rpmdb sacks. """
         if not self._completely_loaded:
-            rpats = self._compile_patterns(patterns, ignore_case)
-            for hdr, idx in self._all_packages():
-                if self._match_repattern(rpats, hdr):
-                    self._makePackageObject(hdr, idx)
-            self._completely_loaded = patterns is None
+            rpmdb_pats = None
+            if patterns and not ignore_case:
+                for pat in patterns:
+                    if misc.re_full_search_needed(pat):
+                        break
+                else:
+                    rpmdb_pats = patterns
+                    patterns = [] # Somewhat magic: makes rpats == None
 
-        pkgobjlist = self._idx2pkg.values()
+            pkgobjlist = []
+            rpats = self._compile_patterns(patterns, ignore_case)
+            for hdr, idx in self._all_packages(rpmdb_pats, ignore_case):
+                if self._match_repattern(rpats, hdr):
+                    pkgobjlist.append(self._makePackageObject(hdr, idx))
+            self._completely_loaded = patterns is None
+            done_match = True
+        else:
+            pkgobjlist = self._idx2pkg.values()
+            done_match = False
+
         # Remove gpg-pubkeys, as no sane callers expects/likes them...
         if self._loaded_gpg_keys:
             pkgobjlist = [pkg for pkg in pkgobjlist if pkg.name != 'gpg-pubkey']
-        if patterns:
+        if patterns and not done_match:
             pkgobjlist = parsePackages(pkgobjlist, patterns, not ignore_case)
             pkgobjlist = pkgobjlist[0] + pkgobjlist[1]
         return pkgobjlist
@@ -444,11 +457,17 @@ class RPMDBPackageSack(PackageSackBase):
         return [ self._makePackageObject(h, mi) for (h, mi) in ts.returnLeafNodes(headers=True) ]
         
     # Helper functions
-    def _all_packages(self):
+    def _all_packages(self, patterns=None, ignore_case=False):
         '''Generator that yield (header, index) for all packages
         '''
         ts = self.readOnlyTS()
         mi = ts.dbMatch()
+        if patterns and not ignore_case:
+            for pat in patterns:
+                if misc.re_glob(pat):
+                    mi.pattern('name', rpm.RPMMIRE_GLOB,   pat)
+                else:
+                    mi.pattern('name', rpm.RPMMIRE_STRCMP, pat)
 
         for hdr in mi:
             if hdr['name'] != 'gpg-pubkey':
