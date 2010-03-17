@@ -106,6 +106,30 @@ def getSigInfo(hdr):
     infotuple = (sigtype, sigdate, sigid)
     return error, infotuple
 
+def rpm2keyid(ts, filename):
+    """ Takes a transaction set and an rpm filename,
+        returns either a tuple of (rpmkeyid, fullkeyid) or None. """
+
+    oflags = ts.setVSFlags(rpm._RPMVSF_NOSIGNATURES|rpm._RPMVSF_NODIGESTS)
+
+    fdno = os.open(filename, os.O_RDONLY)
+    hdr = ts.hdrFromFdno(fdno)
+    error, siginfo = getSigInfo(hdr)
+    del hdr
+    os.close(fdno)
+
+    ts.setVSFlags(oflags)
+
+    if error == 101:
+        return None
+    if not siginfo[2].startswith(' Key ID '):
+        return None
+    fullkeyid = siginfo[2][len(' Key ID '):]
+    if len(fullkeyid) != 16:
+        return None
+
+    return fullkeyid[8:], fullkeyid
+
 def pkgTupleFromHeader(hdr):
     """return a pkgtuple (n, a, e, v, r) from a hdr object, converts
        None epoch to 0, as well."""
