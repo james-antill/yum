@@ -30,7 +30,6 @@ import packageSack
 from repos import Repository
 import parser
 import sqlitecachec
-import sqlitesack
 from yum import config
 from yum import misc
 from yum import comps
@@ -302,6 +301,10 @@ class YumRepository(Repository, config.RepoConf):
         # which calls repo.close() which calls sack.close() which removes the
         # repos from the sack ... thus. breaking the cycle.
         if self._sack is None:
+            global sqlitesack
+            if sqlitesack is None: # sqlitesack imports us too.
+                import sqlitesack as _sqlitesack
+                sqlitesack = _sqlitesack
             self._sack = sqlitesack.YumSqlitePackageSack(
                 sqlitesack.YumAvailablePackageSqlite)
         return self._sack
