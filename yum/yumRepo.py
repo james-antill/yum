@@ -35,7 +35,6 @@ from yum import config
 from yum import misc
 from yum import comps
 from constants import *
-import metalink
 
 import logging
 import logginglevels
@@ -680,6 +679,11 @@ class YumRepository(Repository, config.RepoConf):
 
     def _getMetalink(self):
         if not self._metalink:
+            global metalink
+            if metalink is None:
+                import metalink as real_metalink
+                metalink = real_metalink
+
             self.metalink_filename = self.cachedir + '/' + 'metalink.xml'
             local = self.metalink_filename + '.tmp'
             if not self._metalinkCurrent():
