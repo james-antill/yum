@@ -39,7 +39,6 @@ P_ = yum.i18n.P_
 import config
 from config import ParsingError, ConfigParser
 import Errors
-import rpmsack
 import rpmUtils.updates
 from rpmUtils.arch import archDifference, canCoinstall, ArchStorage, isMultiLibArch
 from rpmUtils.miscutils import compareEVR
@@ -500,6 +499,8 @@ class YumBase(depsolve.Depsolve):
         """sets up a holder object for important information from the rpmdb"""
 
         if self._rpmdb is None:
+            import rpmsack
+
             rpmdb_st = time.time()
             self.verbose_logger.log(logginglevels.DEBUG_4,
                                     _('Reading Local RPMDB'))
