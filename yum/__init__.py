@@ -47,7 +47,6 @@ import pkgtag_db
 from repos import RepoStorage
 import misc
 from parser import ConfigPreProcessor, varReplace
-import transactioninfo
 import urlgrabber
 from urlgrabber.grabber import URLGrabber, URLGrabError
 from urlgrabber.progress import format_number
@@ -197,6 +196,7 @@ class YumBase(depsolve.Depsolve):
 
     def _transactionDataFactory(self):
         """Factory method returning TransactionData object"""
+        import transactioninfo
         return transactioninfo.TransactionData()
 
     def doGenericSetup(self, cache=0):
