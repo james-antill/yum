@@ -39,7 +39,6 @@ P_ = yum.i18n.P_
 import config
 from config import ParsingError, ConfigParser
 import Errors
-import rpmUtils.updates
 from rpmUtils.arch import archDifference, canCoinstall, ArchStorage, isMultiLibArch
 from rpmUtils.miscutils import compareEVR
 import rpmUtils.transaction
@@ -662,6 +661,7 @@ class YumBase(depsolve.Depsolve):
 
         up_st = time.time()
 
+        import rpmUtils.updates
         self._up = rpmUtils.updates.Updates(self.rpmdb.simplePkgList(), self.pkgSack.simplePkgList())
         if self.conf.debuglevel >= 7:
             self._up.debug = 1
