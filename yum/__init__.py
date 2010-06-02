@@ -42,7 +42,6 @@ import Errors
 from rpmUtils.arch import archDifference, canCoinstall, ArchStorage, isMultiLibArch
 from rpmUtils.miscutils import compareEVR
 import rpmUtils.transaction
-import pkgtag_db
 from repos import RepoStorage
 import misc
 from parser import ConfigPreProcessor, varReplace
@@ -778,6 +777,8 @@ class YumBase(depsolve.Depsolve):
                                 _('Getting pkgtags metadata'))
         
         if self._tags is None:
+            import pkgtag_db
+
             self._tags = yum.pkgtag_db.PackageTags()
            
             for repo in self.repos.listEnabled():
