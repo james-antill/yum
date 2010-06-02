@@ -44,7 +44,6 @@ import rpmUtils.updates
 from rpmUtils.arch import archDifference, canCoinstall, ArchStorage, isMultiLibArch
 from rpmUtils.miscutils import compareEVR
 import rpmUtils.transaction
-import comps
 import pkgtag_db
 from repos import RepoStorage
 import misc
@@ -719,6 +718,7 @@ class YumBase(depsolve.Depsolve):
         
         if self._comps:
             return self._comps
+        import comps
 
         group_st = time.time()            
         self.verbose_logger.log(logginglevels.DEBUG_4,
