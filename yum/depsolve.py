@@ -27,7 +27,6 @@ import rpmUtils.miscutils
 from rpmUtils.arch import archDifference, canCoinstall
 import misc
 from misc import unique, version_tuple_to_string
-from transactioninfo import TransactionMember
 import rpm
 
 from packageSack import ListPackageSack
@@ -1277,6 +1276,11 @@ class Depsolve(object):
                 continue
             rec_depsolve[po] = 0
         if len(rec_depsolve) > 1:
+            global TransactionMember
+            if TransactionMember is None:
+                from transactioninfo import TransactionMember as _TM
+                TransactionMember = _TM
+
             for po in rec_depsolve:
                 fake_txmbr = TransactionMember(po)
 
