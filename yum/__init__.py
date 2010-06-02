@@ -55,7 +55,6 @@ import plugins
 import logginglevels
 import yumRepo
 import callbacks
-import yum.history
 
 import warnings
 warnings.simplefilter("ignore", Errors.YumFutureDeprecationWarning)
@@ -806,6 +805,7 @@ class YumBase(depsolve.Depsolve):
         """auto create the history object that to access/append the transaction
            history information. """
         if self._history is None:
+            import yum.history
             pdb_path = self.conf.persistdir + "/history"
             self._history = yum.history.YumHistory(root=self.conf.installroot,
                                                    db_path=pdb_path)
