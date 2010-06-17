@@ -138,9 +138,12 @@ class Depsolve(object):
                             'test': rpm.RPMTRANS_FLAG_TEST,
                             'justdb': rpm.RPMTRANS_FLAG_JUSTDB,
                             'repackage': rpm.RPMTRANS_FLAG_REPACKAGE}
-        # This is only in newer rpm.org releases
+        # This is only in newer rpm.org releases (4.8.x ish)
         if hasattr(rpm, 'RPMTRANS_FLAG_NOCONTEXTS'):
             ts_flags_to_rpm['nocontexts'] = rpm.RPMTRANS_FLAG_NOCONTEXTS
+        # Super new rpm releases ... 4.9.x?
+        if hasattr(rpm, 'RPMTRANS_FLAG_NOCOLLECTIONS'):
+            ts_flags_to_rpm['nocollections'] = rpm.RPMTRANS_FLAG_NOCOLLECTIONS
         
         self._ts.setFlags(0) # reset everything.
         
