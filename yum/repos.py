@@ -62,6 +62,7 @@ class RepoStorage:
         # This allow listEnabled() to be O(1) most of the time.
         self._cache_enabled_repos = []
         self.quick_enable_disable = {}
+        self.list_enabled_count = 0
 
     def doSetup(self, thisrepo = None):
         
@@ -170,7 +171,9 @@ class RepoStorage:
         return repos
         
     def listEnabled(self):
-        """return list of enabled repo objects"""
+        """ Return list of enabled repo objects. Note that after calling this
+            function you can use .list_enabled_count to see if the enabled
+            repos. has changed. """
 
         if (self._cache_enabled_repos is not None and
             not self.quick_enable_disable):
@@ -182,6 +185,7 @@ class RepoStorage:
                 returnlist.append(repo)
 
         returnlist.sort()
+        self.list_enabled_count += 1
 
         if self._cache_enabled_repos is not None:
             self._cache_enabled_repos = returnlist
@@ -189,7 +193,9 @@ class RepoStorage:
         return returnlist
 
     def listGroupsEnabled(self):
-        """return a list of repo objects that have groups enabled"""
+        """ Return a list of repo objects that have groups enabled, this calls
+            listEnabled() so you can also use .list_enabled_count after calling
+            this function. """
         returnlist = []
         for repo in self.listEnabled():
             if repo.enablegroups:

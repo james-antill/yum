@@ -718,7 +718,10 @@ class YumBase(depsolve.Depsolve):
            into the group object"""
         
         if self._comps:
-            return self._comps
+            self.repos.listEnabled()
+            if self.__comps_rlec == self.repos.list_enabled_count:
+                return self._comps
+            self.comps = None
 
         group_st = time.time()            
         self.verbose_logger.log(logginglevels.DEBUG_4,
@@ -741,6 +744,7 @@ class YumBase(depsolve.Depsolve):
         
         # now we know which repos actually have groups files.
         overwrite = self.conf.overwrite_groups
+        self.__comps_rlec = self.repos.list_enabled_count
         self._comps = comps.Comps(overwrite_groups = overwrite)
 
         for repo in reposWithGroups:
