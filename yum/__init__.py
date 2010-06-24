@@ -781,6 +781,11 @@ class YumBase(depsolve.Depsolve):
         self.verbose_logger.log(logginglevels.DEBUG_4,
                                 _('Getting pkgtags metadata'))
         
+        if self._tags:
+            self.repos.listEnabled()
+            if self.__tags_rlec == self.repos.list_enabled_count:
+                self._tags = None
+
         if self._tags is None:
             self._tags = yum.pkgtag_db.PackageTags()
            
@@ -800,7 +805,7 @@ class YumBase(depsolve.Depsolve):
                 except (Errors.RepoError, Errors.PkgTagsError), e:
                     msg = _('Failed to add Pkg Tags for repository: %s - %s') % (repo, str(e))
                     self.logger.critical(msg)
-                    
+            self.__tags_rlec = self.repos.list_enabled_count
                 
         self.verbose_logger.debug('tags time: %0.3f' % (time.time() - tag_st))
         return self._tags
