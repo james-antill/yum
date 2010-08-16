@@ -288,6 +288,18 @@ class InfoCommand(YumCommand):
         return _("Display details about a package or group of packages")
 
     def doCommand(self, base, basecmd, extcmds):
+        if basecmd == 'grep':
+            basecmd = 'list'
+            nextcmds = []
+            for extcmd in extcmds:
+                special = ('available', 'installed', 'all', 'extras', 'updates',
+                           'recent', 'obsoletes')
+                if not nextcmds and extcmd in special:
+                    nextcmds.append(extcmd)
+                    continue
+                nextcmds.append('*%s*' % extcmd)
+            extcmds = nextcmds
+
         try:
             highlight = base.term.MODE['bold']
             ypl = base.returnPkgLists(extcmds, installed_available=highlight)
@@ -385,7 +397,7 @@ class InfoCommand(YumCommand):
 
 class ListCommand(InfoCommand):
     def getNames(self):
-        return ['list']
+        return ['list', 'grep']
 
     def getSummary(self):
         return _("List a package or groups of packages")
