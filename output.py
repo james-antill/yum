@@ -752,10 +752,28 @@ class YumOutput:
                     data[d][v] += 1
 
     def _displayPkgsFromNames(self, pkg_names, verbose, pkg_names2pkgs,
-                              indent='   ', columns=None):
+                              indent='   ', columns=None, igroup_data=None):
         if not verbose:
             for item in sorted(pkg_names):
-                print '%s%s' % (indent, item)
+                if not igroup_data:
+                    print '%s%s' % (indent, item)
+                    continue
+
+                assert item in igroup_data
+                if item not in igroup_data or igroup_data[item] == 'available':
+                    print '%s+%s' % (indent, item) # Group up/in will install it
+                elif igroup_data[item] == 'installed':
+                    print '%s=%s' % (indent, item) # Installed via. group
+                elif igroup_data[item] == 'blacklisted-installed':
+                    if False: # Not sure it's worth listing these...
+                        continue # On the other hand, there's mark-packages
+
+                    print '%s %s' % (indent, item) # Installed, not via. group
+                else:
+                    assert igroup_data[item] == 'blacklisted-available'
+                    if False: # Not sure it's worth listing these...
+                        continue
+                    print '%s-%s' % (indent, item) # Not installed, and won't be
         else:
             for item in sorted(pkg_names):
                 if item not in pkg_names2pkgs:
@@ -779,9 +797,25 @@ class YumOutput:
         verb = self.verbose_logger.isEnabledFor(logginglevels.DEBUG_3)
         if verb:
             print _(' Group-Id: %s') % to_unicode(group.groupid)
+
+        igroup_data = self._groupInstalledData(group)
+        igrp_only   = set()
+        for pkg_name in igroup_data:
+            if igroup_data[pkg_name] == 'installed':
+                igrp_only.add(pkg_name)
+        igrp_only.difference_update(group.packages)
+        all_pkgs = group.packages + list(igrp_only)
+
         pkg_names2pkgs = None
         if verb:
-            pkg_names2pkgs = self._group_names2aipkgs(group.packages)
+            pkg_names2pkgs = self._group_names2aipkgs(all_pkgs)
+        else:
+            pkg_names2pkgs = {}
+            for ipkg in self.rpmdb.searchNames(all_pkgs):
+                if ipkg.name not in pkg_names2pkgs:
+                    pkg_names2pkgs[ipkg.name] = []
+                pkg_names2pkgs[ipkg.name].append(ipkg)
+                
         if group.ui_description:
             print _(' Description: %s') % to_unicode(group.ui_description)
         if group.langonly:
@@ -804,7 +838,13 @@ class YumOutput:
             if len(pkg_names) > 0:
                 print section_name
                 self._displayPkgsFromNames(pkg_names, verb, pkg_names2pkgs,
-                                           columns=columns)
+                                           columns=columns,
+                                           igroup_data=igroup_data)
+        if igrp_only:
+            print _(' Installed Packages:')
+            self._displayPkgsFromNames(igrp_only, verb, pkg_names2pkgs,
+                                       columns=columns,
+                                       igroup_data=igroup_data)
 
     def depListOutput(self, results):
         """take a list of findDeps results and 'pretty print' the output"""

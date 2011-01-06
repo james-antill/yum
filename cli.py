@@ -78,11 +78,14 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
         self.registerCommand(yumcommands.InfoCommand())
         self.registerCommand(yumcommands.ListCommand())
         self.registerCommand(yumcommands.EraseCommand())
-        self.registerCommand(yumcommands.GroupCommand())
-        self.registerCommand(yumcommands.GroupListCommand())
-        self.registerCommand(yumcommands.GroupInstallCommand())
-        self.registerCommand(yumcommands.GroupRemoveCommand())
-        self.registerCommand(yumcommands.GroupInfoCommand())
+        if True:
+            self.registerCommand(yumcommands.GroupsCommand())
+        else:
+            self.registerCommand(yumcommands.GroupCommand())
+            self.registerCommand(yumcommands.GroupListCommand())
+            self.registerCommand(yumcommands.GroupInstallCommand())
+            self.registerCommand(yumcommands.GroupRemoveCommand())
+            self.registerCommand(yumcommands.GroupInfoCommand())
         self.registerCommand(yumcommands.MakeCacheCommand())
         self.registerCommand(yumcommands.CleanCommand())
         self.registerCommand(yumcommands.ProvidesCommand())
@@ -1207,6 +1210,50 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
 
         return 0, [_('Done')]
     
+    def returnGroupSummary(self, userlist):
+
+        uservisible=1
+            
+        if len(userlist) > 0:
+            if userlist[0] == 'hidden':
+                uservisible=0
+                userlist.pop(0)
+        if not userlist:
+            userlist = None # Match everything...
+
+        installed, available = self.doGroupLists(uservisible=uservisible,
+                                                 patterns=userlist)
+        
+        def _out_grp(sect, num):
+            if not num:
+                return
+            self.verbose_logger.log(yum.logginglevels.INFO_2, '%s %u', sect,num)
+        done = 0
+        for group in installed:
+            if group.langonly: continue
+            done += 1
+        _out_grp(_('Installed Groups:'), done)
+
+        done = 0
+        for group in installed:
+            if not group.langonly: continue
+            done += 1
+        _out_grp(_('Installed Language Groups:'), done)
+
+        done = False
+        for group in available:
+            if group.langonly: continue
+            done += 1
+        _out_grp(_('Available Groups:'), done)
+
+        done = False
+        for group in available:
+            if not group.langonly: continue
+            done += 1
+        _out_grp(_('Available Language Groups:'), done)
+
+        return 0, [_('Done')]
+    
     def returnGroupInfo(self, userlist):
         """returns complete information on a list of groups"""
         for strng in userlist:
@@ -1220,7 +1267,7 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
         
         return 0, []
         
-    def installGroups(self, grouplist):
+    def installGroups(self, grouplist, upgrade=False):
         """for each group requested do 'selectGroup' on them."""
         
         pkgs_used = []
@@ -1232,7 +1279,7 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
 
             
                 try:
-                    txmbrs = self.selectGroup(group.groupid)
+                    txmbrs = self.selectGroup(group.groupid, upgrade=upgrade)
                 except yum.Errors.GroupsError:
                     self.logger.critical(_('Warning: Group %s does not exist.'), group_string)
                     continue

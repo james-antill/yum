@@ -432,6 +432,164 @@ class GroupCommand(YumCommand):
         except yum.Errors.YumBaseError, e:
             return 1, [str(e)]
 
+class GroupsCommand(YumCommand):
+    """ Single sub-command interface for most groups interaction. """
+
+    direct_commands = {'grouplist'    : 'list',
+                       'groupinstall' : 'install',
+                       'groupupdate'  : 'install',
+                       'groupremove'  : 'remove',
+                       'grouperase'   : 'remove',
+                       'groupinfo'    : 'info'}
+
+    def getNames(self):
+        return ['groups', 'group'] + self.direct_commands.keys()
+
+    def getUsage(self):
+        return "[list|info|summary|install|upgrade|remove|mark] [GROUP]"
+
+    def getSummary(self):
+        return _("Display, or use, the groups information")
+    
+    def _grp_setup_doCommand(self, base):
+        self.doneCommand(base, _("Setting up Group Process"))
+
+        base.doRepoSetup(dosack=0)
+        try:
+            base.doGroupSetup()
+        except yum.Errors.GroupsError:
+            return 1, [_('No Groups on which to run command')]
+        except yum.Errors.YumBaseError, e:
+            return 1, [str(e)]
+
+    def _grp_cmd(self, basecmd, extcmds):
+        if basecmd in self.direct_commands:
+            cmd = self.direct_commands[basecmd]
+        elif extcmds:
+            cmd = extcmds[0]
+            extcmds = extcmds[1:]
+        else:
+            cmd = 'summary'
+
+        remap = {'update' : 'upgrade',
+                 'erase' : 'remove',
+                 'mark-erase' : 'mark-remove',
+                 }
+        cmd = remap.get(cmd, cmd)
+
+        return cmd, extcmds
+
+    def doCheck(self, base, basecmd, extcmds):
+        cmd, extcmds = self._grp_cmd(basecmd, extcmds)
+
+        checkEnabledRepo(base)
+
+        if cmd in ('install', 'remove',
+                   'mark-install', 'mark-remove',
+                   'mark-members', 'info', 'mark-members-sync'):
+            checkGroupArg(base, cmd, extcmds)
+
+        if cmd in ('install', 'remove', 'upgrade',
+                   'mark-install', 'mark-remove',
+                   'mark-members', 'mark-members-sync'):
+            checkRootUID(base)
+
+        if cmd in ('install', 'upgrade'):
+            checkGPGKey(base)
+
+        cmds = ('list', 'info', 'remove', 'install', 'upgrade', 'summary',
+                'mark-install', 'mark-remove',
+                'mark-members', 'mark-members-sync')
+        if cmd not in cmds:
+            base.logger.critical(_('Invalid groups sub-command, use: %s.'),
+                                 ", ".join(cmds))
+            raise cli.CliError
+
+        if not os.path.exists(base.igroups.filename):
+            base.logger.critical(_("There is no installed groups file."))
+        elif not os.access(base.igroups.filename, os.R_OK):
+            base.logger.critical(_("You don't have access to the history DB."))
+            raise cli.CliError
+
+    def doCommand(self, base, basecmd, extcmds):
+        cmd, extcmds = self._grp_cmd(basecmd, extcmds)
+
+        self._grp_setup_doCommand(base)
+        if cmd == 'summary':
+            return base.returnGroupSummary(extcmds)
+
+        if cmd == 'list':
+            return base.returnGroupLists(extcmds)
+
+        try:
+            if cmd == 'info':
+                return base.returnGroupInfo(extcmds)
+            if cmd == 'install':
+                return base.installGroups(extcmds)
+            if cmd == 'upgrade':
+                return base.installGroups(extcmds, upgrade=True)
+            if cmd == 'remove':
+                return base.removeGroups(extcmds)
+
+            if cmd == 'mark-install':
+                for strng in extcmds:
+                    for group in base.comps.return_groups(strng):
+                        base.igroups.add_group(group.groupid, group.packages)
+                base.igroups.save()
+                return 0, ['Marked install: ' + ','.join(extcmds)]
+
+            if cmd == 'mark-members':
+                if len(extcmds) < 2:
+                    return 1, ['No group or package given']
+                igrps, grps = base._groupReturnGroups([extcmds[0]],
+                                                      ignore_case=False)
+                if len(igrps) != 1:
+                    return 1, ['No group matched']
+                grp = igrps[0]
+                for pkg in base.rpmdb.returnPackages(patterns=extcmds[1:]):
+                    pkg.yumdb_info.group_member = grp.gid
+                    grp.pkg_names.add(pkg.name)
+                base.igroups.save()
+                return 0, ['Marked members: ' + ','.join(extcmds)]
+
+            if cmd == 'mark-members-sync':
+                igrps, grps = base._groupReturnGroups(extcmds,ignore_case=False)
+                if not igrps:
+                    return 1, ['No group matched']
+                for grp in igrps:
+                    for pkg in base.rpmdb.searchNames(grp.pkg_names):
+                        pkg.yumdb_info.group_member = grp.gid
+                return 0, ['Marked members-sync: ' + ','.join(extcmds)]
+                
+
+            if cmd == 'mark-remove':
+                for strng in extcmds:
+                    for group in base.comps.return_groups(strng):
+                        base.igroups.del_group(group.groupid)
+                base.igroups.save()
+                return 0, ['Marked remove: ' + ','.join(extcmds)]
+
+        except yum.Errors.YumBaseError, e:
+            return 1, [str(e)]
+
+
+    def needTs(self, base, basecmd, extcmds):
+        cmd, extcmds = self._grp_cmd(basecmd, extcmds)
+
+        if cmd in ('list', 'info', 'remove', 'summary'):
+            return False
+        if cmd.startswith('mark'):
+            return False
+
+        return True
+
+    def needTsRemove(self, base, basecmd, extcmds):
+        cmd, extcmds = self._grp_cmd(basecmd, extcmds)
+
+        if cmd in ('remove',):
+            return True
+        return False
+
 
 class GroupListCommand(GroupCommand):
     def getNames(self):
