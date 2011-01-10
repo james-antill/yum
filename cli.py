@@ -978,11 +978,18 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
         akeys = set() # All keys, used to see if nothing matched
         mkeys = set() # "Main" set of keys for N/S search (biggest term. hit).
         pos   = set()
+        max_ns_matches = 8
+        skipped = [False]
 
         def _print_match_section(text):
             # Print them in the order they were passed
             used_keys = [arg for arg in args if arg in keys]
             print self.fmtSection(text % ", ".join(used_keys))
+
+        def _print_skipped(num):
+            if num > max_ns_matches:
+                skipped[0] = True
+                print _('[ ... skipped %u ... ]') % (num - max_ns_matches)
 
         #  First try just the name/summary fields, and if we get any hits
         # don't do the other stuff. Unless the user overrides via. "all".
@@ -991,19 +998,31 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
         else:
             matching = self.searchGenerator(['name', 'summary'], args,
                                             showdups=dups, keys=True)
+            num = 0
             for (po, keys, matched_value) in matching:
                 if keys != okeys:
                     if akeys:
                         if len(mkeys) == len(args):
                             break
+
+                        _print_skipped(num)
+                        num = 1
                         print ""
                     else:
+                        _print_skipped(num)
+                        num = 1
                         mkeys = set(keys)
+
                     _print_match_section(_('N/S Matched: %s'))
                     okeys = keys
+                else:
+                    num += 1
+                    if num > max_ns_matches:
+                        continue
                 pos.add(po)
                 akeys.update(keys)
                 self.matchcallback(po, matched_value, args)
+            _print_skipped(num)
 
         matching = self.searchGenerator(searchlist, args,
                                         showdups=dups, keys=True)
