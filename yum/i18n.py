@@ -461,7 +461,27 @@ def str_eq(a, b):
         return True
     
     return False
-    
+
+def exception2msg(e):
+    """ DIE python DIE! Which one works:
+        to_unicode(e.value); unicode(e); str(e); 
+        Call this so you don't have to care. """
+    try:
+        return to_unicode(e.value)
+    except:
+        pass
+
+    try:
+        return unicode(e)
+    except:
+        pass
+
+    try:
+        return str(e)
+    except:
+        pass
+    return "<exception failed to convert to text>"
+
 try: 
     '''
     Setup the yum translation domain and make _() and P_() translation wrappers
