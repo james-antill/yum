@@ -29,7 +29,7 @@ import operator
 import locale
 import fnmatch
 import time
-from yum.i18n import utf8_width, utf8_width_fill, to_unicode
+from yum.i18n import utf8_width, utf8_width_fill, to_unicode, exception2msg
 
 import yum.config
 
@@ -203,7 +203,7 @@ class InstallCommand(YumCommand):
         try:
             return base.installPkgs(extcmds)
         except yum.Errors.YumBaseError, e:
-            return 1, [str(e)]
+            return 1, [exception2msg(e)]
 
 class UpdateCommand(YumCommand):
     def getNames(self):
@@ -225,7 +225,7 @@ class UpdateCommand(YumCommand):
         try:
             return base.updatePkgs(extcmds)
         except yum.Errors.YumBaseError, e:
-            return 1, [str(e)]
+            return 1, [exception2msg(e)]
 
 class DistroSyncCommand(YumCommand):
     def getNames(self):
@@ -248,7 +248,7 @@ class DistroSyncCommand(YumCommand):
             base.conf.obsoletes = 1
             return base.distroSyncPkgs(extcmds)
         except yum.Errors.YumBaseError, e:
-            return 1, [str(e)]
+            return 1, [exception2msg(e)]
 
 def _add_pkg_simple_list_lens(data, pkg, indent=''):
     """ Get the length of each pkg's column. Add that to data.
@@ -293,7 +293,7 @@ class InfoCommand(YumCommand):
             highlight = base.term.MODE['bold']
             ypl = base.returnPkgLists(extcmds, installed_available=highlight)
         except yum.Errors.YumBaseError, e:
-            return 1, [str(e)]
+            return 1, [exception2msg(e)]
         else:
             update_pkgs = {}
             inst_pkgs   = {}
@@ -412,7 +412,7 @@ class EraseCommand(YumCommand):
         try:
             return base.erasePkgs(extcmds)
         except yum.Errors.YumBaseError, e:
-            return 1, [str(e)]
+            return 1, [exception2msg(e)]
 
     def needTs(self, base, basecmd, extcmds):
         return False
@@ -430,7 +430,7 @@ class GroupCommand(YumCommand):
         except yum.Errors.GroupsError:
             return 1, [_('No Groups on which to run command')]
         except yum.Errors.YumBaseError, e:
-            return 1, [str(e)]
+            return 1, [exception2msg(e)]
 
 
 class GroupListCommand(GroupCommand):
@@ -474,7 +474,7 @@ class GroupInstallCommand(GroupCommand):
         try:
             return base.installGroups(extcmds)
         except yum.Errors.YumBaseError, e:
-            return 1, [str(e)]
+            return 1, [exception2msg(e)]
 
 class GroupRemoveCommand(GroupCommand):
     def getNames(self):
@@ -496,7 +496,7 @@ class GroupRemoveCommand(GroupCommand):
         try:
             return base.removeGroups(extcmds)
         except yum.Errors.YumBaseError, e:
-            return 1, [str(e)]
+            return 1, [exception2msg(e)]
 
     def needTs(self, base, basecmd, extcmds):
         return False
@@ -523,7 +523,7 @@ class GroupInfoCommand(GroupCommand):
         try:
             return base.returnGroupInfo(extcmds)
         except yum.Errors.YumBaseError, e:
-            return 1, [str(e)]
+            return 1, [exception2msg(e)]
 
     def needTs(self, base, basecmd, extcmds):
         return False
@@ -564,7 +564,7 @@ class MakeCacheCommand(YumCommand):
 
 
         except yum.Errors.YumBaseError, e:
-            return 1, [str(e)]
+            return 1, [exception2msg(e)]
         return 0, [_('Metadata Cache Created')]
 
     def needTs(self, base, basecmd, extcmds):
@@ -610,7 +610,7 @@ class ProvidesCommand(YumCommand):
         try:
             return base.provides(extcmds)
         except yum.Errors.YumBaseError, e:
-            return 1, [str(e)]
+            return 1, [exception2msg(e)]
 
 class CheckUpdateCommand(YumCommand):
     def getNames(self):
@@ -661,7 +661,7 @@ class CheckUpdateCommand(YumCommand):
                                               columns=columns)
                 result = 100
         except yum.Errors.YumBaseError, e:
-            return 1, [str(e)]
+            return 1, [exception2msg(e)]
         else:
             return result, []
 
@@ -683,7 +683,7 @@ class SearchCommand(YumCommand):
         try:
             return base.search(extcmds)
         except yum.Errors.YumBaseError, e:
-            return 1, [str(e)]
+            return 1, [exception2msg(e)]
 
     def needTs(self, base, basecmd, extcmds):
         return False
@@ -709,7 +709,7 @@ class UpgradeCommand(YumCommand):
         try:
             return base.updatePkgs(extcmds)
         except yum.Errors.YumBaseError, e:
-            return 1, [str(e)]
+            return 1, [exception2msg(e)]
 
 class LocalInstallCommand(YumCommand):
     def __init__(self):
@@ -737,7 +737,7 @@ class LocalInstallCommand(YumCommand):
         try:
             return base.localInstall(filelist=extcmds, updateonly=updateonly)
         except yum.Errors.YumBaseError, e:
-            return 1, [str(e)]
+            return 1, [exception2msg(e)]
 
     def needTs(self, base, basecmd, extcmds):
         return False
@@ -757,7 +757,7 @@ class ResolveDepCommand(YumCommand):
         try:
             return base.resolveDepCli(extcmds)
         except yum.Errors.YumBaseError, e:
-            return 1, [str(e)]
+            return 1, [exception2msg(e)]
 
 class ShellCommand(YumCommand):
     def getNames(self):
@@ -777,7 +777,7 @@ class ShellCommand(YumCommand):
         try:
             return base.doShell()
         except yum.Errors.YumBaseError, e:
-            return 1, [str(e)]
+            return 1, [exception2msg(e)]
 
     def needTs(self, base, basecmd, extcmds):
         return False
@@ -801,7 +801,7 @@ class DepListCommand(YumCommand):
         try:
             return base.deplist(extcmds)
         except yum.Errors.YumBaseError, e:
-            return 1, [str(e)]
+            return 1, [exception2msg(e)]
 
 
 class RepoListCommand(YumCommand):
@@ -1150,7 +1150,7 @@ class ReInstallCommand(YumCommand):
             return base.reinstallPkgs(extcmds)
             
         except yum.Errors.YumBaseError, e:
-            return 1, [to_unicode(e)]
+            return 1, [exception2msg(e)]
 
     def getSummary(self):
         return _("reinstall a package")
@@ -1176,7 +1176,7 @@ class DowngradeCommand(YumCommand):
         try:
             return base.downgradePkgs(extcmds)
         except yum.Errors.YumBaseError, e:
-            return 1, [str(e)]
+            return 1, [exception2msg(e)]
 
     def getSummary(self):
         return _("downgrade a package")
@@ -1284,7 +1284,7 @@ class VersionCommand(YumCommand):
                                      str(data[2][grp])))
                         _append_repos(cols, data[3][grp])
             except yum.Errors.YumBaseError, e:
-                return 1, [str(e)]
+                return 1, [exception2msg(e)]
         if vcmd in ('available', 'all', 'group-available', 'group-all'):
             try:
                 data = base.pkgSack.simpleVersion(not verbose, groups=groups)
@@ -1303,7 +1303,7 @@ class VersionCommand(YumCommand):
                         if verbose:
                             _append_repos(cols, data[3][grp])
             except yum.Errors.YumBaseError, e:
-                return 1, [str(e)]
+                return 1, [exception2msg(e)]
 
         data = {'rid' : {}, 'ver' : {}}
         for (rid, ver) in cols:
@@ -1461,7 +1461,7 @@ class LoadTransactionCommand(YumCommand):
         try:
             base.load_ts(load_file)
         except yum.Errors.YumBaseError, e:
-            return 1, [to_unicode(e)]
+            return 1, [exception2msg(e)]
         return 2, [_('Transaction loaded from %s with %s members') % (load_file, len(base.tsInfo.getMembers()))]
 
 

@@ -43,7 +43,7 @@ from yum.rpmtrans import RPMTransaction
 import signal
 import yumcommands
 
-from yum.i18n import to_unicode, to_utf8
+from yum.i18n import to_unicode, to_utf8, exception2msg
 
 def sigquit(signum, frame):
     """ SIGQUIT handler for the yum cli. """
@@ -427,7 +427,7 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
             try:
                 self._getTs(needTsRemove)
             except yum.Errors.YumBaseError, e:
-                return 1, [str(e)]
+                return 1, [exception2msg(e)]
 
         return self.yum_cli_commands[self.basecmd].doCommand(self, self.basecmd, self.extcmds)
 
@@ -1474,7 +1474,7 @@ class YumOptionParser(OptionParser):
                     excludelist.append(exclude)
                     self.base.conf.exclude = excludelist
                 except yum.Errors.ConfigError, e:
-                    self.logger.critical(e)
+                    self.logger.critical(exception2msg(e))
                     self.base.usage()
                     sys.exit(1)
 
@@ -1494,7 +1494,7 @@ class YumOptionParser(OptionParser):
                     elif opt == '--disablerepo':
                         self.base.repos.disableRepo(repoexp)
                 except yum.Errors.ConfigError, e:
-                    self.logger.critical(e)
+                    self.logger.critical(exception2msg(e))
                     self.base.usage()
                     sys.exit(1)
 
