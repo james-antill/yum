@@ -544,7 +544,17 @@ class YumRepository(Repository, config.RepoConf):
         """make the necessary dirs, if possible, raise on failure"""
 
         cachedir = os.path.join(self.basecachedir, self.id)
-        persistdir = os.path.join(self.base_persistdir, self.id)
+        if self.base_persistdir and self.base_persistdir[0] == '/':
+            persistdir = self.base_persistdir
+        else:
+            #  This sucks, because cakeys can't work ... but it's better
+            # than creating dirs. in the current dir.
+            if tmpdir is None:
+                tmpdir = os.getenv('TMPDIR')
+            if tmpdir is None: # Note that TMPDIR isn't exported by default :(
+                tmpdir = '/var/tmp'
+            persistdir = misc.getCacheDir(tmpdir=tmpdir)
+        persistdir = os.path.join(persistdir, self.id)
         pkgdir = os.path.join(cachedir, 'packages')
         hdrdir = os.path.join(cachedir, 'headers')
         self.setAttribute('_dir_setup_cachedir', cachedir)
