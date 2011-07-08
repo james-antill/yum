@@ -664,7 +664,7 @@ class YumConf(StartupConf):
     tsflags = ListOption()
 
     assumeyes = BoolOption(False)
-    alwaysprompt = BoolOption(True)
+    alwaysprompt = ListOption(['true'])
     exactarch = BoolOption(True)
     tolerant = BoolOption(True)
     diskspacecheck = BoolOption(True)

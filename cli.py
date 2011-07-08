@@ -1391,19 +1391,87 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
         # shortcut for the always-off/always-on options
         if self.conf.assumeyes:
             return False
-        if self.conf.alwaysprompt:
+
+        prompts = {'install'         : False,
+                   'remove'          : True,
+                   'upgrade'         : False,
+                   'downgrade'       : True,
+                   'reinstall'       : False,
+                   'obsoleter'       : False,
+                   'obsoleted'       : False, # True, for "Safe" ?
+                   '_unnamed_'       : True,
+                   '_dep_'           : True,
+                   '_skip_'          : True,
+                   '_not_available_' : False,
+                   '_not_installed_' : False,
+                   }
+
+        prompts_s = prompts.copy() # This is "Safe", and thus. the super default
+        prompts_n = {}
+        prompts_a = {}
+        for prompt in prompts:
+            prompts_a[prompt] = True
+            prompts_n[prompt] = False
+
+        for prompt in self.conf.alwaysprompt:
+            if False: pass
+            elif prompt.lower() in ('1', 'yes',  'true',  'all'):
+                prompts = prompts_a.copy()
+            elif prompt.lower() in ('none',):
+                prompts = prompts_n.copy()
+            elif prompt.lower() in ('0',  'no', 'false', 'safe'):
+                # False is here due to backwards compat.
+                prompts = prompts_s.copy()
+            elif prompt.lower() in prompts:
+                prompts[prompt.lower()] = True
+            elif prompt and prompt[0] == '!' and prompt[1:].lower() in prompts:
+                prompts[prompt[1:].lower()] = False
+            else:
+                return True # If we are confused, just prompt?
+
+
+        # Use the above configuration, to see what the user wants prompts for:
+
+        # First, global things ... if we have any prompt:
+        if prompts['_not_installed_'] and self._not_found_i:
             return True
-        
-        # prompt if:
-        #  package was added to fill a dependency
-        #  package is being removed
-        #  package wasn't explictly given on the command line
+        if prompts['_not_available_'] and self._not_found_a:
+            return True
+        if prompts['_skip_'] and self.skipped_packages:
+            return True
+        if prompts['_unnamed_'] and not self.extcmds:
+            return True
+
+        os2prompt = {yum.TS_INSTALL     : 'install',
+                     yum.TS_TRUEINSTALL : 'install',
+                     yum.TS_UPDATE      : 'upgrade',
+                     yum.TS_UPDATED     : 'upgrade',
+                     yum.TS_OBSOLETED   : 'obsoleted',
+                     yum.TS_OBSOLETING  : 'obsoleter',
+                     yum.TS_ERASE       : 'remove',
+                     }
+        # Then per. package markers:
         for txmbr in self.tsInfo.getMembers():
-            if txmbr.isDep or \
-                   txmbr.ts_state == 'e' or \
-                   txmbr.name not in self.extcmds:
+            if prompts['_dep_'] and txmbr.isDep:
                 return True
-        
+            if prompts['_unnamed_'] and txmbr.name not in self.extcmds:
+                return True
+
+            if txmbr.reinstall:
+                if prompts['reinstall']:
+                    return True
+                continue
+
+            if txmbr.downgrades or txmbr.downgraded_by:
+                if prompts['downgrade']:
+                    return True
+                continue
+
+            if prompts.get(os2prompt.get(txmbr.output_state, 'blah'), True):
+                return True
+
+            continue
+
         # otherwise, don't prompt        
         return False
 
