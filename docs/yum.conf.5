@@ -118,11 +118,51 @@ Command-line option: \fB\-y\fP
 
 .IP
 \fBalwaysprompt\fR
-Either `1' or `0'. Without this option, yum will not prompt for confirmation
-when the list of packages to be installed exactly matches those given on the
-command line. Unless \fBassumeyes\fR is enabled, it will still prompt for
-package removal, or when additional packages need to be installed to fulfill
-dependencies. Default is `1'.
+This option selects when to prompt the user for confirmation of the transaction,
+there are a number of configuration options to choose from and they are
+processed in the order listed.
+
+`install' - Prompt if something will be installed.
+
+`remove' - Prompt if something will be removed.
+
+`upgrade' - Prompt if something will be upgraded.
+
+`downgrade' - Prompt if something will be downgraded.
+
+`reinstall' - Prompt if something will be reinstalled.
+
+`obsoleter' - Prompt if something will obsolete other packages.
+
+`obsoleted' - Prompt if something will be obsoleted.
+
+`_unnamed_' - Prompt if a package name is not specified on the command line.
+
+`_dep_' - Prompt if a package is marked as a dependency.
+
+`_skip_' - Prompt if a package was skipped (by --skip-broken).
+
+`_not_available_' - Prompt if a package was asked for from a repo. but couldn't be found (Eg. by load-ts or history undo/redo).
+
+`_not_installed_' - Prompt if a package was asked for from the rpmdb but couldn't be found (Eg. by load-ts or history undo/redo).
+
+If you put a `!' in front of any of the above single options, it will turn that
+option off. Eg. `!remove' or `!_skip_'.
+
+`none' - Never prompt (this is the same as assumeyes).
+
+`safe' - As though the user specified: remove,downgrade,_unnamed_,_dep_,_skip_
+
+`all' - Prompt for any of the above cases (always).
+
+Also note that for backwards compatibility you can specify `true' or `false'
+etc. The former is the same as `all' and the later is the same as `safe'.
+
+By default yum will ask for confirmation on all transactions (as though you
+passed `all') but if you specify any option the starting configuration is as
+though you specified `safe'.
+
+This option is overridden by the \fBassumeyes\fR option.
 .br
 
 .IP
