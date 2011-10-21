@@ -29,7 +29,7 @@ import re # For YumTerm
 
 from weakref import proxy as weakref
 
-from urlgrabber.progress import TextMeter
+from urlgrabber.progress import TextMeter, TextMultiFileMeter
 import urlgrabber.progress
 from urlgrabber.grabber import URLGrabError
 from yum.misc import prco_tuple_to_string
@@ -74,6 +74,23 @@ class YumTextMeter(TextMeter):
         """
         checkSignals()
         TextMeter.update(self, amount_read, now)
+
+class YumTextMultiFileMeter(TextMultiFileMeter):
+    """A class to display text progress bar output."""
+
+    def __init__(self, fo=sys.stderr):
+        TextMultiFileMeter.__init__(self, fo, threaded=False)
+
+    def update_meter(self, meter, now=None):
+        """Update the status of the text progress bar
+
+        :param meter: the meter we have just updated
+        :param now: the current time in seconds since the epoch.  If
+           *now* is not given, the output of :func:`time.time()` will
+           be used.
+        """
+        checkSignals()
+        TextMultiFileMeter.update_meter(self, meter, now)
 
 class YumTerm:
     """A class to provide some terminal "UI" helpers based on curses."""
@@ -1559,9 +1576,12 @@ Transaction Summary
         # progress bars - this is hacky - I'm open to other options
         # One of these is a download
         if self.conf.debuglevel < 2 or not sys.stdout.isatty():
+            multi_progressbar = None
             progressbar = None
             callback = None
         else:
+            if hasattr(urlgrabber.progress, '_FakeLock'):
+                multi_progressbar = YumTextMultiFileMeter(fo=sys.stdout)
             progressbar = YumTextMeter(fo=sys.stdout)
             callback = CacheProgressCallback()
 
@@ -1572,6 +1592,7 @@ Transaction Summary
         # setup callback for CTRL-C's
         interrupt_callback = self.interrupt_callback
         if hasattr(self, 'prerepoconf'):
+            self.prerepoconf.multi_progressbar = multi_progressbar
             self.prerepoconf.progressbar = progressbar
             self.prerepoconf.callback = callback
             self.prerepoconf.failure_callback = failure_callback
@@ -1579,6 +1600,7 @@ Transaction Summary
         else:
             #  Just in case some API user decides to do self.repos before
             # calling us.
+            self.repos.setMultiProgressBar(multi_progressbar)
             self.repos.setProgressBar(progressbar)
             self.repos.callback = callback
             self.repos.setFailureCallback(failure_callback)

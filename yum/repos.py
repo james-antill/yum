@@ -233,6 +233,12 @@ class RepoStorage:
         for repo in self.repos.values():
             repo.setCallback(obj)
 
+    def setMultiProgressBar(self, obj):
+        """sets the multi. progress bar for downloading N files from repos"""
+        
+        for repo in self.repos.values():
+            repo.setMultiCallback(obj)
+
     def setFailureCallback(self, obj):
         """sets the failure callback for all repos"""
         
@@ -373,6 +379,9 @@ class Repository:
         raise NotImplementedError()
                     
     def setCallback(self, callback):
+        raise NotImplementedError()
+
+    def setMultiCallback(self, callback):
         raise NotImplementedError()
 
     def setFailureObj(self, obj):

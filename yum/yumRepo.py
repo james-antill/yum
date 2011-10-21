@@ -266,6 +266,7 @@ class YumRepository(Repository, config.RepoConf):
 
         # callbacks
         self.callback = None  # for the grabber
+        self.multi_callback = None  # for the grabber
         self.failure_obj = None
         self.mirror_failure_obj = None
         self.interrupt_callback = None
@@ -809,9 +810,14 @@ Insufficient space in download directory %s
     * needed %s'''
                 ) % (os.path.dirname(local), format_number(avail), format_number(long(size)))
 
+        if (self.multi_callback is not None and
+            self.multi_callback.last_update_time):
+            prog_cb = self.multi_callback.newMeter()
+        else:
+            prog_cb = self.callback
         if url and scheme != "media":
             ugopts = self._default_grabopts(cache=cache)
-            ug = URLGrabber(progress_obj = self.callback,
+            ug = URLGrabber(progress_obj = prog_cb,
                             copy_local = copy_local,
                             reget = reget,
                             failure_callback = self.failure_obj,
@@ -842,6 +848,7 @@ Insufficient space in download directory %s
             headers = tuple(self.__headersListFromDict(cache=cache))
             try:
                 result = self.grab.urlgrab(misc.to_utf8(relative), local,
+                                           progress_obj = prog_cb,
                                            text = misc.to_utf8(text),
                                            range = (start, end),
                                            copy_local=copy_local,
@@ -1666,6 +1673,10 @@ Insufficient space in download directory %s
 
     def setCallback(self, callback):
         self.callback = callback
+        self._callbacks_changed = True
+
+    def setMultiCallback(self, callback):
+        self.multi_callback = callback
         self._callbacks_changed = True
 
     def setFailureObj(self, failure_obj):

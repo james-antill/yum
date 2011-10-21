@@ -135,6 +135,7 @@ class _YumPreRepoConf:
     """
     def __init__(self):
         self.progressbar = None
+        self.multi_progressbar = None
         self.callback = None
         self.failure_callback = None
         self.interrupt_callback = None
@@ -640,6 +641,7 @@ class YumBase(depsolve.Depsolve):
             del self.prerepoconf
 
             self.repos.setProgressBar(prerepoconf.progressbar)
+            self.repos.setMultiProgressBar(prerepoconf.multi_progressbar)
             self.repos.callback = prerepoconf.callback
             self.repos.setFailureCallback(prerepoconf.failure_callback)
             self.repos.setInterruptCallback(prerepoconf.interrupt_callback)
@@ -2137,6 +2139,11 @@ class YumBase(depsolve.Depsolve):
         if (hasattr(urlgrabber.progress, 'text_meter_total_size') and
             len(remote_pkgs) > 1):
             urlgrabber.progress.text_meter_total_size(remote_size)
+
+        if remote_pkgs and remote_pkgs[0].repo.multi_callback: # FIXME: blah
+            remote_pkgs[0].repo.multi_callback.start(len(remote_pkgs),
+                                                     remote_size)
+
         beg_download = time.time()
         i = 0
         local_size = 0
@@ -2159,7 +2166,9 @@ class YumBase(depsolve.Depsolve):
 
             checkfunc = (self.verifyPkg, (po, 1), {})
             try:
-                if i == 1 and not local_size and remote_size == po.size:
+                if po.repo.multi_callback:
+                    text = os.path.basename(po.relativepath)
+                elif i == 1 and not local_size and remote_size == po.size:
                     text = os.path.basename(po.relativepath)
                 else:
                     text = '(%s/%s): %s' % (i, len(remote_pkgs),
