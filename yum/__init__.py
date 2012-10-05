@@ -841,8 +841,12 @@ class YumBase(depsolve.Depsolve):
             self._up.debug = 1
         
         if hasattr(self, '_up_obs_hack'):
-            self._up.rawobsoletes = self._up_obs_hack.rawobsoletes
+            self._up.rawobsoletes = self._up_obs_hack_rawobsoletes
+            for po in self._up_obs_hack_locals:
+                self._up.addLocalPackage(po) # Adds to obs. twice, but ok.
             del self._up_obs_hack
+            del self._up_obs_hack_locals
+            del self._up_obs_hack_rawobsoletes
         elif self.conf.obsoletes:
             obs_init = time.time()    
             #  Note: newest=True here is semi-required for repos. with multiple
@@ -4110,6 +4114,16 @@ much more problems).
                 self.verbose_logger.debug('Obs Init time: %0.3f' % (time.time()
                                                                     - obs_init))
                 self._up_obs_hack = up
+                self._up_obs_hack_locals = []
+                # Need to do a deep copy of rawobsoletes...
+                rawobsoletes = {}
+                for key in up.rawobsoletes:
+                    rawobsoletes[key] = up.rawobsoletes[key][:]
+                self._up_obs_hack_rawobsoletes = rawobsoletes
+            if isinstance(po, YumLocalPackage):
+                print "JDBG:", "local:", po
+                self._up_obs_hack.addLocalPackage(po)
+                self._up_obs_hack_locals.append(po)
             thispkgobsdict = self._up_obs_hack.checkForObsolete([po.pkgtup])
 
         if po.pkgtup in thispkgobsdict:
@@ -4358,7 +4372,11 @@ much more problems).
         pkgs = []
         was_pattern = False
         if po:
-            if isinstance(po, YumAvailablePackage) or isinstance(po, YumLocalPackage):
+            if isinstance(po, YumLocalPackage):
+                pkgs.append(po)
+                if self._up:
+                    self.up.addLocalPackage(po)
+            elif isinstance(po, YumAvailablePackage):
                 pkgs.append(po)
             else:
                 raise Errors.InstallError, _('Package Object was not a package object instance')
@@ -4717,7 +4735,10 @@ much more problems).
                 instpkgs.append(po)
             else:
                 availpkgs.append(po)
-                
+
+            if isinstance(po, YumLocalPackage):
+                if self._up:
+                    self.up.addLocalPackage(po)
                 
         elif 'pattern' in kwargs:
             if kwargs['pattern'] and kwargs['pattern'][0] == '-':
@@ -5294,6 +5315,10 @@ much more problems).
         doing_group_pkgs = False
         if po:
             apkgs = [po]
+
+            if isinstance(po, YumLocalPackage):
+                if self._up:
+                    self.up.addLocalPackage(po)
         elif 'pattern' in kwargs:
             if kwargs['pattern'] and kwargs['pattern'][0] == '-':
                 return self._minus_deselect(kwargs['pattern'])

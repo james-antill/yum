@@ -18,6 +18,8 @@ import rpmUtils
 import rpmUtils.miscutils
 import rpmUtils.arch
 
+import time
+
 def _vertup_cmp(tup1, tup2):
     return rpmUtils.miscutils.compareEVR(tup1, tup2)
 class Updates:
@@ -105,12 +107,13 @@ class Updates:
         if self.debug:
             print msg
 
-    def makeNADict(self, pkglist, Nonelists, filter=None):
+    def makeNADict(self, pkglist, Nonelists, filter=None, returndict=None):
         """return lists of (e,v,r) tuples as value of a dict keyed on (n, a)
             optionally will return a (n, None) entry with all the a for that
             n in tuples of (a,e,v,r)"""
+        if returndict is None:
+            returndict = {}
             
-        returndict = {}
         for (n, a, e, v, r) in pkglist:
             if filter and (n, None) not in filter:
                 continue
@@ -280,7 +283,7 @@ class Updates:
            determine what is updated and/or obsoleted, populate self.updatesdict
         """
         
-        
+
         # best bet is to chew through the pkgs and throw out the new ones early
         # then deal with the ones where there are a single pkg installed and a 
         # single pkg available
@@ -505,6 +508,25 @@ class Updates:
                 if new not in self.updating_dict:
                     self.updating_dict[new] = []
                 self.updating_dict[new].append(old)
+
+    def addLocalPackage(self, pkg):
+        """Add a local package to the update data, so that it acts like a repo.
+           package. """
+
+        print "JDBG:", "alp"
+
+        if pkg.obsoletes:
+            obs = []
+            for ob in pkg.obsoletes:
+                obs.append(ob)
+            self.rawobsoletes[pkg.pkgtup] = obs
+            self.doObsoletes()
+
+        if (pkg.name, None) not in self.installdict:
+            return # Not a local upgrade...
+        self.available.append(pkg.pkgtup)
+        self.makeNADict([pkg.pkgtup], 0, returndict=self.availdict)
+        self.doUpdates()
 
     def reduceListByNameArch(self, pkglist, name=None, arch=None):
         """returns a set of pkg naevr tuples reduced based on name or arch"""
