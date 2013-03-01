@@ -695,11 +695,56 @@ class RPMDBPackageSack(PackageSackBase):
         rpmdbv = self.simpleVersion(main_only=True)[0]
         self._write_conflicts_new(pkgs, rpmdbv)
 
+    def _uncached_returnObsoletePackages(self):
+        """ Load the packages which have obsoletes from the rpmdb, this is
+            needed because newer rpm's have obsoletes imply conflicts. """
+
+        if self._cached_obsoletes_data is None:
+            result = {}
+
+            for hdr, idx in self._get_packages('obsoletename'):
+                if not hdr[rpm.RPMTAG_OBSOLETENAME]:
+                    # Pre. rpm-4.9.x the above dbMatch() does nothing.
+                    continue
+
+                po = self._makePackageObject(hdr, idx)
+                result[po.pkgid] = po
+                if po._has_hdr:
+                    continue # Unlikely, but, meh...
+
+                po.hdr = hdr
+                po._has_hdr = True
+                po.obsoletes
+                po._has_hdr = False
+                del po.hdr
+            self._cached_obsoletes_data = result.values()
+
+        return self._cached_obsoletes_data
+
+    def _write_obsoletes_new(self, pkgs, rpmdbv):
+        if not os.access(self._cachedir, os.W_OK):
+            return
+
+        obsoletes_fname = self._cachedir + '/obsoletes'
+        fo = _open_no_umask(obsoletes_fname + '.tmp', 'w')
+        fo.write("%s\n" % rpmdbv)
+        fo.write("%u\n" % len(pkgs))
+        for pkg in sorted(pkgs):
+            for var in pkg.pkgtup:
+                fo.write("%s\n" % var)
+        fo.close()
+        os.rename(obsoletes_fname + '.tmp', obsoletes_fname)
+
+    def _write_obsoletes(self, pkgs):
+        rpmdbv = self.simpleVersion(main_only=True)[0]
+        self._write_obsoletes_new(pkgs, rpmdbv)
+
     def _deal_with_bad_rpmdbcache(self, caller):
         """ This shouldn't be called, but people are hitting weird stuff so
             we want to deal with it so it doesn't stay broken "forever". """
         misc.unlink_f(self._cachedir + "/version")
         misc.unlink_f(self._cachedir + '/conflicts')
+        misc.unlink_f(self._cachedir + '/obsoletes')
         misc.unlink_f(self._cachedir + '/file-requires')
         misc.unlink_f(self._cachedir + '/pkgtups-checksums')
         #  We have a couple of options here, we can:
@@ -767,6 +812,20 @@ class RPMDBPackageSack(PackageSackBase):
 
         return pkgs
 
+    def transactionCacheObsoletePackages(self, pkgs):
+        if self.__cache_rpmdb__:
+            self._trans_cache_store['obsoletes'] = pkgs
+
+    def returnObsoletePackages(self):
+        """ Return a list of packages that have obsoletes. """
+        pkgs = self._read_obsoletes()
+        if pkgs is None:
+            pkgs = self._uncached_returnObsoletePackages()
+            if self.__cache_rpmdb__:
+                self._write_obsoletes(pkgs)
+
+        return pkgs
+
     def transactionResultVersion(self, rpmdbv):
         """ We are going to do a transaction, and the parameter will be the
             rpmdb version when we finish. The idea being we can update all
@@ -779,6 +838,10 @@ class RPMDBPackageSack(PackageSackBase):
         if 'conflicts' in self._trans_cache_store:
             pkgs = self._trans_cache_store['conflicts']
             self._write_conflicts_new(pkgs, rpmdbv)
+
+        if 'obsoletes' in self._trans_cache_store:
+            pkgs = self._trans_cache_store['obsoletes']
+            self._write_obsoletes_new(pkgs, rpmdbv)
 
         if 'file-requires' in self._trans_cache_store:
             data = self._trans_cache_store['file-requires']
