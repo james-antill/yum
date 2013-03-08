@@ -45,6 +45,8 @@ gnome\-packagekit application\&.
 .br
 .I \fR * makecache [fast]
 .br
+.I \fR * downloads [summary]
+.br
 .I \fR * groups  [\&.\&.\&.]
 .br
 .I \fR * search string1 [string2] [\&.\&.\&.]
@@ -211,6 +213,11 @@ the \fIClean Options\fP section below\&.
 Is used to download and make usable all the metadata for the currently enabled
 \fByum\fP repos. If the arguemnt "fast" is passed, then we just try to make
 sure the repos. are current (much like "yum clean expire-cache").
+.IP 
+.IP "\fBdownloads\fP"
+Is used to display information about downloads. The only sub-command available
+at the moment is "summary", although you can get more information by passing
+the verbose flag.
 .IP 
 .IP "\fBgroups\fP"
 A command, new in 3.4.2, that collects all the subcommands that act on groups together.

@@ -32,6 +32,7 @@ import time
 from yum.i18n import utf8_width, utf8_width_fill, to_unicode, exception2msg
 import tempfile
 import glob
+import stat
 
 import yum.config
 
@@ -3648,3 +3649,243 @@ class RepoPkgsCommand(YumCommand):
         if cmd in ('info', 'list'):
             return InfoCommand().cacheRequirement(base, cmd, extcmds[2:])
         return 'write'
+
+
+class DownloadCommand(YumCommand):
+    """A class containing methods needed by the cli to execute the
+    download command.
+    """
+
+    def getNames(self):
+        """Return a list containing the names of this command.  This
+        command can be called from the command line by using any of these names.
+
+        :return: a list containing the names of this command
+        """
+        return ['download', 'downloads']
+
+    def getUsage(self):
+        """Return a usage string for this command.
+
+        :return: a usage string for this command
+        """
+        return "[summary]"
+
+    def getSummary(self):
+        """Return a one line summary of this command.
+
+        :return: a one line summary of this command
+        """
+        return _("Simple way to check on downloads and download packages")
+
+    def doCheck(self, base, basecmd, extcmds):
+        """Verify that conditions are met so that this command can run.
+        These include that the program is being run by the root user,
+        that there are enabled repositories with gpg keys, and that
+        this command is called with appropriate arguments.
+
+        :param base: a :class:`yum.Yumbase` object
+        :param basecmd: the name of the command
+        :param extcmds: the command line arguments passed to *basecmd*
+        """
+        pass
+        # checkEnabledRepo(base, extcmds)
+
+    def doCommand(self, base, basecmd, extcmds):
+        """Execute this command.
+
+        :param base: a :class:`yum.Yumbase` object
+        :param basecmd: the name of the command
+        :param extcmds: the command line arguments passed to *basecmd*
+        :return: (exit_code, [ errors ])
+
+        exit_code is::
+
+            0 = we're done, exit
+            1 = we've errored, exit with error string
+            2 = we've got work yet to do, onto the next stage
+        """
+
+        def _dirs2dict(store, dirs):
+            for cdir in dirs:
+                if cdir not in store:
+                    store[cdir] = {}
+                store = store[cdir]
+            return store
+        def _add(store, fname, num):
+            if not num:
+                return
+
+            if None not in store:
+                store[None] = {'rpm' : 0, 'drpm' : 0, 'sqlite' : 0,
+                               'xml' : 0, None : 0}
+
+            if False: pass
+            elif fname.endswith('drpm'):
+                store[None]['drpm'] += num
+            elif fname.endswith('rpm'):
+                store[None]['rpm'] += num
+
+            elif fname.endswith('sqlite'):
+                store[None]['sqlite'] += num
+            elif fname.endswith('sqlite.bz2'):
+                store[None]['sqlite'] += num
+            elif fname.endswith('sqlite.xz'):
+                store[None]['sqlite'] += num
+            elif fname.endswith('sqlite.gz'):
+                store[None]['sqlite'] += num
+
+            elif fname.endswith('xml'):
+                store[None]['xml'] += num
+            elif fname.endswith('xml.bz2'):
+                store[None]['xml'] += num
+            elif fname.endswith('xml.xz'):
+                store[None]['xml'] += num
+            elif fname.endswith('xml.gz'):
+                store[None]['xml'] += num
+
+            else:
+                store[None][None] += num
+        def _sum(store, T):
+            if T in store and type(store[T]) is int:
+                assert T is None or type(store[T]) is int
+                return store[T]
+
+            ret = 0
+            for nT in store:
+                ret += _sum(store[nT], T)
+            return ret
+
+        def _sum_all(store):
+            if type(store) is int:
+                return store
+
+            ret = 0
+            for T in store:
+                ret += _sum_all(store[T])
+
+            return ret
+
+        #  This is a hack because re-reading the config. file to get raw values
+        # and working forwards from that is annoying ... so we work backwards.
+        cdirs = base.conf.cachedir.split('/')
+        magic_cdirs = []
+        yumvar_rmap = {}
+        for key,val in base.yumvar.iteritems():
+            if val not in yumvar_rmap:
+                yumvar_rmap[val] = '$' + key
+            else:
+                yumvar_rmap[val] += ' | $' + key
+
+        while cdirs[-1] in yumvar_rmap:
+            magic_cdirs.append(cdirs.pop())
+        magic_cdirs.reverse()
+
+        if not magic_cdirs:
+            print "Download/cache dir:", "/".join(cdirs)
+        else:
+            ui_dirs = "/".join(cdirs)
+            ui_dirs += '/'
+            ui_dirs += '/'.join(map(yumvar_rmap.get, magic_cdirs))
+            print "Download/cache dir:", ui_dirs
+            indent = ' '
+            for cdir in magic_cdirs:
+                print indent, yumvar_rmap[cdir], '=', cdir
+
+        du_stats = {}
+        for fname in misc.getFileList("/".join(cdirs), '', []):
+            fstats = misc.stat_f(fname)
+            if not fstats:
+                continue
+
+            if stat.S_ISDIR(fstats.st_mode): # Who cares...
+                continue
+
+            fdirs = fname.split('/')
+            num_dirs = len(fdirs) - len(cdirs)
+            if len(fdirs) >= (len(cdirs) + len(magic_cdirs)):
+                cdir = _dirs2dict(du_stats, fdirs[len(cdirs):-1])
+            else:
+                cdir = _dirs2dict(du_stats, magic_cdirs)
+            _add(cdir, fname, fstats.st_size)
+
+
+        line_fmt = "%-40s %6s %8s %6s %6s %8s"
+        print line_fmt % (_("Directory"), _("All"), _("Pkgs."),
+                          _("SQLite"), _("XML"), _("Other"))
+
+        def _gen_sizes(store):
+            ret = {}
+
+            ret['all'] = _sum_all(store)
+            ret['pkg'] = _sum(store, 'rpm')
+            ret['pkg'] += _sum(store, 'drpm')
+            ret['sql'] = _sum(store, 'sqlite')
+            ret['xml'] = _sum(store, 'xml')
+            ret['o']   = _sum(store, None)
+
+            return ret
+
+        def _ui_sizes(sizes):
+            ret = {}
+
+            for key in sizes:
+                ret[key] = base.format_number(sizes[key])
+
+            return ret
+
+        def _pdir_top(store):
+            name = "/".join(cdirs)
+
+            sizes = _ui_sizes(_gen_sizes(store))
+
+            print line_fmt % (name, sizes['all'],
+                              sizes['pkg'], sizes['sql'], sizes['xml'],
+                              sizes['o'])
+
+        def _pdir(store, indent, num):
+            for tdir in sorted(store):
+                name = tdir
+                if tdir is None:
+                    name = "*"
+
+                if store[tdir] is int:
+                    sizes = {'all' : store[tdir],
+                             'pkg' : 0, 'sql' : 0, 'xml' : 0, '0' : 0}
+                else:
+                    sizes = _gen_sizes(store[tdir])
+
+                sizes = _ui_sizes(sizes)
+
+                print line_fmt % (indent+name, sizes['all'], sizes['pkg'],
+                                  sizes['sql'], sizes['xml'],
+                                  sizes['o'])
+
+                if tdir is not None and num > 0:
+                    _pdir(store[tdir], indent+'  ', num-1)
+
+        _pdir_top(du_stats)
+        levels = len(magic_cdirs)
+        isverb = base.verbose_logger.isEnabledFor(yum.logginglevels.DEBUG_3)
+        if levels or isverb:
+            if not levels and not isverb:
+                pass
+            else:
+                if not isverb:
+                    levels -= 1
+                _pdir(du_stats, ' ', levels)
+
+        return 0, ['%s %s' % (basecmd, " ".join(extcmds))]
+
+    def needTs(self, base, basecmd, extcmds):
+        """Return whether a transaction set must be set up before this
+        command can run.
+
+        :param base: a :class:`yum.Yumbase` object
+        :param basecmd: the name of the command
+        :param extcmds: a list of arguments passed to *basecmd*
+        :return: True if a transaction set is needed, False otherwise
+        """
+        if extcmds and extcmds[0] == 'updates':
+            return True
+        return False
