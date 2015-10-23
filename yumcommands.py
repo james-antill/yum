@@ -389,7 +389,9 @@ class InstallCommand(YumCommand):
 
         :return: a list containing the names of this command
         """
-        return ['install', 'install-n', 'install-na', 'install-nevra']
+        return ['install', 'install-n', 'install-na', 'install-nevra',
+                'fail-or-install-n', 'fail-or-install-na',
+                'fail-or-install-nevra']
 
     def getUsage(self):
         """Return a usage string for this command.

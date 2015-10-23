@@ -964,6 +964,11 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
         
         oldcount = len(self.tsInfo)
         
+        instant_fail = False
+        if basecmd.startswith("fail-or-"):
+            instant_fail = True
+            basecmd = basecmd[len("fail-or-"):]
+
         done = False
         for arg in userlist:
             if (arg.endswith('.rpm') and (yum.misc.re_remote_url(arg) or
@@ -982,6 +987,8 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
                     except:
                         self.verbose_logger.warning(_('Bad %s argument %s.'),
                                                     basecmd, arg)
+                        if instant_fail:
+                            return 1, [_('Instant fail, bad arg., doing nothing')]
                         continue
                     txmbrs = self.install(name=n, arch=a)
                 elif basecmd == 'install-nevra':
@@ -992,6 +999,8 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
                     except:
                         self.verbose_logger.warning(_('Bad %s argument %s.'),
                                                     basecmd, arg)
+                        if instant_fail:
+                            return 1, [_('Instant fail, bad arg., doing nothing')]
                         continue
                     txmbrs = self.install(name=n,
                                           epoch=e, version=v, release=r, arch=a)
@@ -1006,7 +1015,11 @@ class YumBaseCli(yum.YumBase, output.YumOutput):
                                         self.term.MODE['bold'], arg,
                                         self.term.MODE['normal'])
                 self._maybeYouMeant(arg)
+                if instant_fail:
+                    return 1, [_('Instant fail, no install, doing nothing')]
             else:
+                if instant_fail and not txmbrs:
+                    return 1, [_('Instant fail, installed, doing nothing')]
                 done = True
                 self._install_upgraded_requires(txmbrs)
         if len(self.tsInfo) > oldcount:
